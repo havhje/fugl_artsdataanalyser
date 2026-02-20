@@ -1,18 +1,22 @@
 import marimo
 
-__generated_with = "0.16.5"
+__generated_with = "0.19.11"
 app = marimo.App(width="columns")
 
 
 @app.cell(column=0, hide_code=True)
 def _(mo):
-    mo.md(r"""## Utility functions""")
+    mo.md(r"""
+    ## Utility functions
+    """)
     return
 
 
 @app.cell(hide_code=True)
 def _(mo):
-    mo.md(r"""### API fra artsdatabanken""")
+    mo.md(r"""
+    ### API fra artsdatabanken
+    """)
     return
 
 
@@ -66,6 +70,7 @@ def _(DESIRED_RANKS, NORTAXA_API_BASE_URL, lru_cache, requests):
             if name.get("languageIsoCode") == "nn":
                 return name.get("vernacularName")
         return None
+
     return extract_hierarchy_and_ids, fetch_taxon_data, get_norwegian_name
 
 
@@ -164,12 +169,15 @@ def _(
         ])
 
         return df_work
+
     return (process_and_enrich_data,)
 
 
 @app.cell(hide_code=True)
 def _(mo):
-    mo.md(r"""### Arter av nasjonal forvaltningsinteresse""")
+    mo.md(r"""
+    ### Arter av nasjonal forvaltningsinteresse
+    """)
     return
 
 
@@ -226,12 +234,15 @@ def _(pl):
         )
 
         return df_with_criteria
+
     return (add_national_interest_criteria,)
 
 
 @app.cell(hide_code=True)
 def _(mo):
-    mo.md(r"""### Lager en ny kolonne som inneholder mulige verdier av arter av nasjonal forvaltning""")
+    mo.md(r"""
+    ### Lager en ny kolonne som inneholder mulige verdier av arter av nasjonal forvaltning
+    """)
     return
 
 
@@ -273,12 +284,15 @@ def _(pl):
             .otherwise(pl.lit("Nei"))
             .alias("Art av nasjonal forvaltningsinteresse")
         )
+
     return (legg_til_kolonne_arteravnasjonal,)
 
 
 @app.cell(hide_code=True)
 def _(mo):
-    mo.md(r"""### Legger til en kolonne med verdi fra M1941""")
+    mo.md(r"""
+    ### Legger til en kolonne med verdi fra M1941
+    """)
     return
 
 
@@ -312,6 +326,7 @@ def _(pl):
             .otherwise(None)
             .alias("Verdi M1941")
         )
+
     return (legg_til_verdi_m1941,)
 
 
@@ -374,7 +389,9 @@ def _(valgt_fil):
 
 @app.cell(hide_code=True)
 def _(mo):
-    mo.md(r"""### Oppdatere og rydder i datasettet""")
+    mo.md(r"""
+    ### Oppdatere og rydder i datasettet
+    """)
     return
 
 
@@ -443,6 +460,14 @@ def _(df_alle_funksjoner, pl):
     return (artsdata_df,)
 
 
+app._unparsable_cell(
+    r"""
+    artsdata_df = pl.
+    """,
+    name="_"
+)
+
+
 @app.cell(column=2)
 def _(artsdata_df):
     artsdata_df.null_count()
@@ -451,7 +476,9 @@ def _(artsdata_df):
 
 @app.cell(hide_code=True)
 def _(mo):
-    mo.md(r"""### Filtrerer ut alt før X tid (default 1990)""")
+    mo.md(r"""
+    ### Filtrerer ut alt før X tid (default 1990)
+    """)
     return
 
 
@@ -465,7 +492,9 @@ def _(artsdata_df, date, pl):
 
 @app.cell(hide_code=True)
 def _(mo):
-    mo.md(r"""### Legger til manglende artsnavn (dette steget må du gjøre)""")
+    mo.md(r"""
+    ### Legger til manglende artsnavn (dette steget må du gjøre)
+    """)
     return
 
 

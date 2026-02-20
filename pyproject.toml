@@ -3,7 +3,7 @@ name = "artsdatabanken"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.14"
 dependencies = [
     "altair>=5.5.0",
     "anthropic>=0.64.0",
@@ -14,9 +14,23 @@ dependencies = [
     "plotly[express]>=6.3.0",
     "polars>=1.32.3",
     "pyarrow>=21.0.0",
+    "pydantic-ai-slim>=1.62.0",
     "pyproj>=3.7.2",
     "requests>=2.32.5",
     "sqlglot>=27.7.0",
     "vegafusion>=2.0.2",
     "vl-convert-python>=1.8.0",
+]
+
+[dependency-groups]
+dev = [
+    "mcp>=1",
+    "nbformat>=5.10.4",
+    "openai>=2.21.0",
+    "pydantic>=2",
+    "pytest>=9.0.2",
+    "python-lsp-ruff>=2.3.0",
+    "python-lsp-server>=1.14.0",
+    "ruff>=0.15.2",
+    "websockets>=16.0",
 ]
