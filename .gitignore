@@ -8,3 +8,4 @@ wheels/
 test_data/
 # Virtual environments
 .venv
+data_csv_gammel/

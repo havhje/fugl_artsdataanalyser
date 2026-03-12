@@ -1,11 +1,37 @@
 {
   "version": "1",
   "metadata": {
-    "marimo_version": "0.19.11"
+    "marimo_version": "0.20.2"
   },
   "cells": [
     {
+      "id": "setup",
+      "code_hash": "3c6db01b69ce2b4338a02bf68a913b79",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
       "id": "Hbol",
+      "code_hash": "03c76cc8fe9ae19397186f52469073fd",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "MJUe",
       "code_hash": "ae65b27ccd3060a1cdee7080008f8e01",
       "outputs": [
         {
@@ -18,7 +44,7 @@
       "console": []
     },
     {
-      "id": "MJUe",
+      "id": "vblA",
       "code_hash": "8a2aaea25d28ed7cc1132dab98577296",
       "outputs": [
         {
@@ -31,7 +57,33 @@
       "console": []
     },
     {
+      "id": "bkHC",
+      "code_hash": "0be93643b17a633b1a19b00c1b1f38f4",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
       "id": "lEQa",
+      "code_hash": "1911381a75df61a6b50e4a01d0804b14",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "PKri",
       "code_hash": "d92f9ed2b36c80ef8728273902ce3f15",
       "outputs": [
         {
@@ -45,6 +97,19 @@
     },
     {
       "id": "Xref",
+      "code_hash": "9aa9a7238ca7a119dfaafeef9638e4ee",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "SFPL",
       "code_hash": "dda1e72ac50c6417612a74b4eff27eba",
       "outputs": [
         {
@@ -58,6 +123,19 @@
     },
     {
       "id": "BYtC",
+      "code_hash": "8c4d9776203208ccefe3f63738d6aa57",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "RGSE",
       "code_hash": "014174002aa4cf3b1bda533c973342b4",
       "outputs": [
         {
@@ -70,6 +148,85 @@
       "console": []
     },
     {
+      "id": "Kclp",
+      "code_hash": "ba363f002b744aa96b43a77bb04fac7b",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "emfo",
+      "code_hash": "57064c99e8cf5c263185e9d676417b14",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<marimo-ui-element object-id='emfo-0' random-id='c6f43d89-585b-b319-23af-2c69766c3157'><marimo-file-browser data-initial-value='[]' data-label='null' data-initial-path='&quot;/home/havhje/koding/fugl_artsdataanalyser&quot;' data-selection-mode='&quot;file&quot;' data-filetypes='[]' data-multiple='true' data-restrict-navigation='false'></marimo-file-browser></marimo-ui-element>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Hstk",
+      "code_hash": "eba167a8c180faf8976fda82f7b57a59",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "exception",
+          "evalue": "An ancestor raised an exception (IndexError): ",
+          "traceback": []
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "nWHF",
+      "code_hash": "cf4ff315afa2a002eb9d52b2565dbf5b",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "exception",
+          "evalue": "An ancestor raised an exception (IndexError): ",
+          "traceback": []
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stderr",
+          "text": "<span class=\"codehilite\"><div class=\"highlight\"><pre><span></span><span class=\"gt\">Traceback (most recent call last):</span>\n  File <span class=\"nb\">&quot;/tmp/marimo_60639/__marimo__cell_nWHF_.py&quot;</span>, line <span class=\"m\">3</span>, in <span class=\"n\">&lt;module&gt;</span>\n<span class=\"w\">    </span><span class=\"n\">SELECT</span> <span class=\"o\">*</span> <span class=\"n\">FROM</span> <span class=\"n\">read_csv</span><span class=\"p\">(</span><span class=\"s1\">&#39;{str(filepath)}&#39;</span><span class=\"p\">);</span>\n<span class=\"w\">                                 </span><span class=\"pm\">^^^^^^^^</span>\n<span class=\"gr\">NameError</span>: <span class=\"n\">name &#39;filepath&#39; is not defined</span>\n</pre></div>\n</span>",
+          "mimetype": "application/vnd.marimo+traceback"
+        }
+      ]
+    },
+    {
+      "id": "iLit",
+      "code_hash": "c6efd0eca1da2f16bf6f635f060b01d5",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "exception",
+          "evalue": "tuple index out of range",
+          "traceback": []
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stderr",
+          "text": "<span class=\"codehilite\"><div class=\"highlight\"><pre><span></span><span class=\"gt\">Traceback (most recent call last):</span>\n  File <span class=\"nb\">&quot;/tmp/marimo_60639/__marimo__cell_iLit_.py&quot;</span>, line <span class=\"m\">1</span>, in <span class=\"n\">&lt;module&gt;</span>\n<span class=\"w\">    </span><span class=\"n\">file_info</span> <span class=\"o\">=</span> <span class=\"n\">valgt_fil</span><span class=\"o\">.</span><span class=\"n\">value</span><span class=\"p\">[</span><span class=\"mi\">0</span><span class=\"p\">]</span>\n<span class=\"w\">                </span><span class=\"pm\">~~~~~~~~~~~~~~~^^^</span>\n<span class=\"gr\">IndexError</span>: <span class=\"n\">tuple index out of range</span>\n</pre></div>\n</span>",
+          "mimetype": "application/vnd.marimo+traceback"
+        }
+      ]
+    },
+    {
       "id": "ZHCJ",
       "code_hash": "8158f866a1bccb9c37b22a008129e873",
       "outputs": [
@@ -78,6 +235,58 @@
           "data": {
             "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"oppdatere-og-rydder-i-datasettet\">Oppdatere og rydder i datasettet</h3></span>"
           }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "ROlb",
+      "code_hash": "601877eaa9c647f3b34d636f43c2b63a",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "exception",
+          "evalue": "An ancestor raised an exception (IndexError): ",
+          "traceback": []
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "qnkX",
+      "code_hash": "0f806f417e081a4ce49b3e178fe7fbcc",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "exception",
+          "evalue": "An ancestor raised an exception (IndexError): ",
+          "traceback": []
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "TqIu",
+      "code_hash": "cfd5e7e8a63f5373e72c348e63ca8c74",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "exception",
+          "evalue": "line 1\n    artsdata_df = pl.\n                     ^\nSyntaxError: invalid syntax\n",
+          "traceback": []
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Vxnm",
+      "code_hash": "82ad80fb23a19ad9138fac01d40e9fdf",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "exception",
+          "evalue": "An ancestor raised an exception (IndexError): ",
+          "traceback": []
         }
       ],
       "console": []
@@ -96,6 +305,19 @@
       "console": []
     },
     {
+      "id": "ulZA",
+      "code_hash": "c2c81059378e74cd19e80a82b8642de7",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "exception",
+          "evalue": "An ancestor raised an exception (IndexError): ",
+          "traceback": []
+        }
+      ],
+      "console": []
+    },
+    {
       "id": "ecfG",
       "code_hash": "3fe258e51e59793cbd21166a5eb6ff73",
       "outputs": [
@@ -109,215 +331,13 @@
       "console": []
     },
     {
-      "id": "vblA",
-      "code_hash": "8748632c0975506920375d6641942f84",
-      "outputs": [
-        {
-          "type": "data",
-          "data": {
-            "text/plain": ""
-          }
-        }
-      ],
-      "console": []
-    },
-    {
-      "id": "bkHC",
-      "code_hash": "2945874bf21dc0523c67039881dcdd6c",
-      "outputs": [
-        {
-          "type": "data",
-          "data": {
-            "text/plain": ""
-          }
-        }
-      ],
-      "console": []
-    },
-    {
-      "id": "PKri",
-      "code_hash": "21dcb4d2b7bbb1f2731f35e8e7754670",
-      "outputs": [
-        {
-          "type": "data",
-          "data": {
-            "text/plain": ""
-          }
-        }
-      ],
-      "console": []
-    },
-    {
-      "id": "SFPL",
-      "code_hash": "e4c4471f422e737f77ac07222c5a3113",
-      "outputs": [
-        {
-          "type": "data",
-          "data": {
-            "text/plain": ""
-          }
-        }
-      ],
-      "console": []
-    },
-    {
-      "id": "RGSE",
-      "code_hash": "552493b985a7c16d724d8131f7a963b8",
-      "outputs": [
-        {
-          "type": "data",
-          "data": {
-            "text/plain": ""
-          }
-        }
-      ],
-      "console": []
-    },
-    {
-      "id": "Kclp",
-      "code_hash": "3d0becc85b62ca7df524afcc2fffca49",
-      "outputs": [
-        {
-          "type": "data",
-          "data": {
-            "text/plain": ""
-          }
-        }
-      ],
-      "console": []
-    },
-    {
-      "id": "emfo",
-      "code_hash": "eba167a8c180faf8976fda82f7b57a59",
-      "outputs": [
-        {
-          "type": "error",
-          "ename": "exception",
-          "evalue": "An ancestor raised an exception (ValueError): ",
-          "traceback": []
-        }
-      ],
-      "console": []
-    },
-    {
-      "id": "Hstk",
-      "code_hash": "06464e3c41826d9acd0834924adafdd8",
-      "outputs": [
-        {
-          "type": "error",
-          "ename": "exception",
-          "evalue": "Initial path C:\\Users\\havh\\OneDrive - Multiconsult\\Dokumenter\\Oppdrag is not a directory.",
-          "traceback": []
-        }
-      ],
-      "console": [
-        {
-          "type": "stream",
-          "name": "stderr",
-          "text": "<span class=\"codehilite\"><div class=\"highlight\"><pre><span></span><span class=\"gt\">Traceback (most recent call last):</span>\n  File <span class=\"nb\">&quot;/tmp/marimo_32426/__marimo__cell_Hstk_.py&quot;</span>, line <span class=\"m\">1</span>, in <span class=\"n\">&lt;module&gt;</span>\n<span class=\"w\">    </span><span class=\"n\">valgt_fil</span> <span class=\"o\">=</span> <span class=\"n\">mo</span><span class=\"o\">.</span><span class=\"n\">ui</span><span class=\"o\">.</span><span class=\"n\">file_browser</span><span class=\"p\">(</span><span class=\"n\">initial_path</span><span class=\"o\">=</span> <span class=\"sa\">r</span><span class=\"s2\">&quot;C:\\Users\\havh\\OneDrive - Multiconsult\\Dokumenter\\Oppdrag&quot;</span><span class=\"p\">)</span>\n  File <span class=\"nb\">&quot;/home/havhje/koding/fugl_artsdataanalyser/.venv/lib/python3.14/site-packages/marimo/_plugins/ui/_impl/file_browser.py&quot;</span>, line <span class=\"m\">179</span>, in <span class=\"n\">__init__</span>\n<span class=\"w\">    </span><span class=\"k\">raise</span> <span class=\"ne\">ValueError</span><span class=\"p\">(</span>\n<span class=\"w\">    </span>    <span class=\"sa\">f</span><span class=\"s2\">&quot;Initial path </span><span class=\"si\">{</span><span class=\"n\">initial_path</span><span class=\"si\">}</span><span class=\"s2\"> is not a directory.&quot;</span>\n<span class=\"w\">    </span><span class=\"p\">)</span>\n<span class=\"gr\">ValueError</span>: <span class=\"n\">Initial path C:\\Users\\havh\\OneDrive - Multiconsult\\Dokumenter\\Oppdrag is not a directory.</span>\n</pre></div>\n</span>",
-          "mimetype": "application/vnd.marimo+traceback"
-        }
-      ]
-    },
-    {
-      "id": "nWHF",
-      "code_hash": "cf4ff315afa2a002eb9d52b2565dbf5b",
-      "outputs": [
-        {
-          "type": "error",
-          "ename": "exception",
-          "evalue": "An ancestor raised an exception (ValueError): ",
-          "traceback": []
-        }
-      ],
-      "console": []
-    },
-    {
-      "id": "iLit",
-      "code_hash": "c6efd0eca1da2f16bf6f635f060b01d5",
-      "outputs": [
-        {
-          "type": "error",
-          "ename": "exception",
-          "evalue": "An ancestor raised an exception (ValueError): ",
-          "traceback": []
-        }
-      ],
-      "console": []
-    },
-    {
-      "id": "ROlb",
-      "code_hash": "e28ff1ede2be5a171e615607c75f974f",
-      "outputs": [
-        {
-          "type": "error",
-          "ename": "exception",
-          "evalue": "An ancestor raised an exception (ValueError): ",
-          "traceback": []
-        }
-      ],
-      "console": []
-    },
-    {
-      "id": "qnkX",
-      "code_hash": "9f468bc1baa46cb87e6eb8b635fc4181",
-      "outputs": [
-        {
-          "type": "error",
-          "ename": "exception",
-          "evalue": "An ancestor raised an exception (ValueError): ",
-          "traceback": []
-        }
-      ],
-      "console": []
-    },
-    {
-      "id": "TqIu",
-      "code_hash": "707de53e637424940d449550380bd088",
-      "outputs": [
-        {
-          "type": "error",
-          "ename": "syntax",
-          "evalue": "line 1\n    artsdata_df =\n                 ^\nSyntaxError: invalid syntax\n",
-          "traceback": []
-        }
-      ],
-      "console": []
-    },
-    {
-      "id": "Vxnm",
-      "code_hash": "82ad80fb23a19ad9138fac01d40e9fdf",
-      "outputs": [
-        {
-          "type": "error",
-          "ename": "exception",
-          "evalue": "An ancestor raised an exception (ValueError): ",
-          "traceback": []
-        }
-      ],
-      "console": []
-    },
-    {
-      "id": "ulZA",
-      "code_hash": "3318bcc7bd9e5faf632d970f6557d0e5",
-      "outputs": [
-        {
-          "type": "error",
-          "ename": "exception",
-          "evalue": "An ancestor raised an exception (ValueError): ",
-          "traceback": []
-        }
-      ],
-      "console": []
-    },
-    {
       "id": "Pvdt",
-      "code_hash": "f9bb8a9bbe563afc843da2d067f6dad6",
+      "code_hash": "8c047b349fe4cd2bf0278cd438fe20ea",
       "outputs": [
         {
           "type": "error",
           "ename": "exception",
-          "evalue": "An ancestor raised an exception (ValueError): ",
+          "evalue": "An ancestor raised an exception (IndexError): ",
           "traceback": []
         }
       ],
@@ -325,12 +345,12 @@
     },
     {
       "id": "ZBYS",
-      "code_hash": "5fc0d0780afe76f5052acb4fd834c80d",
+      "code_hash": "b5f14e5b6bb07697286fb87ee0e60686",
       "outputs": [
         {
           "type": "error",
           "ename": "exception",
-          "evalue": "An ancestor raised an exception (ValueError): ",
+          "evalue": "An ancestor raised an exception (IndexError): ",
           "traceback": []
         }
       ],
@@ -338,26 +358,13 @@
     },
     {
       "id": "aLJB",
-      "code_hash": "753476ea35fb5b2a042f77c8d0d764d9",
+      "code_hash": "df1347ca55853933da989097d78842ac",
       "outputs": [
         {
           "type": "error",
           "ename": "exception",
-          "evalue": "An ancestor raised an exception (ValueError): ",
+          "evalue": "An ancestor raised an exception (IndexError): ",
           "traceback": []
-        }
-      ],
-      "console": []
-    },
-    {
-      "id": "nHfw",
-      "code_hash": null,
-      "outputs": [
-        {
-          "type": "data",
-          "data": {
-            "text/plain": ""
-          }
         }
       ],
       "console": []
