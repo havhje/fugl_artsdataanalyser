@@ -7,6 +7,7 @@ app = marimo.App(width="medium")
 @app.cell(column=5)
 def _():
     import marimo as mo
+
     return (mo,)
 
 
@@ -165,10 +166,34 @@ def _():
 
 @app.cell(hide_code=True)
 def _(mo, requests, service_url, time, xmax, xmin, ymax, ymin):
+    from typing import Any
+
     # If envelope works better, here's an updated download function
-    def download_arcgis_utm33_envelope(service_url, layer_id, xmin, ymin, xmax, ymax, max_records=2000):
-        """
-        Download GeoJSON data using envelope geometry
+    def download_arcgis_utm33_envelope(
+        service_url: str,
+        layer_id: int,
+        xmin: float,
+        ymin: float,
+        xmax: float,
+        ymax: float,
+        max_records: int = 2000,
+    ) -> dict[str, Any]:
+        """Download GeoJSON data using envelope geometry.
+
+        Queries an ArcGIS MapServer layer within a UTM 33N bounding box,
+        handling pagination to retrieve all matching features.
+
+        Args:
+            service_url: Base URL of the ArcGIS MapServer service.
+            layer_id: Numeric layer index within the service.
+            xmin: Left edge of the bounding box (EPSG:25833).
+            ymin: Bottom edge of the bounding box (EPSG:25833).
+            xmax: Right edge of the bounding box (EPSG:25833).
+            ymax: Top edge of the bounding box (EPSG:25833).
+            max_records: Maximum features per request page. Defaults to 2000.
+
+        Returns:
+            A GeoJSON FeatureCollection dict with ``type`` and ``features`` keys.
         """
         base_url = f"{service_url}/{layer_id}/query"
 
@@ -244,7 +269,9 @@ def _(mo, requests, service_url, time, xmax, xmin, ymax, ymin):
         return {"type": "FeatureCollection", "features": all_features}
 
     # Try the envelope-based download
-    ecosystem_geojson_envelope = download_arcgis_utm33_envelope(service_url, 0, xmin, ymin, xmax, ymax)
+    ecosystem_geojson_envelope = download_arcgis_utm33_envelope(
+        service_url, 0, xmin, ymin, xmax, ymax
+    )
 
     mo.md(f"""### Lastet ned data fra økologisk grunnkart
     Downloaded **{len(ecosystem_geojson_envelope["features"])}** ecosystem polygons
@@ -321,7 +348,7 @@ def _(arter_df, ecosystems, mo):
         INNER JOIN filtered_ecosystems fe
             ON ST_Intersects(sp.geom, fe.polygon_geom)
         """,
-        output=False
+        output=False,
     )
     return (system_arter_df,)
 
