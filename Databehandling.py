@@ -1,6 +1,6 @@
 import marimo
 
-__generated_with = "0.20.2"
+__generated_with = "0.21.1"
 app = marimo.App(width="columns")
 
 with app.setup:
@@ -10,15 +10,14 @@ with app.setup:
     import marimo as mo
     import polars as pl
     import requests
+    import duckdb
 
 
 @app.cell
 def _():
-    # Constants
-    NORTAXA_API_BASE_URL = "https://nortaxa.artsdatabanken.no/api/v1/TaxonName"
-    DESIRED_RANKS = ["Kingdom", "Phylum", "Class", "Order", "Family", "Genus"]
-    RATE_LIMIT_DELAY = 0.1  # seconds between API calls (adjust as needed)
-    return DESIRED_RANKS, NORTAXA_API_BASE_URL, RATE_LIMIT_DELAY
+    DATABASE_URL = "/home/havhje/koding/fugl_artsdataanalyser/fugl_atributt_data"
+    bird_data = duckdb.connect(DATABASE_URL, read_only=False)
+    return
 
 
 @app.cell(hide_code=True)
@@ -37,11 +36,17 @@ def _():
     return
 
 
-@app.cell(hide_code=True)
-def _(DESIRED_RANKS, NORTAXA_API_BASE_URL):
-    # Henter artsdata via API
+@app.cell
+def _():
+    # Constants
+    NORTAXA_API_BASE_URL = "https://nortaxa.artsdatabanken.no/api/v1/TaxonName"
+    DESIRED_RANKS = ["Kingdom", "Phylum", "Class", "Order", "Family", "Genus"]
+    RATE_LIMIT_DELAY = 0.1  # seconds between API calls (adjust as needed)
+    return DESIRED_RANKS, NORTAXA_API_BASE_URL, RATE_LIMIT_DELAY
 
 
+@app.cell
+def _(NORTAXA_API_BASE_URL):
     @lru_cache(maxsize=10000)
     def fetch_taxon_data(scientific_name_id):
         """Fetch taxon data with caching to avoid duplicate API calls."""
@@ -53,7 +58,16 @@ def _(DESIRED_RANKS, NORTAXA_API_BASE_URL):
             print(f"Error fetching ID {scientific_name_id}: {e}")
         return None
 
+    return (fetch_taxon_data,)
 
+
+@app.cell
+def _():
+    return
+
+
+@app.cell
+def _(DESIRED_RANKS):
     def extract_hierarchy_and_ids(api_data):
         """Extract taxonomic hierarchy and rank IDs from API data."""
         hierarchy = {}
@@ -88,10 +102,10 @@ def _(DESIRED_RANKS, NORTAXA_API_BASE_URL):
                 return name.get("vernacularName")
         return None
 
-    return extract_hierarchy_and_ids, fetch_taxon_data, get_norwegian_name
+    return extract_hierarchy_and_ids, get_norwegian_name
 
 
-@app.cell(hide_code=True)
+@app.cell
 def _(
     DESIRED_RANKS,
     RATE_LIMIT_DELAY,
@@ -333,10 +347,12 @@ def _():
     return (valgt_fil,)
 
 
-@app.cell
-def _(endelig_datasett_for_nedlastning):
-    endelig_datasett_for_nedlastning
-    return
+@app.cell(hide_code=True)
+def _(valgt_fil):
+    file_info = valgt_fil.value[0]
+    filepath = file_info.path
+    str(filepath)
+    return (filepath,)
 
 
 @app.cell
@@ -344,17 +360,10 @@ def _(filepath):
     orginal_df = mo.sql(
         f"""
         SELECT * FROM read_csv('{str(filepath)}');
-        """
+        """,
+        output=False
     )
     return (orginal_df,)
-
-
-@app.cell(hide_code=True)
-def _(valgt_fil):
-    file_info = valgt_fil.value[0]
-    filepath = file_info.path
-    str(filepath)
-    return (filepath,)
 
 
 @app.cell(hide_code=True)
@@ -507,10 +516,10 @@ def _(arter_etter_1990, navn_inputs):
     else:
         # If no names were entered, keep the original dataframe
         endelig_datasett_for_nedlastning = arter_etter_1990
-    return (endelig_datasett_for_nedlastning,)
+    return
 
 
-@app.cell(column=3)
+@app.cell
 def _():
     return
 

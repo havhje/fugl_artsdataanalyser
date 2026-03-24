@@ -1,33 +1,20 @@
 {
   "version": "1",
   "metadata": {
-    "marimo_version": "0.20.2"
+    "marimo_version": "0.21.1",
+    "script_metadata_hash": null
   },
   "cells": [
     {
       "id": "setup",
-      "code_hash": "3c6db01b69ce2b4338a02bf68a913b79",
-      "outputs": [
-        {
-          "type": "data",
-          "data": {
-            "text/plain": ""
-          }
-        }
-      ],
+      "code_hash": "ee398902d4775efdaeedb625cde45bc1",
+      "outputs": [],
       "console": []
     },
     {
       "id": "Hbol",
-      "code_hash": "03c76cc8fe9ae19397186f52469073fd",
-      "outputs": [
-        {
-          "type": "data",
-          "data": {
-            "text/plain": ""
-          }
-        }
-      ],
+      "code_hash": "9abe0297ad85faa957df58ff3db49276",
+      "outputs": [],
       "console": []
     },
     {
@@ -58,32 +45,36 @@
     },
     {
       "id": "bkHC",
-      "code_hash": "0be93643b17a633b1a19b00c1b1f38f4",
-      "outputs": [
-        {
-          "type": "data",
-          "data": {
-            "text/plain": ""
-          }
-        }
-      ],
+      "code_hash": "03c76cc8fe9ae19397186f52469073fd",
+      "outputs": [],
       "console": []
     },
     {
       "id": "lEQa",
-      "code_hash": "1911381a75df61a6b50e4a01d0804b14",
-      "outputs": [
-        {
-          "type": "data",
-          "data": {
-            "text/plain": ""
-          }
-        }
-      ],
+      "code_hash": "a2870244b4d3d1888bd5759f4883833d",
+      "outputs": [],
       "console": []
     },
     {
       "id": "PKri",
+      "code_hash": null,
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "Xref",
+      "code_hash": "ea14e27cb85c26dd203da87f2435c5cc",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "SFPL",
+      "code_hash": "1911381a75df61a6b50e4a01d0804b14",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "BYtC",
       "code_hash": "d92f9ed2b36c80ef8728273902ce3f15",
       "outputs": [
         {
@@ -96,20 +87,13 @@
       "console": []
     },
     {
-      "id": "Xref",
+      "id": "RGSE",
       "code_hash": "9aa9a7238ca7a119dfaafeef9638e4ee",
-      "outputs": [
-        {
-          "type": "data",
-          "data": {
-            "text/plain": ""
-          }
-        }
-      ],
+      "outputs": [],
       "console": []
     },
     {
-      "id": "SFPL",
+      "id": "Kclp",
       "code_hash": "dda1e72ac50c6417612a74b4eff27eba",
       "outputs": [
         {
@@ -122,20 +106,13 @@
       "console": []
     },
     {
-      "id": "BYtC",
+      "id": "emfo",
       "code_hash": "8c4d9776203208ccefe3f63738d6aa57",
-      "outputs": [
-        {
-          "type": "data",
-          "data": {
-            "text/plain": ""
-          }
-        }
-      ],
+      "outputs": [],
       "console": []
     },
     {
-      "id": "RGSE",
+      "id": "Hstk",
       "code_hash": "014174002aa4cf3b1bda533c973342b4",
       "outputs": [
         {
@@ -148,86 +125,31 @@
       "console": []
     },
     {
-      "id": "Kclp",
-      "code_hash": "ba363f002b744aa96b43a77bb04fac7b",
-      "outputs": [
-        {
-          "type": "data",
-          "data": {
-            "text/plain": ""
-          }
-        }
-      ],
-      "console": []
-    },
-    {
-      "id": "emfo",
-      "code_hash": "57064c99e8cf5c263185e9d676417b14",
-      "outputs": [
-        {
-          "type": "data",
-          "data": {
-            "text/html": "<marimo-ui-element object-id='emfo-0' random-id='c6f43d89-585b-b319-23af-2c69766c3157'><marimo-file-browser data-initial-value='[]' data-label='null' data-initial-path='&quot;/home/havhje/koding/fugl_artsdataanalyser&quot;' data-selection-mode='&quot;file&quot;' data-filetypes='[]' data-multiple='true' data-restrict-navigation='false'></marimo-file-browser></marimo-ui-element>"
-          }
-        }
-      ],
-      "console": []
-    },
-    {
-      "id": "Hstk",
-      "code_hash": "eba167a8c180faf8976fda82f7b57a59",
-      "outputs": [
-        {
-          "type": "error",
-          "ename": "exception",
-          "evalue": "An ancestor raised an exception (IndexError): ",
-          "traceback": []
-        }
-      ],
-      "console": []
-    },
-    {
       "id": "nWHF",
-      "code_hash": "cf4ff315afa2a002eb9d52b2565dbf5b",
-      "outputs": [
-        {
-          "type": "error",
-          "ename": "exception",
-          "evalue": "An ancestor raised an exception (IndexError): ",
-          "traceback": []
-        }
-      ],
-      "console": [
-        {
-          "type": "stream",
-          "name": "stderr",
-          "text": "<span class=\"codehilite\"><div class=\"highlight\"><pre><span></span><span class=\"gt\">Traceback (most recent call last):</span>\n  File <span class=\"nb\">&quot;/tmp/marimo_60639/__marimo__cell_nWHF_.py&quot;</span>, line <span class=\"m\">3</span>, in <span class=\"n\">&lt;module&gt;</span>\n<span class=\"w\">    </span><span class=\"n\">SELECT</span> <span class=\"o\">*</span> <span class=\"n\">FROM</span> <span class=\"n\">read_csv</span><span class=\"p\">(</span><span class=\"s1\">&#39;{str(filepath)}&#39;</span><span class=\"p\">);</span>\n<span class=\"w\">                                 </span><span class=\"pm\">^^^^^^^^</span>\n<span class=\"gr\">NameError</span>: <span class=\"n\">name &#39;filepath&#39; is not defined</span>\n</pre></div>\n</span>",
-          "mimetype": "application/vnd.marimo+traceback"
-        }
-      ]
+      "code_hash": "ba363f002b744aa96b43a77bb04fac7b",
+      "outputs": [],
+      "console": []
     },
     {
       "id": "iLit",
-      "code_hash": "c6efd0eca1da2f16bf6f635f060b01d5",
-      "outputs": [
-        {
-          "type": "error",
-          "ename": "exception",
-          "evalue": "tuple index out of range",
-          "traceback": []
-        }
-      ],
-      "console": [
-        {
-          "type": "stream",
-          "name": "stderr",
-          "text": "<span class=\"codehilite\"><div class=\"highlight\"><pre><span></span><span class=\"gt\">Traceback (most recent call last):</span>\n  File <span class=\"nb\">&quot;/tmp/marimo_60639/__marimo__cell_iLit_.py&quot;</span>, line <span class=\"m\">1</span>, in <span class=\"n\">&lt;module&gt;</span>\n<span class=\"w\">    </span><span class=\"n\">file_info</span> <span class=\"o\">=</span> <span class=\"n\">valgt_fil</span><span class=\"o\">.</span><span class=\"n\">value</span><span class=\"p\">[</span><span class=\"mi\">0</span><span class=\"p\">]</span>\n<span class=\"w\">                </span><span class=\"pm\">~~~~~~~~~~~~~~~^^^</span>\n<span class=\"gr\">IndexError</span>: <span class=\"n\">tuple index out of range</span>\n</pre></div>\n</span>",
-          "mimetype": "application/vnd.marimo+traceback"
-        }
-      ]
+      "code_hash": "57064c99e8cf5c263185e9d676417b14",
+      "outputs": [],
+      "console": []
     },
     {
       "id": "ZHCJ",
+      "code_hash": "c6efd0eca1da2f16bf6f635f060b01d5",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "ROlb",
+      "code_hash": "e30eff7a5f12742623ae057193aab567",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "qnkX",
       "code_hash": "8158f866a1bccb9c37b22a008129e873",
       "outputs": [
         {
@@ -240,59 +162,31 @@
       "console": []
     },
     {
-      "id": "ROlb",
-      "code_hash": "601877eaa9c647f3b34d636f43c2b63a",
-      "outputs": [
-        {
-          "type": "error",
-          "ename": "exception",
-          "evalue": "An ancestor raised an exception (IndexError): ",
-          "traceback": []
-        }
-      ],
-      "console": []
-    },
-    {
-      "id": "qnkX",
-      "code_hash": "0f806f417e081a4ce49b3e178fe7fbcc",
-      "outputs": [
-        {
-          "type": "error",
-          "ename": "exception",
-          "evalue": "An ancestor raised an exception (IndexError): ",
-          "traceback": []
-        }
-      ],
-      "console": []
-    },
-    {
       "id": "TqIu",
-      "code_hash": "cfd5e7e8a63f5373e72c348e63ca8c74",
-      "outputs": [
-        {
-          "type": "error",
-          "ename": "exception",
-          "evalue": "line 1\n    artsdata_df = pl.\n                     ^\nSyntaxError: invalid syntax\n",
-          "traceback": []
-        }
-      ],
+      "code_hash": "601877eaa9c647f3b34d636f43c2b63a",
+      "outputs": [],
       "console": []
     },
     {
       "id": "Vxnm",
-      "code_hash": "82ad80fb23a19ad9138fac01d40e9fdf",
-      "outputs": [
-        {
-          "type": "error",
-          "ename": "exception",
-          "evalue": "An ancestor raised an exception (IndexError): ",
-          "traceback": []
-        }
-      ],
+      "code_hash": "0f806f417e081a4ce49b3e178fe7fbcc",
+      "outputs": [],
       "console": []
     },
     {
       "id": "DnEU",
+      "code_hash": "cfd5e7e8a63f5373e72c348e63ca8c74",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "ulZA",
+      "code_hash": "82ad80fb23a19ad9138fac01d40e9fdf",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "ecfG",
       "code_hash": "e1448f78aabeb946390055b45752c42d",
       "outputs": [
         {
@@ -305,20 +199,13 @@
       "console": []
     },
     {
-      "id": "ulZA",
+      "id": "Pvdt",
       "code_hash": "c2c81059378e74cd19e80a82b8642de7",
-      "outputs": [
-        {
-          "type": "error",
-          "ename": "exception",
-          "evalue": "An ancestor raised an exception (IndexError): ",
-          "traceback": []
-        }
-      ],
+      "outputs": [],
       "console": []
     },
     {
-      "id": "ecfG",
+      "id": "ZBYS",
       "code_hash": "3fe258e51e59793cbd21166a5eb6ff73",
       "outputs": [
         {
@@ -331,42 +218,27 @@
       "console": []
     },
     {
-      "id": "Pvdt",
-      "code_hash": "8c047b349fe4cd2bf0278cd438fe20ea",
-      "outputs": [
-        {
-          "type": "error",
-          "ename": "exception",
-          "evalue": "An ancestor raised an exception (IndexError): ",
-          "traceback": []
-        }
-      ],
-      "console": []
-    },
-    {
-      "id": "ZBYS",
-      "code_hash": "b5f14e5b6bb07697286fb87ee0e60686",
-      "outputs": [
-        {
-          "type": "error",
-          "ename": "exception",
-          "evalue": "An ancestor raised an exception (IndexError): ",
-          "traceback": []
-        }
-      ],
-      "console": []
-    },
-    {
       "id": "aLJB",
+      "code_hash": "8c047b349fe4cd2bf0278cd438fe20ea",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "nHfw",
+      "code_hash": "b5f14e5b6bb07697286fb87ee0e60686",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "xXTn",
       "code_hash": "df1347ca55853933da989097d78842ac",
-      "outputs": [
-        {
-          "type": "error",
-          "ename": "exception",
-          "evalue": "An ancestor raised an exception (IndexError): ",
-          "traceback": []
-        }
-      ],
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "AjVT",
+      "code_hash": null,
+      "outputs": [],
       "console": []
     }
   ]
