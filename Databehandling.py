@@ -74,6 +74,7 @@ def _(DESIRED_RANKS, NORTAXA_API_BASE_URL):
             print(f"Error fetching ID {scientific_name_id}: {e}")
         return None
 
+
     def extract_hierarchy_and_ids(
         api_data: dict[str, Any] | None,
     ) -> tuple[dict[str, str], int | None, int | None]:
@@ -102,6 +103,7 @@ def _(DESIRED_RANKS, NORTAXA_API_BASE_URL):
                     order_id = level.get("scientificNameId")
 
         return hierarchy, family_id, order_id
+
 
     def get_norwegian_name(api_data: dict[str, Any] | None) -> str | None:
         """Extract Norwegian vernacular name (prioritize Bokmål over Nynorsk).
@@ -154,9 +156,10 @@ def _(
             Enriched dataframe with taxonomy columns, or None on error.
         """
         # Convert to Polars for better performance
-        df_work = pl.from_pandas(
-            source_df.to_pandas() if hasattr(source_df, "to_pandas") else source_df
-        )
+        if isinstance(source_df, pl.DataFrame):
+            df_work = source_df.clone()
+        else:
+            df_work = pl.from_pandas(source_df)
 
         # Check if required column exists
         if "validScientificNameId" not in df_work.columns:
@@ -164,9 +167,7 @@ def _(
             return None
 
         # Get unique IDs
-        unique_ids = (
-            df_work.select("validScientificNameId").unique().to_series().to_list()
-        )
+        unique_ids = df_work.select("validScientificNameId").unique().to_series().to_list()
         total_ids = len(unique_ids)
 
         # Storage for results
@@ -188,9 +189,7 @@ def _(
                 # Fetch species data
                 species_data = fetch_taxon_data(species_id)
                 if species_data:
-                    hierarchy, family_id, order_id = extract_hierarchy_and_ids(
-                        species_data
-                    )
+                    hierarchy, family_id, order_id = extract_hierarchy_and_ids(species_data)
                     taxonomy_data[species_id] = hierarchy
 
                     # Fetch family name if available
@@ -210,20 +209,14 @@ def _(
                     time.sleep(RATE_LIMIT_DELAY)
 
                 # Update progress
-                bar.update(
-                    i + 1, title=f"Processing ID {species_id} ({i + 1}/{total_ids})"
-                )
+                bar.update(i + 1, title=f"Processing ID {species_id} ({i + 1}/{total_ids})")
 
         # Add taxonomy columns with proper return_dtype
         for rank in DESIRED_RANKS:
             df_work = df_work.with_columns(
                 pl.col("validScientificNameId")
                 .map_elements(
-                    lambda x: (
-                        taxonomy_data.get(int(x), {}).get(rank)
-                        if x and x is not None
-                        else None
-                    ),
+                    lambda x: taxonomy_data.get(int(x), {}).get(rank) if x and x is not None else None,
                     return_dtype=pl.Utf8,  # Fixed: Added return_dtype
                 )
                 .alias(rank)
@@ -252,6 +245,45 @@ def _(
     return (process_and_enrich_data,)
 
 
+@app.cell
+def _(process_and_enrich_data):
+    test_df1 = pl.DataFrame(
+        {
+            "validScientificNameId": [
+                4382,  # granmeis
+                204586,  # skjeand
+                3677,  # gråmåke
+                295741,
+            ],  # hønsehauk
+        }
+    )
+
+    r = process_and_enrich_data(test_df1)
+
+    r
+    return
+
+
+@app.cell
+def _(process_and_enrich_data):
+    def test_process_and_enrich_data():
+
+        # Du må endre df, slik at det abre er species ID som er inputten, er slik funksjonen fungerer
+        test_df = pl.DataFrame(
+            {
+                "validScientificNameId": [4263]  # dompapp
+            }
+        )
+
+        test_result = process_and_enrich_data(test_df)
+
+        dompap = test_result.filter(pl.col("validScientificNameId") == 4263)
+
+        assert dompap.get_column("Family").eq("Fringillidae").all(), "Dompap should be in Fringillidae  family"
+
+    return
+
+
 @app.cell(hide_code=True)
 def _():
     mo.md(r"""
@@ -261,9 +293,7 @@ def _():
 
 
 @app.function(hide_code=True)
-def add_national_interest_criteria(
-    df_enriched: pl.DataFrame, excel_path: str | None = None
-) -> pl.DataFrame:
+def add_national_interest_criteria(df_enriched: pl.DataFrame, excel_path: str | None = None) -> pl.DataFrame:
     """Add national interest criteria from Excel file to enriched dataframe.
 
     Reads criteria columns from the national-interest Excel sheet, converts
@@ -308,12 +338,8 @@ def add_national_interest_criteria(
     )
 
     # Fill nulls with "No" for non-matched rows
-    criteria_renamed = [
-        col.replace("Kriterium_", "").replace("_", " ") for col in criteria_cols
-    ]
-    df_with_criteria = df_with_criteria.with_columns(
-        [pl.col(col).fill_null("No") for col in criteria_renamed]
-    )
+    criteria_renamed = [col.replace("Kriterium_", "").replace("_", " ") for col in criteria_cols]
+    df_with_criteria = df_with_criteria.with_columns([pl.col(col).fill_null("No") for col in criteria_renamed])
 
     return df_with_criteria
 
@@ -389,15 +415,9 @@ def legg_til_verdi_m1941(df: pl.DataFrame) -> pl.DataFrame:
         DataFrame with the added ``Verdi M1941`` column.
     """
     return df.with_columns(
-        pl.when(
-            (pl.col("category").is_in(["EN", "CR"]))
-            | (pl.col("Prioriterte arter") == "Yes")
-        )
+        pl.when((pl.col("category").is_in(["EN", "CR"])) | (pl.col("Prioriterte arter") == "Yes"))
         .then(pl.lit("Svært stor verdi"))
-        .when(
-            (pl.col("category") == "VU")
-            | (pl.col("Andre spesielt hensynskrevende arter") == "Yes")
-        )
+        .when((pl.col("category") == "VU") | (pl.col("Andre spesielt hensynskrevende arter") == "Yes"))
         .then(pl.lit("Stor verdi"))
         .when(pl.col("category") == "NT")
         .then(pl.lit("Middels verdi"))
@@ -472,9 +492,7 @@ def _(df_alle_funksjoner):
             .alias("Antall"),
             pl.col("behavior").alias("Atferd"),
             pl.col("dateTimeCollected").dt.date().alias("Observert dato"),
-            pl.col("coordinateUncertaintyInMeters")
-            .alias("Usikkerhet meter")
-            .cast(pl.Int64),
+            pl.col("coordinateUncertaintyInMeters").alias("Usikkerhet meter").cast(pl.Int64),
             pl.col("FamilieNavn").alias("Familie"),
             pl.col("OrdenNavn").alias("Orden"),
             pl.col("taxonGroupName").alias("Artsgruppe"),
@@ -530,11 +548,7 @@ def _():
 @app.cell
 def _(arter_etter_1990):
     mangler_navn = (
-        arter_etter_1990.filter(
-            pl.col("Navn").is_null()
-            | pl.col("Familie").is_null()
-            | pl.col("Orden").is_null()
-        )
+        arter_etter_1990.filter(pl.col("Navn").is_null() | pl.col("Familie").is_null() | pl.col("Orden").is_null())
         .select(["Art", "Navn", "Familie", "Orden"])
         .unique()
         .sort("Art")
@@ -547,10 +561,7 @@ def _(arter_etter_1990):
 @app.cell
 def _(mangler_navn):
     navn_inputs = mo.ui.dictionary(
-        {
-            row["Art"]: mo.ui.text(placeholder="Skriv inn norsk navn...")
-            for row in mangler_navn.iter_rows(named=True)
-        }
+        {row["Art"]: mo.ui.text(placeholder="Skriv inn norsk navn...") for row in mangler_navn.iter_rows(named=True)}
     )
 
     navn_inputs
@@ -568,9 +579,7 @@ def _(arter_etter_1990, navn_inputs):
 
     # Create a temporary dataframe with the mappings
     if navn_mapping:
-        mapping_df = pl.DataFrame(
-            {"Art": list(navn_mapping.keys()), "Navn_ny": list(navn_mapping.values())}
-        )
+        mapping_df = pl.DataFrame({"Art": list(navn_mapping.keys()), "Navn_ny": list(navn_mapping.values())})
 
         # Join with the original dataframe and update the Navn column
         endelig_datasett_for_nedlastning = (
