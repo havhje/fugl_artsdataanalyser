@@ -247,39 +247,59 @@ def _(
 
 @app.cell
 def _(process_and_enrich_data):
-    test_df1 = pl.DataFrame(
-        {
-            "validScientificNameId": [
-                4382,  # granmeis
-                204586,  # skjeand
-                3677,  # gråmåke
-                295741,
-            ],  # hønsehauk
-        }
-    )
-
-    r = process_and_enrich_data(test_df1)
-
-    r
-    return
-
-
-@app.cell
-def _(process_and_enrich_data):
     def test_process_and_enrich_data():
 
         # Du må endre df, slik at det abre er species ID som er inputten, er slik funksjonen fungerer
         test_df = pl.DataFrame(
             {
-                "validScientificNameId": [4263]  # dompapp
+                "validScientificNameId": [
+                    4382,  # granmeis
+                    204586,  # skjeand
+                    3677,  # gråmåke
+                    295741,
+                ],  # hønsehauk
             }
         )
 
         test_result = process_and_enrich_data(test_df)
 
-        dompap = test_result.filter(pl.col("validScientificNameId") == 4263)
+        # Test granmeis (4382)
+        granmeis = test_result.filter(pl.col("validScientificNameId") == 4382)
+        assert granmeis.get_column("Order").eq("Passeriformes").all(), "Granmeis should be in Passeriformes order"
+        assert granmeis.get_column("Family").eq("Paridae").all(), "Granmeis should be in Paridae family"
+        assert granmeis.get_column("Genus").eq("Poecile").all(), "Granmeis should be in Poecile genus"
+        assert granmeis.get_column("FamilieNavn").eq("meisefamilien").all(), (
+            "Granmeis should have FamilieNavn 'meisefamilien'"
+        )
+        assert granmeis.get_column("OrdenNavn").eq("spurvefugler").all(), "Granmeis should have OrdenNavn 'spurvefugler'"
 
-        assert dompap.get_column("Family").eq("Fringillidae").all(), "Dompap should be in Fringillidae  family"
+        # Test skjeand (204586)
+        skjeand = test_result.filter(pl.col("validScientificNameId") == 204586)
+        assert skjeand.get_column("Order").eq("Anseriformes").all(), "Skjeand should be in Anseriformes order"
+        assert skjeand.get_column("Family").eq("Anatidae").all(), "Skjeand should be in Anatidae family"
+        assert skjeand.get_column("Genus").eq("Spatula").all(), "Skjeand should be in Spatula genus"
+        assert skjeand.get_column("FamilieNavn").eq("andefamilien").all(), "Skjeand should have FamilieNavn 'andefamilien'"
+        assert skjeand.get_column("OrdenNavn").eq("andefugler").all(), "Skjeand should have OrdenNavn 'andefugler'"
+
+        # Test gråmåke (3677)
+        graamake = test_result.filter(pl.col("validScientificNameId") == 3677)
+        assert graamake.get_column("Order").eq("Charadriiformes").all(), "Gråmåke should be in Charadriiformes order"
+        assert graamake.get_column("Family").eq("Laridae").all(), "Gråmåke should be in Laridae family"
+        assert graamake.get_column("Genus").eq("Larus").all(), "Gråmåke should be in Larus genus"
+        assert graamake.get_column("FamilieNavn").eq("måkefamilien").all(), "Gråmåke should have FamilieNavn 'måkefamilien'"
+        assert graamake.get_column("OrdenNavn").eq("vade-, måke- og alkefugler").all(), (
+            "Gråmåke should have OrdenNavn 'vade-, måke- og alkefugler'"
+        )
+
+        # Test hønsehauk (295741)
+        honsehauk = test_result.filter(pl.col("validScientificNameId") == 295741)
+        assert honsehauk.get_column("Order").eq("Accipitriformes").all(), "Hønsehauk should be in Accipitriformes order"
+        assert honsehauk.get_column("Family").eq("Accipitridae").all(), "Hønsehauk should be in Accipitridae family"
+        assert honsehauk.get_column("Genus").eq("Astur ").all(), "Hønsehauk should be in Astur genus"
+        assert honsehauk.get_column("FamilieNavn").eq("haukefamilien").all(), (
+            "Hønsehauk should have FamilieNavn 'haukefamilien'"
+        )
+        assert honsehauk.get_column("OrdenNavn").eq("haukefugler").all(), "Hønsehauk should have OrdenNavn 'rovfugler'"
 
     return
 

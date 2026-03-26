@@ -90,26 +90,13 @@
       "console": []
     },
     {
-      "id": "HXyj",
-      "code_hash": "e5d7201a8dd6992921b548a4788d71c7",
-      "outputs": [
-        {
-          "type": "data",
-          "data": {
-            "text/html": "<marimo-ui-element object-id='HXyj-0' random-id='c2a04993-d069-89cd-de8f-2e36ad23cdf1'><marimo-table data-initial-value='[]' data-label='null' data-data='&quot;[{&#92;&quot;validScientificNameId&#92;&quot;:4263,&#92;&quot;Kingdom&#92;&quot;:&#92;&quot;Animalia&#92;&quot;,&#92;&quot;Phylum&#92;&quot;:&#92;&quot;Chordata&#92;&quot;,&#92;&quot;Class&#92;&quot;:&#92;&quot;Aves&#92;&quot;,&#92;&quot;Order&#92;&quot;:&#92;&quot;Passeriformes&#92;&quot;,&#92;&quot;Family&#92;&quot;:&#92;&quot;Fringillidae&#92;&quot;,&#92;&quot;Genus&#92;&quot;:&#92;&quot;Pyrrhula&#92;&quot;,&#92;&quot;FamilieNavn&#92;&quot;:&#92;&quot;finkefamilien&#92;&quot;,&#92;&quot;OrdenNavn&#92;&quot;:&#92;&quot;spurvefugler&#92;&quot;},{&#92;&quot;validScientificNameId&#92;&quot;:4164,&#92;&quot;Kingdom&#92;&quot;:&#92;&quot;Animalia&#92;&quot;,&#92;&quot;Phylum&#92;&quot;:&#92;&quot;Chordata&#92;&quot;,&#92;&quot;Class&#92;&quot;:&#92;&quot;Aves&#92;&quot;,&#92;&quot;Order&#92;&quot;:&#92;&quot;Passeriformes&#92;&quot;,&#92;&quot;Family&#92;&quot;:&#92;&quot;Corvidae&#92;&quot;,&#92;&quot;Genus&#92;&quot;:&#92;&quot;Corvus&#92;&quot;,&#92;&quot;FamilieNavn&#92;&quot;:&#92;&quot;kr&#92;&#92;u00e5kefamilien&#92;&quot;,&#92;&quot;OrdenNavn&#92;&quot;:&#92;&quot;spurvefugler&#92;&quot;},{&#92;&quot;validScientificNameId&#92;&quot;:3664,&#92;&quot;Kingdom&#92;&quot;:&#92;&quot;Animalia&#92;&quot;,&#92;&quot;Phylum&#92;&quot;:&#92;&quot;Chordata&#92;&quot;,&#92;&quot;Class&#92;&quot;:&#92;&quot;Aves&#92;&quot;,&#92;&quot;Order&#92;&quot;:&#92;&quot;Charadriiformes&#92;&quot;,&#92;&quot;Family&#92;&quot;:&#92;&quot;Haematopodidae&#92;&quot;,&#92;&quot;Genus&#92;&quot;:&#92;&quot;Haematopus&#92;&quot;,&#92;&quot;FamilieNavn&#92;&quot;:&#92;&quot;tjeldfamilien&#92;&quot;,&#92;&quot;OrdenNavn&#92;&quot;:&#92;&quot;vade-, m&#92;&#92;u00e5ke- og alkefugler&#92;&quot;}]&quot;' data-total-rows='3' data-total-columns='9' data-max-columns='50' data-banner-text='&quot;&quot;' data-pagination='true' data-page-size='30' data-field-types='[[&quot;validScientificNameId&quot;,[&quot;integer&quot;,&quot;i64&quot;]],[&quot;Kingdom&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;Phylum&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;Class&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;Order&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;Family&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;Genus&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;FamilieNavn&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;OrdenNavn&quot;,[&quot;string&quot;,&quot;str&quot;]]]' data-show-filters='true' data-show-download='true' data-show-column-summaries='false' data-show-data-types='true' data-show-page-size-selector='false' data-show-column-explorer='true' data-show-chart-builder='true' data-row-headers='[]' data-has-stable-row-id='false' data-lazy='false' data-preload='false' data-download-file-name='&quot;df&quot;'></marimo-table></marimo-ui-element>"
-          }
-        }
-      ],
-      "console": []
-    },
-    {
       "id": "RGSE",
-      "code_hash": "d4800ffc807858fbf9e6aadd20d68799",
+      "code_hash": "2ebfaa4424aad01985f571d5c71bcc49",
       "outputs": [
         {
           "type": "data",
           "data": {
-            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><marimo-progress data-title='&quot;Processing ID 4263 (1/1)&quot;' data-total='1' data-progress='1' data-rate='9.94' data-eta='0.0'></marimo-progress></div>"
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><marimo-progress data-title='&quot;Processing ID 295741 (4/4)&quot;' data-total='4' data-progress='10' data-rate='24.92' data-eta='-0.24'></marimo-progress></div>"
           }
         }
       ],
