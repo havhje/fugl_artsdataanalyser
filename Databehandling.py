@@ -312,7 +312,7 @@ def _():
     return
 
 
-@app.function(hide_code=True)
+@app.function
 def add_national_interest_criteria(df_enriched: pl.DataFrame, excel_path: str | None = None) -> pl.DataFrame:
     """Add national interest criteria from Excel file to enriched dataframe.
 
@@ -398,9 +398,11 @@ def legg_til_kolonne_arteravnasjonal(input_df: pl.DataFrame) -> pl.DataFrame:
     ]
 
     # Build the category list once
-    category_list = pl.concat_list(
-        [pl.when(pl.col(col) == "Yes").then(pl.lit(col)) for col in category_columns]
-    ).list.drop_nulls()
+    expressions = []
+    for col in category_columns:
+        expr = pl.when(pl.col(col) == "Yes").then(pl.lit(col))
+        expressions.append(expr)
+    category_list = pl.concat_list(expressions).list.drop_nulls()
 
     return input_df.with_columns(
         pl.when(category_list.list.len() > 0)

@@ -21,7 +21,14 @@
     {
       "id": "Hbol",
       "code_hash": "9abe0297ad85faa957df58ff3db49276",
-      "outputs": [],
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
       "console": []
     },
     {
