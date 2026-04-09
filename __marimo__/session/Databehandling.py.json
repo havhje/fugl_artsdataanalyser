@@ -8,13 +8,27 @@
     {
       "id": "setup",
       "code_hash": "ca19d1ff5c16264532999591518b77f8",
-      "outputs": [],
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
       "console": []
     },
     {
       "id": "Hbol",
       "code_hash": "218e0cccdc228d767e07dc2e9724ce54",
-      "outputs": [],
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
       "console": []
     },
     {
@@ -82,24 +96,39 @@
     },
     {
       "id": "BYtC",
-      "code_hash": "d4a5da94e77ec8eca4142a6cd4ea2846",
-      "outputs": [],
+      "code_hash": "21fbc04a749e181999c132029854fceb",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
       "console": []
     },
     {
-      "id": "BhaL",
-      "code_hash": null,
-      "outputs": [],
-      "console": []
+      "id": "BXeR",
+      "code_hash": "317fefa8611b9eed35ffa2b360002e94",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stdout",
+          "text": "\u001b[32m.\u001b[0m\u001b[33m                                                                        [100%]\u001b[0m\n=================================== Overview ===================================\nPassed Tests:\n\u001b[1m\u001b[32m\u001b[22m\u2713\u001b[0m\u001b[0m Databehandling.py::test_add_national_interest_criteria\n\nSummary:\nTotal: 1, Passed: 1, Failed: 0, Errors: 0, Skipped: 0\n",
+          "mimetype": "text/plain"
+        }
+      ]
     },
     {
       "id": "RGSE",
-      "code_hash": null,
-      "outputs": [],
-      "console": []
-    },
-    {
-      "id": "Kclp",
       "code_hash": "dda1e72ac50c6417612a74b4eff27eba",
       "outputs": [
         {
@@ -112,13 +141,13 @@
       "console": []
     },
     {
-      "id": "emfo",
+      "id": "Kclp",
       "code_hash": "3966bb586145249e7bc22c8034e7e733",
       "outputs": [],
       "console": []
     },
     {
-      "id": "Hstk",
+      "id": "emfo",
       "code_hash": "014174002aa4cf3b1bda533c973342b4",
       "outputs": [
         {
@@ -131,31 +160,31 @@
       "console": []
     },
     {
-      "id": "nWHF",
+      "id": "Hstk",
       "code_hash": "05697768a8d8ab4bdba91bcf2a9c7baa",
       "outputs": [],
       "console": []
     },
     {
-      "id": "iLit",
+      "id": "nWHF",
       "code_hash": "57064c99e8cf5c263185e9d676417b14",
       "outputs": [],
       "console": []
     },
     {
-      "id": "ZHCJ",
+      "id": "iLit",
       "code_hash": "c6efd0eca1da2f16bf6f635f060b01d5",
       "outputs": [],
       "console": []
     },
     {
-      "id": "ROlb",
+      "id": "ZHCJ",
       "code_hash": "cf4ff315afa2a002eb9d52b2565dbf5b",
       "outputs": [],
       "console": []
     },
     {
-      "id": "qnkX",
+      "id": "ROlb",
       "code_hash": "8158f866a1bccb9c37b22a008129e873",
       "outputs": [
         {
@@ -168,25 +197,25 @@
       "console": []
     },
     {
-      "id": "TqIu",
+      "id": "qnkX",
       "code_hash": "601877eaa9c647f3b34d636f43c2b63a",
       "outputs": [],
       "console": []
     },
     {
-      "id": "Vxnm",
+      "id": "TqIu",
       "code_hash": "0f806f417e081a4ce49b3e178fe7fbcc",
       "outputs": [],
       "console": []
     },
     {
-      "id": "DnEU",
+      "id": "Vxnm",
       "code_hash": "82ad80fb23a19ad9138fac01d40e9fdf",
       "outputs": [],
       "console": []
     },
     {
-      "id": "ulZA",
+      "id": "DnEU",
       "code_hash": "e1448f78aabeb946390055b45752c42d",
       "outputs": [
         {
@@ -199,13 +228,13 @@
       "console": []
     },
     {
-      "id": "ecfG",
+      "id": "ulZA",
       "code_hash": "c2c81059378e74cd19e80a82b8642de7",
       "outputs": [],
       "console": []
     },
     {
-      "id": "Pvdt",
+      "id": "ecfG",
       "code_hash": "3fe258e51e59793cbd21166a5eb6ff73",
       "outputs": [
         {
@@ -218,25 +247,25 @@
       "console": []
     },
     {
-      "id": "ZBYS",
+      "id": "Pvdt",
       "code_hash": "8c047b349fe4cd2bf0278cd438fe20ea",
       "outputs": [],
       "console": []
     },
     {
-      "id": "aLJB",
+      "id": "ZBYS",
       "code_hash": "b5f14e5b6bb07697286fb87ee0e60686",
       "outputs": [],
       "console": []
     },
     {
-      "id": "nHfw",
+      "id": "aLJB",
       "code_hash": "df1347ca55853933da989097d78842ac",
       "outputs": [],
       "console": []
     },
     {
-      "id": "xXTn",
+      "id": "nHfw",
       "code_hash": null,
       "outputs": [],
       "console": []

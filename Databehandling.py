@@ -370,6 +370,61 @@ def _add_national_interest_criteria(bird_data):
     return (add_national_interest_criteria,)
 
 
+@app.cell
+def _(add_national_interest_criteria):
+    def test_add_national_interest_criteria():
+
+        # Du må endre df, slik at det abre er species ID som er inputten, er slik funksjonen fungerer
+        test_df_anf = pl.DataFrame(
+            {
+                "validScientificNameId": [
+                    4382,  # granmeis
+                    204586,  # skjeand
+                    3677,  # gråmåke
+                    295741,
+                ],  # hønsehauk
+            }
+        )
+
+        test_result = add_national_interest_criteria(test_df_anf)
+
+        # Test granmeis (4382)
+        granmeis = test_result.filter(pl.col("validScientificNameId") == 4382)
+        assert granmeis.get_column("Trua arter").eq("Yes").all(), (
+            "Granmeis er en trua art"
+        )  # - .all() means: "are all of these booleans True?", if even one row is not "No", .all() becomes False - that gives assert the single boolean it requires
+        assert granmeis.get_column("Andre spesielt hensynskrevende arter").eq("No").all(), (
+            "Granmeis er ikke spesielt hensynskrevende"
+        )
+
+    return
+
+
+@app.cell
+def _(add_national_interest_criteria):
+    test_df_anf = pl.DataFrame(
+        {
+            "validScientificNameId": [
+                4382,  # granmeis
+                204586,  # skjeand
+                3677,  # gråmåke
+                295741,
+            ],  # hønsehauk
+        }
+    )
+
+    test_result = add_national_interest_criteria(test_df_anf)
+    test_result
+    return
+
+
+@app.cell
+def _(bird_data):
+    df_arter_nf1 = bird_data.execute("SELECT * FROM arter_av_nasjonal_forvaltningsinteresse").pl()
+    df_arter_nf1
+    return
+
+
 @app.cell(hide_code=True)
 def _():
     mo.md(r"""
