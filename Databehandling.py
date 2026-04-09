@@ -1,6 +1,6 @@
 import marimo
 
-__generated_with = "0.21.1"
+__generated_with = "0.23.0"
 app = marimo.App(width="columns")
 
 with app.setup:
@@ -20,7 +20,7 @@ with app.setup:
 def _():
     DATABASE_URL = "fugl_atributt_data"
     bird_data = duckdb.connect(DATABASE_URL, read_only=False)
-    return
+    return (bird_data,)
 
 
 @app.cell(hide_code=True)
@@ -312,10 +312,10 @@ def _():
     return
 
 
-app._unparsable_cell(
-    """
+@app.cell
+def _add_national_interest_criteria(bird_data):
     def add_national_interest_criteria(df_enriched: pl.DataFrame) -> pl.DataFrame:
-        \"\"\"Add national interest criteria from Excel file to enriched dataframe.
+        """Add national interest criteria from Excel file to enriched dataframe.
 
         Reads criteria columns from the national-interest Excel sheet, converts
         X-marks to Yes/No, and left-joins the result onto the enriched dataframe.
@@ -327,62 +327,47 @@ app._unparsable_cell(
 
         Returns:
             DataFrame with added criteria columns.
-        \"\"\"
+        """
 
         # Load Excel with criteria
-        df_arter_nf = bird_data.execute(\"SELECT * FROM arter_av_nasjonal_forvaltningsinteresse\").pl()
+        df_arter_nf = bird_data.execute("SELECT * FROM arter_av_nasjonal_forvaltningsinteresse").pl()
 
         # Get criteria columns
         criteria_cols = [
-            \"Kriterium_Ansvarsarter\",
-            \"Kriterium_Trua_arter\",
-            \"Kriterium_Andre spesielt_hensynskrevende_arter\",
-            \"Kriterium_Spesielle_okologiske_former\",
-            \"Kriterium_Prioriterte_arter\",
-            \"Kriterium_Fredete_arter\",
-            \"Kriterium_NT\",
-            \"Kriterium_Fremmede_arter\"
+            "Kriterium_Ansvarsarter",
+            "Kriterium_Trua_arter",
+            "Kriterium_Andre spesielt_hensynskrevende_arter",
+            "Kriterium_Spesielle_okologiske_former",
+            "Kriterium_Prioriterte_arter",
+            "Kriterium_Fredete_arter",
+            "Kriterium_NT",
+            "Kriterium_Fremmede_arter",
         ]
-    
 
         # Process criteria data - convert X marks to Yes/No and remve the Kriterium prefix
-        criteria_data= 
-        df_arter_nf.select(
-            pl.col(\"ValidScientificNameId\"), #, legger til ett nytt argument slik at ny df består av scientificid OG ...
-            *[ 
-                pl.when(pl.col(c).str.to_uppercase().str.strip_chars() == \"X\")
-                .then(pl.lit(\"YES\"))
-                .otherwise(pl.lit(\"NO\"))
-                .alias(c.replace(\"Kriterium_\", \"\").replace(\"_\", \" \"))
+        criteria_data = df_arter_nf.select(
+            pl.col("ValidScientificNameId"),  # , legger til ett nytt argument slik at ny df består av scientificid OG ...
+            *[
+                pl.when(pl.col(c).str.to_uppercase().str.strip_chars() == "X")
+                .then(pl.lit("Yes"))
+                .otherwise(pl.lit("No"))
+                .alias(c.replace("Kriterium_", "").replace("_", " "))
                 for c in criteria_cols
-            ] 
-    # *[] er en list comprehension, hvor * sier pakk ut alle \"oppskriftene objektene (polars expression = objekter i lista og gjennomfør dette for alle kolonner som matcher de i criteria_cols\". Strukturen er hva du skal gjøre først og deretter hvor du skal gjøre det som er hvorfor loopen kommer til slutt. 
-
-    
-    ################## Har kommet hit###
+            ],
+        )
+        # *[] er en list comprehension, hvor * sier pakk ut alle "oppskriftene objektene (polars expression = objekter i lista og gjennomfør dette for alle kolonner som matcher de i criteria_cols". Strukturen er hva du skal gjøre først og deretter hvor du skal gjøre det som er hvorfor loopen kommer til slutt.
 
         # Merge with enriched data
         df_with_criteria = df_enriched.join(
             criteria_data,
-            left_on=\"validScientificNameId\",
-            right_on=\"ValidScientificNameId\",
-            how=\"left\",
+            left_on="validScientificNameId",
+            right_on="ValidScientificNameId",
+            how="left",
         )
 
-        # Fill nulls with \"No\" for non-matched rows # men non matching rows burde flahhes?? Skal ikke finnes??
-
-
-
-
-
-
-    
-        df_with_criteria = df_with_criteria.with_columns([pl.col(col).fill_null(\"No\") for col in criteria_renamed])
-
         return df_with_criteria
-    """,
-    name="*add_national_interest_criteria"
-)
+
+    return (add_national_interest_criteria,)
 
 
 @app.cell(hide_code=True)
