@@ -346,7 +346,12 @@ def _add_national_interest_criteria(bird_data):
 
         # Process criteria data - convert X marks to Yes/No and remve the Kriterium prefix
         criteria_data = df_arter_nf.select(
-            pl.col("ValidScientificNameId"),  # , legger til ett nytt argument slik at ny df består av scientificid OG ...
+            pl.col("ValidScientificNameId").alias(
+                "arts_id_mdir"
+            ),  # , legger til ett nytt argument slik at ny df består av scientificid OG ...
+            pl.col("Vitenskapelig_Navn").alias(
+                "vitenskapelig_navn_mdir"
+            ),  # _mdir er verdiene fra arter av nasjonal forvaltningsinteresse tabell
             *[
                 pl.when(pl.col(c).str.to_uppercase().str.strip_chars() == "X")
                 .then(pl.lit("Yes"))
@@ -357,12 +362,33 @@ def _add_national_interest_criteria(bird_data):
         )
         # *[] er en list comprehension, hvor * sier pakk ut alle "oppskriftene objektene (polars expression = objekter i lista og gjennomfør dette for alle kolonner som matcher de i criteria_cols". Strukturen er hva du skal gjøre først og deretter hvor du skal gjøre det som er hvorfor loopen kommer til slutt.
 
+        criteria_cols_clean = [
+            "Ansvarsarter",
+            "Trua arter",
+            "Andre spesielt hensynskrevende arter",
+            "Spesielle okologiske former",
+            "Prioriterte arter",
+            "Fredete arter",
+            "NT",
+            "Fremmede arter",
+        ]
+
         # Merge with enriched data
-        df_with_criteria = df_enriched.join(
-            criteria_data,
-            left_on="validScientificNameId",
-            right_on="ValidScientificNameId",
-            how="left",
+        df_with_criteria = (
+            df_enriched.join(criteria_data, left_on="validScientificNameId", right_on="arts_id_mdir", how="left")
+            .join(
+                criteria_data,
+                left_on=("validScientificName"),
+                right_on=("vitenskapelig_navn_mdir"),
+                how="left",
+                suffix="_fallback",
+            )
+            # Tar en second join på artsnavn, legger til alle criteria_data en gang til med eget suffix = fallback
+            .with_columns(*[pl.coalesce(c, f"{c}_fallback").fill_null("Treff ikke funnet") for c in criteria_cols_clean])
+            # bruker coalece som sier velg først join 1 (c), hvis det finnes null verdier bruk verdiene i join 2 (c_fallback)
+            .drop(([f"{c}_fallback" for c in criteria_cols_clean]))
+            .drop(pl.col("vitenskapelig_navn_mdir"), pl.col("arts_id_mdir"))
+            # dropper kollonene som er lagt til 2 ganger
         )
 
         return df_with_criteria
@@ -371,57 +397,101 @@ def _add_national_interest_criteria(bird_data):
 
 
 @app.cell
+def _(bird_data):
+    df_arter_nf1 = bird_data.execute("SELECT * FROM arter_av_nasjonal_forvaltningsinteresse").pl()
+    df_arter_nf1
+    return
+
+
+@app.cell
 def _(add_national_interest_criteria):
     def test_add_national_interest_criteria():
 
-        # Du må endre df, slik at det abre er species ID som er inputten, er slik funksjonen fungerer
         test_df_anf = pl.DataFrame(
             {
                 "validScientificNameId": [
-                    4382,  # granmeis
-                    204586,  # skjeand
-                    3677,  # gråmåke
-                    295741,
-                ],  # hønsehauk
+                    3506,  # havelle
+                    3768,  # svarthalespove
+                    295741,  # hønsehauk
+                    3478,  # dverggås
+                    3495,  # kanadagås
+                    999999,  # finnes ikke i kriterietabellen
+                ],
+                "validScientificName": [
+                    "Clangula hyemalis",  # havelle
+                    "Limosa limosa islandica",  # svarthalespove
+                    "Accipiter gentilis",  # hønsehauk
+                    "Anser erythropus",  # dverggås
+                    "Branta canadensis",  # kanadagås
+                    "Nonexistent species",  # finnes ikke
+                ],
             }
         )
 
         test_result = add_national_interest_criteria(test_df_anf)
 
-        # Test granmeis (4382)
-        granmeis = test_result.filter(pl.col("validScientificNameId") == 4382)
-        assert granmeis.get_column("Trua arter").eq("Yes").all(), (
-            "Granmeis er en trua art"
-        )  # - .all() means: "are all of these booleans True?", if even one row is not "No", .all() becomes False - that gives assert the single boolean it requires
-        assert granmeis.get_column("Andre spesielt hensynskrevende arter").eq("No").all(), (
-            "Granmeis er ikke spesielt hensynskrevende"
-        )
+        expected_criteria_cols = [
+            "Ansvarsarter",
+            "Trua arter",
+            "Andre spesielt hensynskrevende arter",
+            "Spesielle okologiske former",
+            "Prioriterte arter",
+            "Fredete arter",
+            "NT",
+            "Fremmede arter",
+        ]
 
-    return
+        # Alle kriteriekolonner skal finnes i resultatet
+        for col in expected_criteria_cols:
+            assert col in test_result.columns, f"Kolonne '{col}' mangler i resultatet"
 
+        # Antall rader skal være uendret
+        assert test_result.height == 6, f"Forventet 6 rader, fikk {test_result.height}"
 
-@app.cell
-def _(add_national_interest_criteria):
-    test_df_anf = pl.DataFrame(
-        {
-            "validScientificNameId": [
-                4382,  # granmeis
-                204586,  # skjeand
-                3677,  # gråmåke
-                295741,
-            ],  # hønsehauk
-        }
-    )
+        # Test havelle (3506) – VU/trua art
+        havelle = test_result.filter(pl.col("validScientificNameId") == 3506)
+        assert havelle.height > 0, "Havelle ikke funnet i resultatet"
+        assert havelle.get_column("NT").eq("Yes").all(), "Havelle er en nært trua art"
 
-    test_result = add_national_interest_criteria(test_df_anf)
-    test_result
-    return
+        # Test svarthalespove (3768) – trua art
+        svarthalespove = test_result.filter(pl.col("validScientificNameId") == 3768)
+        assert svarthalespove.height > 0, "Svarthalespove ikke funnet i resultatet"
+        assert svarthalespove.get_column("Trua arter").eq("Yes").all(), "Svarthalespove er en trua art"
 
+        # Test hønsehauk (295741) – trua art
+        hønsehauk = test_result.filter(pl.col("validScientificNameId") == 295741)
+        assert hønsehauk.height > 0, "Hønsehauk ikke funnet i resultatet"
+        assert hønsehauk.get_column("Trua arter").eq("Yes").all(), "Hønsehauk er en trua art"
 
-@app.cell
-def _(bird_data):
-    df_arter_nf1 = bird_data.execute("SELECT * FROM arter_av_nasjonal_forvaltningsinteresse").pl()
-    df_arter_nf1
+        # Test dverggås (3478) – flere kriterier
+        dverggås = test_result.filter(pl.col("validScientificNameId") == 3478)
+        assert dverggås.height > 0, "Dverggås ikke funnet i resultatet"
+        assert dverggås.get_column("Ansvarsarter").eq("Yes").all(), "Dverggås er en ansvarsart"
+        assert dverggås.get_column("Trua arter").eq("Yes").all(), "Dverggås er en trua art"
+        assert dverggås.get_column("Prioriterte arter").eq("Yes").all(), "Dverggås er en prioritert art"
+        assert dverggås.get_column("Fredete arter").eq("No").all(), "Dverggås er ikke en fredet art"
+
+        # Test kanadagås (3495) – fremmed art
+        kanadagås = test_result.filter(pl.col("validScientificNameId") == 3495)
+        assert kanadagås.height > 0, "Kanadagås ikke funnet i resultatet"
+        assert kanadagås.get_column("Fremmede arter").eq("Yes").all(), "Kanadagås er en fremmed art"
+
+        # Test ID som ikke finnes (999999) -> "Treff ikke funnet"
+        missing = test_result.filter(pl.col("validScientificNameId") == 999999)
+        assert missing.height > 0, "Manglende art (999999) ikke funnet i resultatet"
+        for col in expected_criteria_cols:
+            assert missing.get_column(col).eq("Treff ikke funnet").all(), (
+                f"Kolonne '{col}' skal være 'Treff ikke funnet' for ukjent art"
+            )
+
+        # Verdier skal kun være "Yes", "No" eller "Treff ikke funnet"
+        valid_values = {"Yes", "No", "Treff ikke funnet"}
+        for col in expected_criteria_cols:
+            unique_vals = set(test_result.get_column(col).unique().to_list())
+            assert unique_vals.issubset(valid_values), (
+                f"Kolonne '{col}' inneholder ugyldige verdier: {unique_vals - valid_values}"
+            )
+
     return
 
 
