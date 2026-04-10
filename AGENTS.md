@@ -2,14 +2,13 @@ Norwegian species data analysis tool built as interactive marimo notebooks, usin
 
 **Language:** Inline comments and UI text in Norwegian. Code identifiers, docstrings, and function names in English.
 
-This project uses `uv` as the package manager and `ruff` (default config) for linting/formatting.
+This project uses `uv` as the package manager and uses marimo check as a notebook linter. Run this after every edit.
 
 ```bash
 uv sync                        # install dependencies
 uv sync --group dev            # install with dev dependencies
 uv run marimo edit <file>.py   # run notebook in edit mode
-uv run ruff check .            # lint
-uv run ruff format .           # format
+uv run marimo check
 uv run pytest                  # run tests
 ```
 
