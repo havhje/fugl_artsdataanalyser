@@ -190,8 +190,15 @@
     },
     {
       "id": "emfo",
-      "code_hash": "3966bb586145249e7bc22c8034e7e733",
-      "outputs": [],
+      "code_hash": "0dac722fc5b45557eb8d5e4752887bf5",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
       "console": []
     },
     {
