@@ -372,9 +372,7 @@ def _add_national_interest_criteria(bird_data):
         """
 
         # Load Excel with criteria
-        df_arter_nf = bird_data.execute(
-            "SELECT * FROM arter_av_nasjonal_forvaltningsinteresse"
-        ).pl()
+        df_arter_nf = bird_data.execute("SELECT * FROM arter_av_nasjonal_forvaltningsinteresse").pl()
 
         # Get criteria columns
         criteria_cols = [
@@ -433,12 +431,7 @@ def _add_national_interest_criteria(bird_data):
                 suffix="_fallback",
             )
             # Tar en second join på artsnavn, legger til alle criteria_data en gang til med eget suffix = fallback
-            .with_columns(
-                *[
-                    pl.coalesce(c, f"{c}_fallback").fill_null("Treff ikke funnet")
-                    for c in criteria_cols_clean
-                ]
-            )
+            .with_columns(*[pl.coalesce(c, f"{c}_fallback").fill_null("Treff ikke funnet") for c in criteria_cols_clean])
             # bruker coalece som sier velg først join 1 (c), hvis det finnes null verdier bruk verdiene i join 2 (c_fallback)
             .drop(([f"{c}_fallback" for c in criteria_cols_clean]))
             .drop(pl.col("vitenskapelig_navn_mdir"), pl.col("arts_id_mdir"))
@@ -458,7 +451,7 @@ def _(add_national_interest_criteria):
             {
                 "validScientificNameId": [
                     3506,  # havelle
-                    3768,  # svarthalespove
+                    3768,  # svarthalespove (iclandica)
                     295741,  # hønsehauk
                     3478,  # dverggås
                     3495,  # kanadagås
@@ -498,142 +491,82 @@ def _(add_national_interest_criteria):
         # Test havelle (3506) – nært trua art og andre spesielt hensynskrevende
         havelle = test_result.filter(pl.col("validScientificNameId") == 3506)
         assert havelle.height > 0, "Havelle ikke funnet i resultatet"
-        assert havelle.get_column("Ansvarsarter").eq("No").all(), (
-            "Havelle er ikke en ansvarsart"
+        assert havelle.get_column("Ansvarsarter").eq("No").all(), "Havelle er ikke en ansvarsart"
+        assert havelle.get_column("Trua arter").eq("No").all(), "Havelle er ikke en trua art"
+        assert havelle.get_column("Andre spesielt hensynskrevende arter").eq("Yes").all(), (
+            "Havelle er en andre spesielt hensynskrevende art"
         )
-        assert havelle.get_column("Trua arter").eq("No").all(), (
-            "Havelle er ikke en trua art"
-        )
-        assert (
-            havelle.get_column("Andre spesielt hensynskrevende arter").eq("Yes").all()
-        ), "Havelle er en andre spesielt hensynskrevende art"
         assert havelle.get_column("Spesielle okologiske former").eq("No").all(), (
             "Havelle er ikke en spesiell økologisk form"
         )
-        assert havelle.get_column("Prioriterte arter").eq("No").all(), (
-            "Havelle er ikke en prioritert art"
-        )
-        assert havelle.get_column("Fredete arter").eq("No").all(), (
-            "Havelle er ikke en fredet art"
-        )
+        assert havelle.get_column("Prioriterte arter").eq("No").all(), "Havelle er ikke en prioritert art"
+        assert havelle.get_column("Fredete arter").eq("No").all(), "Havelle er ikke en fredet art"
         assert havelle.get_column("NT").eq("Yes").all(), "Havelle er en nært trua art"
-        assert havelle.get_column("Fremmede arter").eq("No").all(), (
-            "Havelle er ikke en fremmed art"
-        )
+        assert havelle.get_column("Fremmede arter").eq("No").all(), "Havelle er ikke en fremmed art"
 
         # Test svarthalespove (3768) – trua art og prioritert art
         svarthalespove = test_result.filter(pl.col("validScientificNameId") == 3768)
         assert svarthalespove.height > 0, "Svarthalespove ikke funnet i resultatet"
-        assert svarthalespove.get_column("Ansvarsarter").eq("No").all(), (
-            "Svarthalespove er ikke en ansvarsart"
+        assert svarthalespove.get_column("Ansvarsarter").eq("No").all(), "Svarthalespove er ikke en ansvarsart"
+        assert svarthalespove.get_column("Trua arter").eq("Yes").all(), "Svarthalespove er en trua art"
+        assert svarthalespove.get_column("Andre spesielt hensynskrevende arter").eq("No").all(), (
+            "Svarthalespove er ikke en andre spesielt hensynskrevende art"
         )
-        assert svarthalespove.get_column("Trua arter").eq("Yes").all(), (
-            "Svarthalespove er en trua art"
+        assert svarthalespove.get_column("Spesielle okologiske former").eq("No").all(), (
+            "Svarthalespove er ikke en spesiell økologisk form"
         )
-        assert (
-            svarthalespove.get_column("Andre spesielt hensynskrevende arter")
-            .eq("No")
-            .all()
-        ), "Svarthalespove er ikke en andre spesielt hensynskrevende art"
-        assert (
-            svarthalespove.get_column("Spesielle okologiske former").eq("No").all()
-        ), "Svarthalespove er ikke en spesiell økologisk form"
-        assert svarthalespove.get_column("Prioriterte arter").eq("Yes").all(), (
-            "Svarthalespove er en prioritert art"
-        )
-        assert svarthalespove.get_column("Fredete arter").eq("No").all(), (
-            "Svarthalespove er ikke en fredet art"
-        )
-        assert svarthalespove.get_column("NT").eq("No").all(), (
-            "Svarthalespove er ikke en nært trua art"
-        )
-        assert svarthalespove.get_column("Fremmede arter").eq("No").all(), (
-            "Svarthalespove er ikke en fremmed art"
-        )
+        assert svarthalespove.get_column("Prioriterte arter").eq("Yes").all(), "Svarthalespove er en prioritert art"
+        assert svarthalespove.get_column("Fredete arter").eq("No").all(), "Svarthalespove er ikke en fredet art"
+        assert svarthalespove.get_column("NT").eq("No").all(), "Svarthalespove er ikke en nært trua art"
+        assert svarthalespove.get_column("Fremmede arter").eq("No").all(), "Svarthalespove er ikke en fremmed art"
 
         # Test hønsehauk (295741) – trua art (matchet via vitenskapelig navn-fallback)
         hønsehauk = test_result.filter(pl.col("validScientificNameId") == 295741)
         assert hønsehauk.height > 0, "Hønsehauk ikke funnet i resultatet"
-        assert hønsehauk.get_column("Ansvarsarter").eq("No").all(), (
-            "Hønsehauk er ikke en ansvarsart"
+        assert hønsehauk.get_column("Ansvarsarter").eq("No").all(), "Hønsehauk er ikke en ansvarsart"
+        assert hønsehauk.get_column("Trua arter").eq("Yes").all(), "Hønsehauk er en trua art"
+        assert hønsehauk.get_column("Andre spesielt hensynskrevende arter").eq("No").all(), (
+            "Hønsehauk er ikke en andre spesielt hensynskrevende art"
         )
-        assert hønsehauk.get_column("Trua arter").eq("Yes").all(), (
-            "Hønsehauk er en trua art"
-        )
-        assert (
-            hønsehauk.get_column("Andre spesielt hensynskrevende arter").eq("No").all()
-        ), "Hønsehauk er ikke en andre spesielt hensynskrevende art"
         assert hønsehauk.get_column("Spesielle okologiske former").eq("No").all(), (
             "Hønsehauk er ikke en spesiell økologisk form"
         )
-        assert hønsehauk.get_column("Prioriterte arter").eq("No").all(), (
-            "Hønsehauk er ikke en prioritert art"
-        )
-        assert hønsehauk.get_column("Fredete arter").eq("No").all(), (
-            "Hønsehauk er ikke en fredet art"
-        )
-        assert hønsehauk.get_column("NT").eq("No").all(), (
-            "Hønsehauk er ikke en nært trua art"
-        )
-        assert hønsehauk.get_column("Fremmede arter").eq("No").all(), (
-            "Hønsehauk er ikke en fremmed art"
-        )
+        assert hønsehauk.get_column("Prioriterte arter").eq("No").all(), "Hønsehauk er ikke en prioritert art"
+        assert hønsehauk.get_column("Fredete arter").eq("No").all(), "Hønsehauk er ikke en fredet art"
+        assert hønsehauk.get_column("NT").eq("No").all(), "Hønsehauk er ikke en nært trua art"
+        assert hønsehauk.get_column("Fremmede arter").eq("No").all(), "Hønsehauk er ikke en fremmed art"
 
         # Test dverggås (3478) – ansvarsart, trua art og prioritert art
         dverggås = test_result.filter(pl.col("validScientificNameId") == 3478)
         assert dverggås.height > 0, "Dverggås ikke funnet i resultatet"
-        assert dverggås.get_column("Ansvarsarter").eq("Yes").all(), (
-            "Dverggås er en ansvarsart"
+        assert dverggås.get_column("Ansvarsarter").eq("Yes").all(), "Dverggås er en ansvarsart"
+        assert dverggås.get_column("Trua arter").eq("Yes").all(), "Dverggås er en trua art"
+        assert dverggås.get_column("Andre spesielt hensynskrevende arter").eq("No").all(), (
+            "Dverggås er ikke en andre spesielt hensynskrevende art"
         )
-        assert dverggås.get_column("Trua arter").eq("Yes").all(), (
-            "Dverggås er en trua art"
-        )
-        assert (
-            dverggås.get_column("Andre spesielt hensynskrevende arter").eq("No").all()
-        ), "Dverggås er ikke en andre spesielt hensynskrevende art"
         assert dverggås.get_column("Spesielle okologiske former").eq("No").all(), (
             "Dverggås er ikke en spesiell økologisk form"
         )
-        assert dverggås.get_column("Prioriterte arter").eq("Yes").all(), (
-            "Dverggås er en prioritert art"
-        )
-        assert dverggås.get_column("Fredete arter").eq("No").all(), (
-            "Dverggås er ikke en fredet art"
-        )
-        assert dverggås.get_column("NT").eq("No").all(), (
-            "Dverggås er ikke en nært trua art"
-        )
-        assert dverggås.get_column("Fremmede arter").eq("No").all(), (
-            "Dverggås er ikke en fremmed art"
-        )
+        assert dverggås.get_column("Prioriterte arter").eq("Yes").all(), "Dverggås er en prioritert art"
+        assert dverggås.get_column("Fredete arter").eq("No").all(), "Dverggås er ikke en fredet art"
+        assert dverggås.get_column("NT").eq("No").all(), "Dverggås er ikke en nært trua art"
+        assert dverggås.get_column("Fremmede arter").eq("No").all(), "Dverggås er ikke en fremmed art"
 
         # Test kanadagås (3495) – fremmed art
         kanadagås = test_result.filter(pl.col("validScientificNameId") == 3495)
         assert kanadagås.height > 0, "Kanadagås ikke funnet i resultatet"
-        assert kanadagås.get_column("Ansvarsarter").eq("No").all(), (
-            "Kanadagås er ikke en ansvarsart"
+        assert kanadagås.get_column("Ansvarsarter").eq("No").all(), "Kanadagås er ikke en ansvarsart"
+        assert kanadagås.get_column("Trua arter").eq("No").all(), "Kanadagås er ikke en trua art"
+        assert kanadagås.get_column("Andre spesielt hensynskrevende arter").eq("No").all(), (
+            "Kanadagås er ikke en andre spesielt hensynskrevende art"
         )
-        assert kanadagås.get_column("Trua arter").eq("No").all(), (
-            "Kanadagås er ikke en trua art"
-        )
-        assert (
-            kanadagås.get_column("Andre spesielt hensynskrevende arter").eq("No").all()
-        ), "Kanadagås er ikke en andre spesielt hensynskrevende art"
         assert kanadagås.get_column("Spesielle okologiske former").eq("No").all(), (
             "Kanadagås er ikke en spesiell økologisk form"
         )
-        assert kanadagås.get_column("Prioriterte arter").eq("No").all(), (
-            "Kanadagås er ikke en prioritert art"
-        )
-        assert kanadagås.get_column("Fredete arter").eq("No").all(), (
-            "Kanadagås er ikke en fredet art"
-        )
-        assert kanadagås.get_column("NT").eq("No").all(), (
-            "Kanadagås er ikke en nært trua art"
-        )
-        assert kanadagås.get_column("Fremmede arter").eq("Yes").all(), (
-            "Kanadagås er en fremmed art"
-        )
+        assert kanadagås.get_column("Prioriterte arter").eq("No").all(), "Kanadagås er ikke en prioritert art"
+        assert kanadagås.get_column("Fredete arter").eq("No").all(), "Kanadagås er ikke en fredet art"
+        assert kanadagås.get_column("NT").eq("No").all(), "Kanadagås er ikke en nært trua art"
+        assert kanadagås.get_column("Fremmede arter").eq("Yes").all(), "Kanadagås er en fremmed art"
 
         # Test ID som ikke finnes (999999) -> "Treff ikke funnet"
         missing = test_result.filter(pl.col("validScientificNameId") == 999999)
@@ -680,10 +613,12 @@ def legg_til_kolonne_arteravnasjonal(input_df: pl.DataFrame) -> pl.DataFrame:
     """
     category_columns = [
         "Ansvarsarter",
+        "Trua arter",
         "Andre spesielt hensynskrevende arter",
         "Spesielle okologiske former",
         "Prioriterte arter",
         "Fredete arter",
+        "NT",
         "Fremmede arter",
     ]
 
@@ -708,64 +643,52 @@ def legg_til_kolonne_arteravnasjonal(input_df: pl.DataFrame) -> pl.DataFrame:
     return output_df
 
 
-@app.cell
+@app.function
 def test_legg_til_kolonne_arteravnasjonal():
-    """Tests for legg_til_kolonne_arteravnasjonal."""
-
-    category_columns = [
-        "Ansvarsarter",
-        "Andre spesielt hensynskrevende arter",
-        "Spesielle okologiske former",
-        "Prioriterte arter",
-        "Fredete arter",
-        "Fremmede arter",
-    ]
-
-    # Happy path: en art med to kategorier
-    df_two = pl.DataFrame({col: ["No"] for col in category_columns}).with_columns(
-        pl.lit("Yes").alias("Ansvarsarter"),
-        pl.lit("Yes").alias("Fredete arter"),
-    )
-    result_two = legg_til_kolonne_arteravnasjonal(df_two)
-    val = result_two.get_column("Art av nasjonal forvaltningsinteresse")[0]
-    assert "Ansvarsarter" in val
-    assert "Fredete arter" in val
-
-    # Ingen kategorier gir "Nei"
-    df_none = pl.DataFrame({col: ["No"] for col in category_columns})
-    result_none = legg_til_kolonne_arteravnasjonal(df_none)
-    assert result_none.get_column("Art av nasjonal forvaltningsinteresse")[0] == "Nei"
-
-    # Alle kategorier satt til "Yes"
-    df_all = pl.DataFrame({col: ["Yes"] for col in category_columns})
-    result_all = legg_til_kolonne_arteravnasjonal(df_all)
-    val_all = result_all.get_column("Art av nasjonal forvaltningsinteresse")[0]
-    for col in category_columns:
-        assert col in val_all
-
-    # Tom DataFrame
-    df_empty = pl.DataFrame({col: pl.Series([], dtype=pl.Utf8) for col in category_columns})
-    result_empty = legg_til_kolonne_arteravnasjonal(df_empty)
-    assert result_empty.height == 0
-    assert "Art av nasjonal forvaltningsinteresse" in result_empty.columns
-
-    # Flere rader med blanding
-    df_mix = pl.DataFrame(
+    sample_df = pl.DataFrame(
         {
-            "Ansvarsarter": ["Yes", "No", "No"],
-            "Andre spesielt hensynskrevende arter": ["No", "No", "No"],
-            "Spesielle okologiske former": ["No", "Yes", "No"],
-            "Prioriterte arter": ["No", "No", "No"],
-            "Fredete arter": ["No", "No", "No"],
-            "Fremmede arter": ["No", "No", "No"],
+            "species": ["Hubro", "Gråspurv", "Fjellrev", "Villmink", "Dverggås"],
+            "Ansvarsarter": ["Yes", "No", "No", "No", "Yes"],
+            "Trua arter": ["No", "No", "No", "No", "No"],
+            "Andre spesielt hensynskrevende arter": ["No", "No", "Yes", "No", "No"],
+            "Spesielle okologiske former": ["No", "No", "No", "No", "Yes"],
+            "Prioriterte arter": ["Yes", "No", "No", "No", "No"],
+            "Fredete arter": ["Yes", "No", "No", "No", "No"],
+            "NT": ["No", "No", "No", "No", "No"],
+            "Fremmede arter": ["No", "No", "No", "Yes", "No"],
         }
     )
-    result_mix = legg_til_kolonne_arteravnasjonal(df_mix)
-    col_vals = result_mix.get_column("Art av nasjonal forvaltningsinteresse").to_list()
-    assert col_vals[0] == "Ansvarsarter"
-    assert col_vals[1] == "Spesielle okologiske former"
-    assert col_vals[2] == "Nei"
-    return
+
+    result = legg_til_kolonne_arteravnasjonal(sample_df)
+
+    # Column should exist. Henter alle kolonne navnene med .columns til en liste du tester mot (i.e. in "the list")
+    assert "Art av nasjonal forvaltningsinteresse" in result.columns
+
+    # Tar verdiene i kolonnen "art av nasjonal forvaltningsinteresse" og gjør verdiene for hver rad i kolonnen om til en liste med verdiene og en index som korrensponderer til raden/arten
+    values = result.get_column("Art av nasjonal forvaltningsinteresse").to_list()
+
+    # Unpacker (en egen python greie (må ha samme "lengde") lista inn i artene (som er de fra df), slik at disse får sine korrensponderende verdier fra ANF kolonnen i orginal df
+    hubro, graspurv, fjellrev, villmink, dverggas = values
+
+    # Kan da skrive de riktige "assertene" i testen
+    # Hubro: Ansvarsarter, Prioriterte arter, Fredete arter
+    assert "Ansvarsarter" in hubro
+    assert "Prioriterte arter" in hubro
+    assert "Fredete arter" in hubro
+
+    # Gråspurv: none → "Nei"
+    assert graspurv == "Nei"
+
+    # Fjellrev: Andre spesielt hensynskrevende arter
+    assert fjellrev == "Andre spesielt hensynskrevende arter"
+
+    # Villmink: Fremmede arter
+    assert villmink == "Fremmede arter"
+
+    # Dverggås: Ansvarsarter + Spesielle okologiske former
+    assert "Ansvarsarter" in dverggas
+    assert "Spesielle okologiske former" in dverggas
+    assert dverggas.count(",") == 1  # teller antall ",", ska være 1
 
 
 @app.cell(hide_code=True)
@@ -973,6 +896,16 @@ def _(arter_etter_1990, navn_inputs):
     else:
         # If no names were entered, keep the original dataframe
         endelig_datasett_for_nedlastning = arter_etter_1990
+    return
+
+
+@app.cell
+def _():
+    return
+
+
+@app.cell
+def _():
     return
 
 

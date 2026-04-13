@@ -1,7 +1,7 @@
 import marimo
 
-__generated_with = "0.16.5"
-app = marimo.App(width="medium")
+__generated_with = "0.23.0"
+app = marimo.App(width="columns")
 
 
 @app.cell(column=5)
@@ -13,7 +13,9 @@ def _():
 
 @app.cell(hide_code=True)
 def _(mo):
-    mo.md(r"""## Overlagsanalyse mot hovedøkosystemkartet""")
+    mo.md(r"""
+    ## Overlagsanalyse mot hovedøkosystemkartet
+    """)
     return
 
 
@@ -304,17 +306,15 @@ def _(mo, temp_geojson_path):
         SELECT * FROM ST_Read('{temp_geojson_path}');
         """
     )
-    return (ecosystems,)
+    return
 
 
 @app.cell(hide_code=True)
 def _(mo):
-    mo.md(
-        r"""
-    ### Husk at du filtrerer på økosystemtyper ved å velge nummer 1-12 eller flere ved 1,2,5. 
+    mo.md(r"""
+    ### Husk at du filtrerer på økosystemtyper ved å velge nummer 1-12 eller flere ved 1,2,5.
     - Endre denne    : "WHERE ecotype IN (4)"
-    """
-    )
+    """)
     return
 
 
@@ -348,7 +348,7 @@ def _(arter_df, ecosystems, mo):
         INNER JOIN filtered_ecosystems fe
             ON ST_Intersects(sp.geom, fe.polygon_geom)
         """,
-        output=False,
+        output=False
     )
     return (system_arter_df,)
 

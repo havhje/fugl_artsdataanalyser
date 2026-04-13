@@ -1,0 +1,95 @@
+{
+  "version": "1",
+  "metadata": {
+    "marimo_version": "0.23.0",
+    "script_metadata_hash": null
+  },
+  "cells": [
+    {
+      "id": "Hbol",
+      "code_hash": "1d0db38904205bec4d6f6f6a1f6cec3e",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "MJUe",
+      "code_hash": "1d08690bbf9a2b11e93c78c5a4253c39",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"overlagsanalyse-mot-hovedkosystemkartet\">Overlagsanalyse mot hoved\u00f8kosystemkartet</h2></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "vblA",
+      "code_hash": "583f27bdf451413158768bd33b9c606f",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "bkHC",
+      "code_hash": "da2634a3773a68e66806de9c74cade2e",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "lEQa",
+      "code_hash": "94ccec0a76da9de3fba4c18604360bdf",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "PKri",
+      "code_hash": "a30614a3861122523aa064a8e7a62b11",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "Xref",
+      "code_hash": "b8e40cd6beeea7b78b5bb0fa0a0bb8dd",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "SFPL",
+      "code_hash": "5d54b677a855d9f1272a56222e5b0d88",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "BYtC",
+      "code_hash": "8f29b2eba7041e95d4f08e64e909d4b0",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "RGSE",
+      "code_hash": "b3ebfb52721df0e39454666ec939eee7",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"husk-at-du-filtrerer-pa-kosystemtyper-ved-a-velge-nummer-1-12-eller-flere-ved-125\">Husk at du filtrerer p\u00e5 \u00f8kosystemtyper ved \u00e5 velge nummer 1-12 eller flere ved 1,2,5.</h3>\n<ul>\n<li>Endre denne    : \"WHERE ecotype IN (4)\"</li>\n</ul></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Kclp",
+      "code_hash": "2987bf4d72e752a01507ba8d36fdf947",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "emfo",
+      "code_hash": "8322d2a402611669dbc0189feb185a13",
+      "outputs": [],
+      "console": []
+    }
+  ]
+}
