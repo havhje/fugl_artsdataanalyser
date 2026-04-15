@@ -74,6 +74,7 @@ def _(DESIRED_RANKS, NORTAXA_API_BASE_URL):
             print(f"Error fetching ID {scientific_name_id}: {e}")
         return None
 
+
     def extract_hierarchy_and_ids(
         api_data: dict[str, Any] | None,
     ) -> tuple[dict[str, str], int | None, int | None]:
@@ -102,6 +103,7 @@ def _(DESIRED_RANKS, NORTAXA_API_BASE_URL):
                     order_id = level.get("scientificNameId")
 
         return hierarchy, family_id, order_id
+
 
     def get_norwegian_name(api_data: dict[str, Any] | None) -> str | None:
         """Extract Norwegian vernacular name (prioritize Bokmål over Nynorsk).
@@ -165,9 +167,7 @@ def _(
             return None
 
         # Get unique IDs
-        unique_ids = (
-            df_work.select("validScientificNameId").unique().to_series().to_list()
-        )
+        unique_ids = df_work.select("validScientificNameId").unique().to_series().to_list()
         total_ids = len(unique_ids)
 
         # Storage for results
@@ -189,9 +189,7 @@ def _(
                 # Fetch species data
                 species_data = fetch_taxon_data(species_id)
                 if species_data:
-                    hierarchy, family_id, order_id = extract_hierarchy_and_ids(
-                        species_data
-                    )
+                    hierarchy, family_id, order_id = extract_hierarchy_and_ids(species_data)
                     taxonomy_data[species_id] = hierarchy
 
                     # Fetch family name if available
@@ -211,20 +209,14 @@ def _(
                     time.sleep(RATE_LIMIT_DELAY)
 
                 # Update progress
-                bar.update(
-                    i + 1, title=f"Processing ID {species_id} ({i + 1}/{total_ids})"
-                )
+                bar.update(i + 1, title=f"Processing ID {species_id} ({i + 1}/{total_ids})")
 
         # Add taxonomy columns with proper return_dtype
         for rank in DESIRED_RANKS:
             df_work = df_work.with_columns(
                 pl.col("validScientificNameId")
                 .map_elements(
-                    lambda x: (
-                        taxonomy_data.get(int(x), {}).get(rank)
-                        if x and x is not None
-                        else None
-                    ),
+                    lambda x: taxonomy_data.get(int(x), {}).get(rank) if x and x is not None else None,
                     return_dtype=pl.Utf8,  # Fixed: Added return_dtype
                 )
                 .alias(rank)
@@ -273,75 +265,41 @@ def _(process_and_enrich_data):
 
         # Test granmeis (4382)
         granmeis = test_result.filter(pl.col("validScientificNameId") == 4382)
-        assert granmeis.get_column("Order").eq("Passeriformes").all(), (
-            "Granmeis should be in Passeriformes order"
-        )
-        assert granmeis.get_column("Family").eq("Paridae").all(), (
-            "Granmeis should be in Paridae family"
-        )
-        assert granmeis.get_column("Genus").eq("Poecile").all(), (
-            "Granmeis should be in Poecile genus"
-        )
+        assert granmeis.get_column("Order").eq("Passeriformes").all(), "Granmeis should be in Passeriformes order"
+        assert granmeis.get_column("Family").eq("Paridae").all(), "Granmeis should be in Paridae family"
+        assert granmeis.get_column("Genus").eq("Poecile").all(), "Granmeis should be in Poecile genus"
         assert granmeis.get_column("FamilieNavn").eq("meisefamilien").all(), (
             "Granmeis should have FamilieNavn 'meisefamilien'"
         )
-        assert granmeis.get_column("OrdenNavn").eq("spurvefugler").all(), (
-            "Granmeis should have OrdenNavn 'spurvefugler'"
-        )
+        assert granmeis.get_column("OrdenNavn").eq("spurvefugler").all(), "Granmeis should have OrdenNavn 'spurvefugler'"
 
         # Test skjeand (204586)
         skjeand = test_result.filter(pl.col("validScientificNameId") == 204586)
-        assert skjeand.get_column("Order").eq("Anseriformes").all(), (
-            "Skjeand should be in Anseriformes order"
-        )
-        assert skjeand.get_column("Family").eq("Anatidae").all(), (
-            "Skjeand should be in Anatidae family"
-        )
-        assert skjeand.get_column("Genus").eq("Spatula").all(), (
-            "Skjeand should be in Spatula genus"
-        )
-        assert skjeand.get_column("FamilieNavn").eq("andefamilien").all(), (
-            "Skjeand should have FamilieNavn 'andefamilien'"
-        )
-        assert skjeand.get_column("OrdenNavn").eq("andefugler").all(), (
-            "Skjeand should have OrdenNavn 'andefugler'"
-        )
+        assert skjeand.get_column("Order").eq("Anseriformes").all(), "Skjeand should be in Anseriformes order"
+        assert skjeand.get_column("Family").eq("Anatidae").all(), "Skjeand should be in Anatidae family"
+        assert skjeand.get_column("Genus").eq("Spatula").all(), "Skjeand should be in Spatula genus"
+        assert skjeand.get_column("FamilieNavn").eq("andefamilien").all(), "Skjeand should have FamilieNavn 'andefamilien'"
+        assert skjeand.get_column("OrdenNavn").eq("andefugler").all(), "Skjeand should have OrdenNavn 'andefugler'"
 
         # Test gråmåke (3677)
         graamake = test_result.filter(pl.col("validScientificNameId") == 3677)
-        assert graamake.get_column("Order").eq("Charadriiformes").all(), (
-            "Gråmåke should be in Charadriiformes order"
+        assert graamake.get_column("Order").eq("Charadriiformes").all(), "Gråmåke should be in Charadriiformes order"
+        assert graamake.get_column("Family").eq("Laridae").all(), "Gråmåke should be in Laridae family"
+        assert graamake.get_column("Genus").eq("Larus").all(), "Gråmåke should be in Larus genus"
+        assert graamake.get_column("FamilieNavn").eq("måkefamilien").all(), "Gråmåke should have FamilieNavn 'måkefamilien'"
+        assert graamake.get_column("OrdenNavn").eq("vade-, måke- og alkefugler").all(), (
+            "Gråmåke should have OrdenNavn 'vade-, måke- og alkefugler'"
         )
-        assert graamake.get_column("Family").eq("Laridae").all(), (
-            "Gråmåke should be in Laridae family"
-        )
-        assert graamake.get_column("Genus").eq("Larus").all(), (
-            "Gråmåke should be in Larus genus"
-        )
-        assert graamake.get_column("FamilieNavn").eq("måkefamilien").all(), (
-            "Gråmåke should have FamilieNavn 'måkefamilien'"
-        )
-        assert (
-            graamake.get_column("OrdenNavn").eq("vade-, måke- og alkefugler").all()
-        ), "Gråmåke should have OrdenNavn 'vade-, måke- og alkefugler'"
 
         # Test hønsehauk (295741)
         honsehauk = test_result.filter(pl.col("validScientificNameId") == 295741)
-        assert honsehauk.get_column("Order").eq("Accipitriformes").all(), (
-            "Hønsehauk should be in Accipitriformes order"
-        )
-        assert honsehauk.get_column("Family").eq("Accipitridae").all(), (
-            "Hønsehauk should be in Accipitridae family"
-        )
-        assert honsehauk.get_column("Genus").eq("Astur ").all(), (
-            "Hønsehauk should be in Astur genus"
-        )
+        assert honsehauk.get_column("Order").eq("Accipitriformes").all(), "Hønsehauk should be in Accipitriformes order"
+        assert honsehauk.get_column("Family").eq("Accipitridae").all(), "Hønsehauk should be in Accipitridae family"
+        assert honsehauk.get_column("Genus").eq("Astur ").all(), "Hønsehauk should be in Astur genus"
         assert honsehauk.get_column("FamilieNavn").eq("haukefamilien").all(), (
             "Hønsehauk should have FamilieNavn 'haukefamilien'"
         )
-        assert honsehauk.get_column("OrdenNavn").eq("haukefugler").all(), (
-            "Hønsehauk should have OrdenNavn 'rovfugler'"
-        )
+        assert honsehauk.get_column("OrdenNavn").eq("haukefugler").all(), "Hønsehauk should have OrdenNavn 'rovfugler'"
 
     return
 
@@ -724,9 +682,58 @@ def legg_til_verdi_m1941(df: pl.DataFrame) -> pl.DataFrame:
         .then(pl.lit("Middels verdi"))
         .when(pl.col("category") == "LC")
         .then(pl.lit("Noe verdi"))
-        .otherwise(None)
+        .otherwise(pl.lit("Ikke definert"))
         .alias("Verdi M1941")
     )
+
+
+@app.function
+def test_legg_til_verdi_m1941():
+    sample_df = pl.DataFrame(
+        {
+            "species": [
+                "Hubro",  # Tester "EN" og "Prioriterte arter" == "Yes" -> Svært stor verdi
+                "Gråspurv",  # Tester "LC" -> Noe verdi
+                "Fjellrev",  # Tester "VU" og "Andre spesielt..." == "Yes" -> Stor verdi
+                "Villmink",  # Tester udefinert kategori ("NA") -> Ikke deffinert
+                "Dverggås",  # Tester "NT" -> Middels verdi
+                "Gaupe",  # Tester "LC" men "Andre spesielt..." == "Yes" -> Stor verdi
+                "Ulv",  # Tester "CR" -> Svært stor verdi
+            ],
+            "category": ["EN", "LC", "VU", "haraball", "NT", "LC", "CR"],
+            "Ansvarsarter": ["Yes", "No", "No", "No", "Yes", "No", "No"],
+            "Trua arter": ["No", "No", "No", "No", "No", "No", "No"],
+            "Andre spesielt hensynskrevende arter": ["No", "No", "Yes", "No", "No", "Yes", "No"],
+            "Spesielle okologiske former": ["No", "No", "No", "No", "Yes", "No", "No"],
+            "Prioriterte arter": ["Yes", "No", "No", "No", "No", "No", "No"],
+            "Fredete arter": ["Yes", "No", "No", "No", "No", "No", "No"],
+            "NT": ["No", "No", "No", "No", "No", "No", "No"],
+            "Fremmede arter": ["No", "No", "No", "Yes", "No", "No", "No"],
+        }
+    )
+
+    result = legg_til_verdi_m1941(sample_df)
+
+    hubro_df = result.filter(pl.col("species") == "Hubro")
+    assert hubro_df.get_column("Verdi M1941").eq("Svært stor verdi").all(), "Hubro skal ha svært stor verdi"
+
+    gråspurv_df = result.filter(pl.col("species") == "Gråspurv")
+    assert gråspurv_df.get_column("Verdi M1941").eq("Noe verdi").all(), "Gråspurv skal ha noe verdi"
+
+    fjellrev_df = result.filter(pl.col("species") == "Fjellrev")
+    assert fjellrev_df.get_column("Verdi M1941").eq("Stor verdi").all(), "Fjellrev skal ha stor verdi"
+
+    villmink_df = result.filter(pl.col("species") == "Villmink")
+    assert villmink_df.get_column("Verdi M1941").eq("Ikke definert").all(), "Villmink skal ha ikke deffinert"
+
+    dverggås_df = result.filter(pl.col("species") == "Dverggås")
+    assert dverggås_df.get_column("Verdi M1941").eq("Middels verdi").all(), "Dverggås skal ha middels verdi"
+
+    gaupe_df = result.filter(pl.col("species") == "Gaupe")
+    assert gaupe_df.get_column("Verdi M1941").eq("Stor verdi").all(), "Gaupe skal ha stor verdi"
+
+    ulv_df = result.filter(pl.col("species") == "Ulv")
+    assert ulv_df.get_column("Verdi M1941").eq("Svært stor verdi").all(), "Ulv skal ha svært stor verdi"
 
 
 @app.cell(column=1, hide_code=True)

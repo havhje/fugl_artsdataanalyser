@@ -216,8 +216,15 @@
     },
     {
       "id": "nWHF",
-      "code_hash": "05697768a8d8ab4bdba91bcf2a9c7baa",
-      "outputs": [],
+      "code_hash": "b1ac4431bd36e6f046604d7d042f4928",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
       "console": []
     },
     {
