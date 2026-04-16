@@ -1022,7 +1022,8 @@ def _(filepath):
     orginal_df = mo.sql(
         f"""
         SELECT * FROM read_csv('{str(filepath)}');
-        """
+        """,
+        output=False,
     )
     return (orginal_df,)
 
@@ -1043,6 +1044,7 @@ def _(add_national_interest_criteria, orginal_df, process_and_enrich_data):
         df_artsdatabanken.pipe(add_national_interest_criteria)
         .pipe(legg_til_kolonne_arteravnasjonal)
         .pipe(legg_til_verdi_m1941)
+        .pipe(rydd_navn_og_datatyper)
     )
     return
 
@@ -1132,6 +1134,14 @@ def _():
 
 @app.cell
 def _():
+    return
+
+
+@app.cell(hide_code=True)
+def _():
+    mo.md(r"""
+    ### Output statestikk som du må sjekke
+    """)
     return
 
 
