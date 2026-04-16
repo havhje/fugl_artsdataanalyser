@@ -14,6 +14,7 @@ with app.setup:
     import duckdb
     import pytest
     from unittest.mock import MagicMock, patch
+    from datetime import datetime, date as dt_date
 
 
 @app.cell
@@ -29,6 +30,271 @@ def _():
     ## Utility functions
     """)
     return
+
+
+@app.cell(hide_code=True)
+def _():
+    mo.md(r"""
+    ### Rydder opp i navn og datatyper
+    """)
+    return
+
+
+@app.function
+def rydd_navn_og_datatyper(df_input: pl.DataFrame) -> pl.DataFrame: 
+
+    df_alle_funksjoner_ferdig_kjørt = df_input.select(
+    [
+        pl.col("category").alias("Kategori"),
+        pl.col("Art av nasjonal forvaltningsinteresse"),
+        pl.col("Verdi M1941"),
+        pl.col("preferredPopularName").alias("Navn"),
+        pl.col("validScientificName").alias("Art"),
+        pl.col("individualCount")
+        .fill_null("1") #antar at alle obs = minimum 1 når observatøren ikke har lagt inn spesifitk antall
+        .str.split("/")  # Noen har en 1/1 antall - aner ikke hva det betyr
+        .list.first()  # Take the first number
+        .cast(pl.Float64)  # Noen har komma, så må ta til float først
+        .cast(pl.Int64)
+        .alias("Antall"),
+        pl.col("behavior").alias("Atferd"),
+        pl.col("dateTimeCollected").dt.date().alias("Observert dato"),
+        pl.col("coordinateUncertaintyInMeters").alias("Usikkerhet meter").cast(pl.Int64),
+        pl.col("FamilieNavn").alias("Familie"),
+        pl.col("OrdenNavn").alias("Orden"),
+        pl.col("taxonGroupName").alias("Artsgruppe"),
+        pl.col("collector").alias("Observatør"),
+        pl.col("locality").alias("Lokalitet"),
+        pl.col("municipality").alias("Kommune"),
+        pl.col("county").alias("Fylke"),
+        pl.col("scientificNameRank").alias("Taksonomisk nivå"),
+        pl.col("Ansvarsarter"),
+        pl.col("Andre spesielt hensynskrevende arter"),
+        pl.col("Spesielle okologiske former").alias("Spesielle økologiske former"),
+        pl.col("Prioriterte arter"),
+        pl.col("Fredete arter"),
+        pl.col("Fremmede arter"),
+        pl.col("latitude").str.replace_all(",", ".").cast(pl.Float64),
+        pl.col("longitude").str.replace_all(",", ".").cast(pl.Float64),
+        pl.col("geometry"),
+        pl.col("validScientificNameId").alias("Artens ID"),
+    ]
+    )
+
+
+    return (df_alle_funksjoner_ferdig_kjørt)
+
+
+@app.function
+def test_rydd_navn_og_datatyper():
+
+    # ── Build test input with all required columns ──────────────────
+    test_df = pl.DataFrame(
+        {
+            "category": ["LC", "NT", "EN"],
+            "Art av nasjonal forvaltningsinteresse": ["Yes", "No", "Yes"],
+            "Verdi M1941": ["C", "D", "B"],
+            "preferredPopularName": ["dompap", "kråke", "tjeld"],
+            "validScientificName": [
+                "Pyrrhula pyrrhula",
+                "Corvus cornix",
+                "Haematopus ostralegus",
+            ],
+            "individualCount": ["6", None, "3/1"],
+            "behavior": ["singing", None, "flying"],
+            "dateTimeCollected": [
+                datetime(2022, 5, 15, 10, 30, 0),
+                datetime(2023, 7, 4, 14, 0, 0),
+                datetime(2019, 6, 1, 7, 4, 19),
+            ],
+            "coordinateUncertaintyInMeters": [300, None, 9],
+            "FamilieNavn": ["Fringillidae", "Corvidae", "Haematopodidae"],
+            "OrdenNavn": ["Passeriformes", "Passeriformes", "Charadriiformes"],
+            "taxonGroupName": ["Fugler", "Fugler", "Fugler"],
+            "collector": ["Ola Nordmann", "Kari Nordmann", None],
+            "locality": ["Sommarøyveien 21", "Strengelvågfjorden", None],
+            "municipality": ["Øksnes", "Øksnes", "Øksnes"],
+            "county": ["Nordland", "Nordland", "Nordland"],
+            "scientificNameRank": ["species", "species", "species"],
+            "Ansvarsarter": ["No", "No", "Yes"],
+            "Andre spesielt hensynskrevende arter": ["No", "Yes", "No"],
+            "Spesielle okologiske former": ["No", "No", "Yes"],
+            "Prioriterte arter": ["No", "No", "Yes"],
+            "Fredete arter": ["No", "No", "No"],
+            "Fremmede arter": ["No", "No", "No"],
+            "latitude": ["68,904168", "68,962388", "68.974144"],
+            "longitude": ["15,066918", "15,148183", "14.947151"],
+            "geometry": [
+                "POINT (502688 7643678)",
+                "POINT (505937 7650175)",
+                "POINT (497884 7651480)",
+            ],
+            "validScientificNameId": [4263, 4164, 3664],
+        }
+    )
+
+    test_result = rydd_navn_og_datatyper(test_df)
+
+
+
+    # ── Antall rader skal være uendret ──────────────────────────────
+    assert test_result.height == 3, f"Forventet 3 rader, fikk {test_result.height}"
+
+    # ── Alle forventede kolonner skal finnes ────────────────────────
+    expected_cols = [
+        "Kategori",
+        "Art av nasjonal forvaltningsinteresse",
+        "Verdi M1941",
+        "Navn",
+        "Art",
+        "Antall",
+        "Atferd",
+        "Observert dato",
+        "Usikkerhet meter",
+        "Familie",
+        "Orden",
+        "Artsgruppe",
+        "Observatør",
+        "Lokalitet",
+        "Kommune",
+        "Fylke",
+        "Taksonomisk nivå",
+        "Ansvarsarter",
+        "Andre spesielt hensynskrevende arter",
+        "Spesielle økologiske former",
+        "Prioriterte arter",
+        "Fredete arter",
+        "Fremmede arter",
+        "latitude",
+        "longitude",
+        "geometry",
+        "Artens ID",
+    ]
+
+    for col in expected_cols:
+        assert col in test_result.columns, f"Kolonne '{col}' mangler i resultatet"
+
+    assert len(test_result.columns) == len(expected_cols), (
+        f"Forventet {len(expected_cols)} kolonner, fikk {len(test_result.columns)}: {test_result.columns}"
+    )
+
+    # ── Test kolonneomnavning (renaming) ────────────────────────────
+    # category → Kategori
+    assert test_result.get_column("Kategori").to_list() == ["LC", "NT", "EN"], (
+        "category skal omdøpes til Kategori med riktige verdier"
+    )
+
+    # preferredPopularName → Navn
+    assert test_result.get_column("Navn").to_list() == ["dompap", "kråke", "tjeld"], (
+        "preferredPopularName skal omdøpes til Navn"
+    )
+
+    # validScientificName → Art
+    assert test_result.get_column("Art").to_list() == [
+        "Pyrrhula pyrrhula",
+        "Corvus cornix",
+        "Haematopus ostralegus",
+    ], "validScientificName skal omdøpes til Art"
+
+    # validScientificNameId → Artens ID
+    assert test_result.get_column("Artens ID").to_list() == [4263, 4164, 3664], (
+        "validScientificNameId skal omdøpes til Artens ID"
+    )
+
+    # FamilieNavn → Familie
+    assert test_result.get_column("Familie").to_list() == [
+        "Fringillidae",
+        "Corvidae",
+        "Haematopodidae",
+    ], "FamilieNavn skal omdøpes til Familie"
+
+    # OrdenNavn → Orden
+    assert test_result.get_column("Orden").to_list() == [
+        "Passeriformes",
+        "Passeriformes",
+        "Charadriiformes",
+    ], "OrdenNavn skal omdøpes til Orden"
+
+    # Spesielle okologiske former → Spesielle økologiske former (ø)
+    assert "Spesielle økologiske former" in test_result.columns, (
+        "'Spesielle okologiske former' skal omdøpes til 'Spesielle økologiske former' med ø"
+    )
+
+    # ── Test individualCount-transformasjon → Antall ────────────────
+    antall = test_result.get_column("Antall")
+    assert antall.dtype == pl.Int64, f"Antall skal være Int64, fikk {antall.dtype}"
+
+    # "6" → 6
+    assert antall[0] == 6, f"individualCount '6' skal bli 6, fikk {antall[0]}"
+
+    # None → 1 (fill_null med "1")
+    assert antall[1] == 1, f"individualCount null skal bli 1, fikk {antall[1]}"
+
+    # "3/1" → 3 (split på '/' og ta første)
+    assert antall[2] == 3, f"individualCount '3/1' skal bli 3, fikk {antall[2]}"
+
+    # ── Test dateTimeCollected → Observert dato (date) ──────────────
+    obs_dato = test_result.get_column("Observert dato")
+    assert obs_dato.dtype == pl.Date, f"Observert dato skal være Date, fikk {obs_dato.dtype}"
+    assert obs_dato[0] == dt_date(2022, 5, 15), f"Dato for rad 0 skal være 2022-05-15, fikk {obs_dato[0]}"
+    assert obs_dato[1] == dt_date(2023, 7, 4), f"Dato for rad 1 skal være 2023-07-04, fikk {obs_dato[1]}"
+    assert obs_dato[2] == dt_date(2019, 6, 1), f"Dato for rad 2 skal være 2019-06-01, fikk {obs_dato[2]}"
+
+    # ── Test coordinateUncertaintyInMeters → Usikkerhet meter ───────
+    usikkerhet = test_result.get_column("Usikkerhet meter")
+    assert usikkerhet.dtype == pl.Int64, f"Usikkerhet meter skal være Int64, fikk {usikkerhet.dtype}"
+    assert usikkerhet[0] == 300, f"Usikkerhet for rad 0 skal være 300, fikk {usikkerhet[0]}"
+    assert usikkerhet[2] == 9, f"Usikkerhet for rad 2 skal være 9, fikk {usikkerhet[2]}"
+
+    # ── Test latitude komma → punktum → Float64 ────────────────────
+    lat = test_result.get_column("latitude")
+    assert lat.dtype == pl.Float64, f"latitude skal være Float64, fikk {lat.dtype}"
+    assert abs(lat[0] - 68.904168) < 1e-5, f"latitude '68,904168' skal bli 68.904168, fikk {lat[0]}"
+    # Latitude med punktum skal også fungere
+    assert abs(lat[2] - 68.974144) < 1e-5, f"latitude '68.974144' (allerede punktum) skal bli 68.974144, fikk {lat[2]}"
+
+    # ── Test longitude komma → punktum → Float64 ───────────────────
+    lon = test_result.get_column("longitude")
+    assert lon.dtype == pl.Float64, f"longitude skal være Float64, fikk {lon.dtype}"
+    assert abs(lon[0] - 15.066918) < 1e-5, f"longitude '15,066918' skal bli 15.066918, fikk {lon[0]}"
+    assert abs(lon[1] - 15.148183) < 1e-5, f"longitude '15,148183' skal bli 15.148183, fikk {lon[1]}"
+
+    # ── Test at kolonner som ikke omdøpes beholder verdier ──────────
+    assert test_result.get_column("Atferd").to_list() == ["singing", None, "flying"], (
+        "behavior skal omdøpes til Atferd med riktige verdier"
+    )
+    assert test_result.get_column("Artsgruppe").to_list() == [
+        "Fugler",
+        "Fugler",
+        "Fugler",
+    ], "taxonGroupName skal omdøpes til Artsgruppe"
+
+    assert test_result.get_column("Kommune").to_list() == [
+        "Øksnes",
+        "Øksnes",
+        "Øksnes",
+    ], "municipality skal omdøpes til Kommune"
+
+    assert test_result.get_column("Fylke").to_list() == [
+        "Nordland",
+        "Nordland",
+        "Nordland",
+    ], "county skal omdøpes til Fylke"
+
+    # ── Test at passthrough-kolonner ikke endres ────────────────────
+    assert test_result.get_column("geometry").to_list() == [
+        "POINT (502688 7643678)",
+        "POINT (505937 7650175)",
+        "POINT (497884 7651480)",
+    ], "geometry skal beholde sine verdier uendret"
+
+    assert test_result.get_column("Art av nasjonal forvaltningsinteresse").to_list() == [
+        "Yes",
+        "No",
+        "Yes",
+    ], "Art av nasjonal forvaltningsinteresse skal beholde sine verdier"
+
+    assert test_result.get_column("Verdi M1941").to_list() == ["C", "D", "B"], "Verdi M1941 skal beholde sine verdier"
 
 
 @app.cell(hide_code=True)
@@ -646,7 +912,7 @@ def test_legg_til_kolonne_arteravnasjonal():
     # Dverggås: Ansvarsarter + Spesielle okologiske former
     assert "Ansvarsarter" in dverggas
     assert "Spesielle okologiske former" in dverggas
-    assert dverggas.count(",") == 1  # teller antall ",", ska være 1
+    assert dverggas.count(",") == 1
 
 
 @app.cell(hide_code=True)
@@ -736,14 +1002,14 @@ def test_legg_til_verdi_m1941():
     assert ulv_df.get_column("Verdi M1941").eq("Svært stor verdi").all(), "Ulv skal ha svært stor verdi"
 
 
-@app.cell(column=1, hide_code=True)
+@app.cell(column=1)
 def _():
     valgt_fil = mo.ui.file_browser()
     valgt_fil
     return (valgt_fil,)
 
 
-@app.cell(hide_code=True)
+@app.cell
 def _(valgt_fil):
     file_info = valgt_fil.value[0]
     filepath = file_info.path
@@ -764,7 +1030,7 @@ def _(filepath):
 @app.cell(hide_code=True)
 def _():
     mo.md(r"""
-    ### Oppdatere og rydder i datasettet
+    ### Filtrerer ut alt før X tid (default 1990)
     """)
     return
 
@@ -778,64 +1044,6 @@ def _(add_national_interest_criteria, orginal_df, process_and_enrich_data):
         .pipe(legg_til_kolonne_arteravnasjonal)
         .pipe(legg_til_verdi_m1941)
     )
-    return (df_alle_funksjoner,)
-
-
-@app.cell
-def _(df_alle_funksjoner):
-    # Endrer navn, datatype og rekkefølge i dataframen
-    artsdata_df = df_alle_funksjoner.select(
-        [
-            pl.col("category").alias("Kategori"),
-            pl.col("Art av nasjonal forvaltningsinteresse"),
-            pl.col("Verdi M1941"),
-            pl.col("preferredPopularName").alias("Navn"),
-            pl.col("validScientificName").alias("Art"),
-            pl.col("individualCount")
-            .fill_null("1")
-            .str.split("/")  # Noen har en 1/1 antall - anter ikke hva det betyr
-            .list.first()  # Take the first number
-            .cast(pl.Float64)  # Noen har komma, så må ta til float først
-            .cast(pl.Int64)
-            .alias("Antall"),
-            pl.col("behavior").alias("Atferd"),
-            pl.col("dateTimeCollected").dt.date().alias("Observert dato"),
-            pl.col("coordinateUncertaintyInMeters").alias("Usikkerhet meter").cast(pl.Int64),
-            pl.col("FamilieNavn").alias("Familie"),
-            pl.col("OrdenNavn").alias("Orden"),
-            pl.col("taxonGroupName").alias("Artsgruppe"),
-            pl.col("collector").alias("Observatør"),
-            pl.col("locality").alias("Lokalitet"),
-            pl.col("municipality").alias("Kommune"),
-            pl.col("county").alias("Fylke"),
-            pl.col("scientificNameRank").alias("Taksonomisk nivå"),
-            pl.col("Ansvarsarter"),
-            pl.col("Andre spesielt hensynskrevende arter"),
-            pl.col("Spesielle okologiske former").alias("Spesielle økologiske former"),
-            pl.col("Prioriterte arter"),
-            pl.col("Fredete arter"),
-            pl.col("Fremmede arter"),
-            pl.col("latitude").str.replace_all(",", ".").cast(pl.Float64),
-            pl.col("longitude").str.replace_all(",", ".").cast(pl.Float64),
-            pl.col("geometry"),
-            pl.col("validScientificNameId").alias("Artens ID"),
-        ]
-    )
-    artsdata_df
-    return (artsdata_df,)
-
-
-@app.cell(column=2)
-def _(artsdata_df):
-    artsdata_df.null_count()
-    return
-
-
-@app.cell(hide_code=True)
-def _():
-    mo.md(r"""
-    ### Filtrerer ut alt før X tid (default 1990)
-    """)
     return
 
 
@@ -843,6 +1051,12 @@ def _():
 def _(artsdata_df):
     arter_etter_1990 = artsdata_df.filter(pl.col("Observert dato") >= date(1990, 1, 1))
     return (arter_etter_1990,)
+
+
+@app.cell
+def _(artsdata_df):
+    artsdata_df.null_count()
+    return
 
 
 @app.cell(hide_code=True)
