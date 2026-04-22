@@ -7,7 +7,7 @@
   "cells": [
     {
       "id": "setup",
-      "code_hash": "9cc24c24653c7f3ddc1f273ada365d22",
+      "code_hash": "21a98228ce215486089507fcbbaa41c8",
       "outputs": [
         {
           "type": "data",
@@ -20,232 +20,138 @@
     },
     {
       "id": "Hbol",
-      "code_hash": "218e0cccdc228d767e07dc2e9724ce54",
+      "code_hash": null,
       "outputs": [],
       "console": []
     },
     {
       "id": "MJUe",
-      "code_hash": "ae65b27ccd3060a1cdee7080008f8e01",
-      "outputs": [
-        {
-          "type": "data",
-          "data": {
-            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"utility-functions\">Utility functions</h2></span>"
-          }
-        }
-      ],
+      "code_hash": null,
+      "outputs": [],
       "console": []
     },
     {
       "id": "vblA",
-      "code_hash": "8a2aaea25d28ed7cc1132dab98577296",
-      "outputs": [
-        {
-          "type": "data",
-          "data": {
-            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"api-fra-artsdatabanken\">API fra artsdatabanken</h3></span>"
-          }
-        }
-      ],
-      "console": []
-    },
-    {
-      "id": "CAvV",
       "code_hash": null,
       "outputs": [],
       "console": []
     },
     {
       "id": "bkHC",
-      "code_hash": "03c76cc8fe9ae19397186f52469073fd",
+      "code_hash": null,
       "outputs": [],
       "console": []
     },
     {
       "id": "lEQa",
-      "code_hash": "f9f2e8922a59138b8ebbb2411432f482",
+      "code_hash": null,
       "outputs": [],
       "console": []
     },
     {
       "id": "PKri",
-      "code_hash": "18f65d64de88f5809e5d4aced6456ac5",
+      "code_hash": null,
       "outputs": [],
       "console": []
     },
     {
       "id": "Xref",
-      "code_hash": "2ba1236656f7c9157c8cdb8a600b4e2f",
+      "code_hash": null,
       "outputs": [],
       "console": []
     },
     {
       "id": "SFPL",
-      "code_hash": "d92f9ed2b36c80ef8728273902ce3f15",
-      "outputs": [
-        {
-          "type": "data",
-          "data": {
-            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"arter-av-nasjonal-forvaltningsinteresse\">Arter av nasjonal forvaltningsinteresse</h3></span>"
-          }
-        }
-      ],
+      "code_hash": null,
+      "outputs": [],
       "console": []
     },
     {
       "id": "BYtC",
-      "code_hash": "56c957a471dc21e12668fb3524776020",
+      "code_hash": null,
       "outputs": [],
       "console": []
     },
     {
       "id": "RGSE",
-      "code_hash": "03b7d6809ca724a53df5110fc99e1344",
+      "code_hash": null,
       "outputs": [],
       "console": []
     },
     {
       "id": "Kclp",
-      "code_hash": "dda1e72ac50c6417612a74b4eff27eba",
-      "outputs": [
-        {
-          "type": "data",
-          "data": {
-            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"lager-en-ny-kolonne-som-inneholder-mulige-verdier-av-arter-av-nasjonal-forvaltning\">Lager en ny kolonne som inneholder mulige verdier av arter av nasjonal forvaltning</h3></span>"
-          }
-        }
-      ],
+      "code_hash": null,
+      "outputs": [],
       "console": []
     },
     {
       "id": "emfo",
-      "code_hash": "dc98c1bcb2242ec3594484d8b31b9b99",
+      "code_hash": null,
       "outputs": [],
       "console": []
     },
     {
       "id": "Hstk",
-      "code_hash": "b5009442b1b32a0c44e20f8722e83789",
+      "code_hash": null,
       "outputs": [],
       "console": []
     },
     {
       "id": "nWHF",
-      "code_hash": "014174002aa4cf3b1bda533c973342b4",
-      "outputs": [
-        {
-          "type": "data",
-          "data": {
-            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"legger-til-en-kolonne-med-verdi-fra-m1941\">Legger til en kolonne med verdi fra M1941</h3></span>"
-          }
-        }
-      ],
+      "code_hash": null,
+      "outputs": [],
       "console": []
     },
     {
       "id": "iLit",
-      "code_hash": "cf623a2c4dca80680fa2f1f407f1a05d",
+      "code_hash": null,
       "outputs": [],
       "console": []
     },
     {
       "id": "ZHCJ",
-      "code_hash": "34f7d3b42ad0ca666fc970ab8a916a8e",
+      "code_hash": null,
       "outputs": [],
       "console": []
     },
     {
       "id": "ROlb",
-      "code_hash": "57064c99e8cf5c263185e9d676417b14",
-      "outputs": [
-        {
-          "type": "data",
-          "data": {
-            "text/html": "<marimo-ui-element object-id='ROlb-0' random-id='430f3fa3-4df2-7232-4a78-38720a2147f4'><marimo-file-browser data-initial-value='[]' data-label='null' data-initial-path='&quot;/home/havhje/koding/fugl_artsdataanalyser&quot;' data-selection-mode='&quot;file&quot;' data-filetypes='[]' data-multiple='true' data-restrict-navigation='false'></marimo-file-browser></marimo-ui-element>"
-          }
-        }
-      ],
+      "code_hash": null,
+      "outputs": [],
       "console": []
     },
     {
       "id": "qnkX",
-      "code_hash": "c6efd0eca1da2f16bf6f635f060b01d5",
-      "outputs": [
-        {
-          "type": "data",
-          "data": {
-            "text/html": "<pre class='text-xs'>&#x27;/home/havhje/koding/fugl_artsdataanalyser/data_csv_gammel/test_fugledata.csv&#x27;</pre>"
-          }
-        }
-      ],
+      "code_hash": null,
+      "outputs": [],
       "console": []
     },
     {
       "id": "TqIu",
-      "code_hash": "99ee22cf38641af8bad020ef262739ba",
-      "outputs": [
-        {
-          "type": "data",
-          "data": {
-            "text/plain": ""
-          }
-        }
-      ],
+      "code_hash": null,
+      "outputs": [],
       "console": []
     },
     {
       "id": "Vxnm",
-      "code_hash": "8158f866a1bccb9c37b22a008129e873",
-      "outputs": [
-        {
-          "type": "data",
-          "data": {
-            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"oppdatere-og-rydder-i-datasettet\">Oppdatere og rydder i datasettet</h3></span>"
-          }
-        }
-      ],
+      "code_hash": null,
+      "outputs": [],
       "console": []
     },
     {
       "id": "DnEU",
-      "code_hash": "601877eaa9c647f3b34d636f43c2b63a",
+      "code_hash": null,
       "outputs": [],
       "console": []
     },
     {
       "id": "ulZA",
-      "code_hash": "0f806f417e081a4ce49b3e178fe7fbcc",
+      "code_hash": null,
       "outputs": [],
       "console": []
     },
     {
       "id": "ecfG",
-      "code_hash": "82ad80fb23a19ad9138fac01d40e9fdf",
-      "outputs": [],
-      "console": []
-    },
-    {
-      "id": "Pvdt",
-      "code_hash": "e1448f78aabeb946390055b45752c42d",
-      "outputs": [
-        {
-          "type": "data",
-          "data": {
-            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"filtrerer-ut-alt-fr-x-tid-default-1990\">Filtrerer ut alt f\u00f8r X tid (default 1990)</h3></span>"
-          }
-        }
-      ],
-      "console": []
-    },
-    {
-      "id": "ZBYS",
-      "code_hash": "c2c81059378e74cd19e80a82b8642de7",
-      "outputs": [],
-      "console": []
-    },
-    {
-      "id": "aLJB",
       "code_hash": "3fe258e51e59793cbd21166a5eb6ff73",
       "outputs": [
         {
@@ -258,37 +164,46 @@
       "console": []
     },
     {
-      "id": "nHfw",
-      "code_hash": "8c047b349fe4cd2bf0278cd438fe20ea",
-      "outputs": [],
+      "id": "Pvdt",
+      "code_hash": "1081708cf24d7038e9573fd49f35b0f9",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
       "console": []
     },
     {
-      "id": "xXTn",
-      "code_hash": "b5f14e5b6bb07697286fb87ee0e60686",
-      "outputs": [],
-      "console": []
-    },
-    {
-      "id": "AjVT",
-      "code_hash": "df1347ca55853933da989097d78842ac",
-      "outputs": [],
-      "console": []
-    },
-    {
-      "id": "pHFh",
+      "id": "ZBYS",
       "code_hash": null,
       "outputs": [],
       "console": []
     },
     {
-      "id": "NCOB",
-      "code_hash": null,
-      "outputs": [],
-      "console": []
+      "id": "aEft",
+      "code_hash": "4d70c02b64dbde349f794d5ed488e67c",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "exception",
+          "evalue": "name 'navn_mapping' is not defined",
+          "traceback": null
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stderr",
+          "text": "<span class=\"codehilite\"><div class=\"highlight\"><pre><span></span><span class=\"gt\">Traceback (most recent call last):</span>\n  File <span class=\"nb\">&quot;/tmp/marimo_17612/__marimo__cell_aEft_.py&quot;</span>, line <span class=\"m\">1</span>, in <span class=\"n\">&lt;module&gt;</span>\n<span class=\"w\">    </span><span class=\"n\">mapping_df</span> <span class=\"o\">=</span> <span class=\"n\">pl</span><span class=\"o\">.</span><span class=\"n\">DataFrame</span><span class=\"p\">({</span><span class=\"s2\">&quot;Art&quot;</span><span class=\"p\">:</span> <span class=\"nb\">list</span><span class=\"p\">(</span><span class=\"n\">navn_mapping</span><span class=\"o\">.</span><span class=\"n\">keys</span><span class=\"p\">()),</span> <span class=\"s2\">&quot;Navn_ny&quot;</span><span class=\"p\">:</span> <span class=\"nb\">list</span><span class=\"p\">(</span><span class=\"n\">navn_mapping</span><span class=\"o\">.</span><span class=\"n\">values</span><span class=\"p\">())})</span>\n<span class=\"w\">                                           </span><span class=\"pm\">^^^^^^^^^^^^</span>\n<span class=\"gr\">NameError</span>: <span class=\"n\">name &#39;navn_mapping&#39; is not defined</span>\n</pre></div>\n</span>",
+          "mimetype": "application/vnd.marimo+traceback"
+        }
+      ]
     },
     {
-      "id": "aqbW",
+      "id": "aLJB",
       "code_hash": null,
       "outputs": [],
       "console": []

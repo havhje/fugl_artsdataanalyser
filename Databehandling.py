@@ -15,6 +15,12 @@ with app.setup:
     import pytest
     from unittest.mock import MagicMock, patch
     from datetime import datetime, date as dt_date
+    import typer
+    from pathlib import Path
+    import rich
+    from rich.console import Console
+    from rich.table import Table
+    from rich.prompt import Prompt
 
 
 @app.cell
@@ -41,48 +47,47 @@ def _():
 
 
 @app.function
-def rydd_navn_og_datatyper(df_input: pl.DataFrame) -> pl.DataFrame: 
+def rydd_navn_og_datatyper(df_input: pl.DataFrame) -> pl.DataFrame:
 
     df_alle_funksjoner_ferdig_kjørt = df_input.select(
-    [
-        pl.col("category").alias("Kategori"),
-        pl.col("Art av nasjonal forvaltningsinteresse"),
-        pl.col("Verdi M1941"),
-        pl.col("preferredPopularName").alias("Navn"),
-        pl.col("validScientificName").alias("Art"),
-        pl.col("individualCount")
-        .fill_null("1") #antar at alle obs = minimum 1 når observatøren ikke har lagt inn spesifitk antall
-        .str.split("/")  # Noen har en 1/1 antall - aner ikke hva det betyr
-        .list.first()  # Take the first number
-        .cast(pl.Float64)  # Noen har komma, så må ta til float først
-        .cast(pl.Int64)
-        .alias("Antall"),
-        pl.col("behavior").alias("Atferd"),
-        pl.col("dateTimeCollected").dt.date().alias("Observert dato"),
-        pl.col("coordinateUncertaintyInMeters").alias("Usikkerhet meter").cast(pl.Int64),
-        pl.col("FamilieNavn").alias("Familie"),
-        pl.col("OrdenNavn").alias("Orden"),
-        pl.col("taxonGroupName").alias("Artsgruppe"),
-        pl.col("collector").alias("Observatør"),
-        pl.col("locality").alias("Lokalitet"),
-        pl.col("municipality").alias("Kommune"),
-        pl.col("county").alias("Fylke"),
-        pl.col("scientificNameRank").alias("Taksonomisk nivå"),
-        pl.col("Ansvarsarter"),
-        pl.col("Andre spesielt hensynskrevende arter"),
-        pl.col("Spesielle okologiske former").alias("Spesielle økologiske former"),
-        pl.col("Prioriterte arter"),
-        pl.col("Fredete arter"),
-        pl.col("Fremmede arter"),
-        pl.col("latitude").str.replace_all(",", ".").cast(pl.Float64),
-        pl.col("longitude").str.replace_all(",", ".").cast(pl.Float64),
-        pl.col("geometry"),
-        pl.col("validScientificNameId").alias("Artens ID"),
-    ]
+        [
+            pl.col("category").alias("Kategori"),
+            pl.col("Art av nasjonal forvaltningsinteresse"),
+            pl.col("Verdi M1941"),
+            pl.col("preferredPopularName").alias("Navn"),
+            pl.col("validScientificName").alias("Art"),
+            pl.col("individualCount")
+            .fill_null("1")  # antar at alle obs = minimum 1 når observatøren ikke har lagt inn spesifitk antall
+            .str.split("/")  # Noen har en 1/1 antall - aner ikke hva det betyr
+            .list.first()  # Take the first number
+            .cast(pl.Float64)  # Noen har komma, så må ta til float først
+            .cast(pl.Int64)
+            .alias("Antall"),
+            pl.col("behavior").alias("Atferd"),
+            pl.col("dateTimeCollected").dt.date().alias("Observert dato"),
+            pl.col("coordinateUncertaintyInMeters").alias("Usikkerhet meter").cast(pl.Int64),
+            pl.col("FamilieNavn").alias("Familie"),
+            pl.col("OrdenNavn").alias("Orden"),
+            pl.col("taxonGroupName").alias("Artsgruppe"),
+            pl.col("collector").alias("Observatør"),
+            pl.col("locality").alias("Lokalitet"),
+            pl.col("municipality").alias("Kommune"),
+            pl.col("county").alias("Fylke"),
+            pl.col("scientificNameRank").alias("Taksonomisk nivå"),
+            pl.col("Ansvarsarter"),
+            pl.col("Andre spesielt hensynskrevende arter"),
+            pl.col("Spesielle okologiske former").alias("Spesielle økologiske former"),
+            pl.col("Prioriterte arter"),
+            pl.col("Fredete arter"),
+            pl.col("Fremmede arter"),
+            pl.col("latitude").str.replace_all(",", ".").cast(pl.Float64),
+            pl.col("longitude").str.replace_all(",", ".").cast(pl.Float64),
+            pl.col("geometry"),
+            pl.col("validScientificNameId").alias("Artens ID"),
+        ]
     )
 
-
-    return (df_alle_funksjoner_ferdig_kjørt)
+    return df_alle_funksjoner_ferdig_kjørt
 
 
 @app.function
@@ -134,8 +139,6 @@ def test_rydd_navn_og_datatyper():
     )
 
     test_result = rydd_navn_og_datatyper(test_df)
-
-
 
     # ── Antall rader skal være uendret ──────────────────────────────
     assert test_result.height == 3, f"Forventet 3 rader, fikk {test_result.height}"
@@ -1002,63 +1005,69 @@ def test_legg_til_verdi_m1941():
     assert ulv_df.get_column("Verdi M1941").eq("Svært stor verdi").all(), "Ulv skal ha svært stor verdi"
 
 
-@app.cell(column=1)
-def _():
-    valgt_fil = mo.ui.file_browser()
-    valgt_fil
-    return (valgt_fil,)
-
-
-@app.cell
-def _(valgt_fil):
-    file_info = valgt_fil.value[0]
-    filepath = file_info.path
-    str(filepath)
-    return (filepath,)
-
-
-@app.cell
-def _(filepath):
-    orginal_df = mo.sql(
-        f"""
-        SELECT * FROM read_csv('{str(filepath)}');
-        """,
-        output=False,
-    )
-    return (orginal_df,)
-
-
-@app.cell(hide_code=True)
+@app.cell(column=1, hide_code=True)
 def _():
     mo.md(r"""
-    ### Filtrerer ut alt før X tid (default 1990)
+    ### Input data
     """)
     return
 
 
 @app.cell
-def _(add_national_interest_criteria, orginal_df, process_and_enrich_data):
-    df_artsdatabanken = process_and_enrich_data(orginal_df)
+def _(
+    console,
+    join_navn_til_orginal_df,
+    les_data_og_kjør_alle_funksjoner,
+    prompt_mangler_navn,
+):
+    app = typer.Typer()
+    # har en egen les og skriv fil for typer som viser til den faktiske funksjonen hvor alt skjer
 
-    df_alle_funksjoner = (
-        df_artsdatabanken.pipe(add_national_interest_criteria)
-        .pipe(legg_til_kolonne_arteravnasjonal)
-        .pipe(legg_til_verdi_m1941)
-        .pipe(rydd_navn_og_datatyper)
-    )
+
+    @app.command()
+    def les_data_cli(
+        input_fil_sti: str = typer.Argument(..., help="Sti til CSV-fil med fugledata"),
+        filter_year: int = typer.Option(1990, help="Filtrer observasjoner fra og med dette året"),
+        output: str = typer.Option("output.csv", help="Sti til utfil (CSV)"),
+    ):
+        """Les fugledata fra CSV, berik med artsdatabanken, og skriv resultatet til fil."""
+        df = les_data_og_kjør_alle_funksjoner(input_fil_sti, filter_year)
+        # Sjekk for manglende navn
+        mangler_df = finn_mangler_navn(df)
+        if not mangler_df.is_empty():
+            navn_mapping = prompt_mangler_navn(mangler_df)
+            df = join_navn_til_orginal_df(df, navn_mapping)
+        df.write_csv(output)
+        console.print(f"[green]Skrev {df.shape[0]} rader til {output}[/green]")
+
     return
 
 
 @app.cell
-def _(artsdata_df):
-    arter_etter_1990 = artsdata_df.filter(pl.col("Observert dato") >= date(1990, 1, 1))
-    return (arter_etter_1990,)
+def _(add_national_interest_criteria, process_and_enrich_data):
+    def les_data_og_kjør_alle_funksjoner(input_fil_sti: str, filter_year: int = 1990) -> pl.DataFrame:
+        """Les CSV med DuckDB, filtrer på år, og kjør alle berikingsfunksjoner."""
 
+        # Bruker DuckDB direkte for å lese CSV — unngår polars sin ragged-lines feil
+        input_df = duckdb.sql(f"SELECT * FROM read_csv('{input_fil_sti}')").pl()
 
-@app.cell
-def _(artsdata_df):
-    artsdata_df.null_count()
-    return
+        input_filtrert_df = input_df.with_columns(pl.col("dateTimeCollected").dt.date()).filter(
+            pl.col("dateTimeCollected") >= date(filter_year, 1, 1)
+        )
+
+        # Kjører alle berikingsfunksjonene
+        df_artsdatabanken = process_and_enrich_data(input_filtrert_df)
+
+        df_alle_funksjoner = (
+            df_artsdatabanken.pipe(add_national_interest_criteria)
+            .pipe(legg_til_kolonne_arteravnasjonal)
+            .pipe(legg_til_verdi_m1941)
+            .pipe(rydd_navn_og_datatyper)
+        )
+
+        return df_alle_funksjoner
+
+    return (les_data_og_kjør_alle_funksjoner,)
 
 
 @app.cell(hide_code=True)
@@ -1069,80 +1078,84 @@ def _():
     return
 
 
-@app.cell
-def _(arter_etter_1990):
-    mangler_navn = (
-        arter_etter_1990.filter(pl.col("Navn").is_null() | pl.col("Familie").is_null() | pl.col("Orden").is_null())
-        .select(["Art", "Navn", "Familie", "Orden"])
-        .unique()
-        .sort("Art")
-    )
+@app.function
+def finn_mangler_navn(df: pl.DataFrame) -> pl.DataFrame:
+    """Finn arter som mangler norsk navn (Navn-kolonnen er null)."""
 
-    mangler_navn
-    return (mangler_navn,)
+    mangler_df = df.filter(pl.col("Navn").is_null()).select(["Art", "Navn", "Familie", "Orden"]).unique().sort("Art")
+
+    return mangler_df
 
 
 @app.cell
-def _(mangler_navn):
-    navn_inputs = mo.ui.dictionary(
-        {row["Art"]: mo.ui.text(placeholder="Skriv inn norsk navn...") for row in mangler_navn.iter_rows(named=True)}
-    )
-
-    navn_inputs
-    return (navn_inputs,)
+def _():
+    console = Console()
 
 
-@app.cell
-def _(arter_etter_1990, navn_inputs):
-    # Get the mapping of species to Norwegian names from the UI inputs
-    navn_mapping = {
-        art: text_value
-        for art, text_value in navn_inputs.value.items()
-        if text_value  # Only include non-empty values
-    }
+    def prompt_mangler_navn(mangler_df: pl.DataFrame) -> dict[str, str]:
+        """Vis arter uten norsk navn og be bruker skrive inn navn."""
 
-    # Create a temporary dataframe with the mappings
-    if navn_mapping:
-        mapping_df = pl.DataFrame({"Art": list(navn_mapping.keys()), "Navn_ny": list(navn_mapping.values())})
+        if mangler_df.is_empty():
+            return {}
 
-        # Join with the original dataframe and update the Navn column
-        endelig_datasett_for_nedlastning = (
-            arter_etter_1990.join(mapping_df, on="Art", how="left")
+        arter = mangler_df.get_column("Art").fill_null("—").to_list()
+        familier = mangler_df.get_column("Familie").fill_null("—").to_list()
+        ordener = mangler_df.get_column("Orden").fill_null("—").to_list()
+
+        # Build table - use zip() to iterate corresponding elements
+        table = Table(title="Arter som mangler norsk navn")
+        table.add_column("Art (latinsk)", style="cyan")
+        table.add_column("Familie", style="green")
+        table.add_column("Orden", style="magenta")
+        for art, familie, orden in zip(
+            arter, familier, ordener
+        ):  # zipper sammen listene til en tuple pr art, familie, orden. Slik at alle med posisjon 1 i hver list blir en tuple, osv. Loopen kan da hente art, familie , orden (dvs. posisjon 1, 2 og 3 i hver tuple og det blir argumentet om a legge til en rad med disse verdiene)
+            table.add_row(art, familie, orden)
+        console.print(table)
+        console.print(f"\n[bold]Fant {mangler_df.height} arter uten norsk navn.[/bold]")
+        console.print("Skriv inn norsk navn for hver art:\n")
+
+        # Collect names - iterate using zip on columns
+        navn_mapping = {}  # lager en dictionary som fylles av for loopen under
+        for art in arter:
+            navn = Prompt.ask(f"  [cyan]{art}[/cyan]")
+            if (
+                not navn.strip()
+            ):  # strip er å ta bort alle whitespacses, etc. Sånn at du kun evaluerer om det faktisk er tomt
+                console.print(f"\n[bold red]Feil:[/bold red] Du må skrive inn navn for {art}. Avbryter.")
+                raise typer.Exit(code=1)
+            navn_mapping[art] = (
+                navn.strip()
+            )  # navn_mapping is a dictionary. The square bracket syntax [art] is how you access a specific slot in that dictionary by key. The variable art holds a string like "Sylvia borin", so this means "the slot in navn_mapping whose key is "Sylvia borin"." Slik at du ber programmet skrive over "value" i key:value nøkkelen til dictionary for den gitte arten (i.e key). Slik python funker så legges også art (i.e. the key) til når python ser at denne mangler i dictionarien når den skal assigne en value (navn) til den gitte keyen.
+        return navn_mapping
+
+    return console, prompt_mangler_navn
+
+
+app._unparsable_cell(
+    """
+    def join_navn_til_orginal_df(
+        df: pl.DataFrame, navn_mapping: dict[str, str]
+    ) -> pl.DataFrame:  # navn mapping er en dict med key:value som begge er str. hvor f.eks. det latinske navnet er \"key\" og det norske er \"navn\"
+        \"\"\"Oppdater Navn-kolonnen med manuelt oppgitte navn.\"\"\"
+
+        mapping_df = pl.DataFrame({\"Art\": list(navn_mapping.keys()), \"Navn_ny\": list(navn_mapping.values())}) # dette lager en ny poalrs df med to kolonner art og navn_ny hvor du henter navn mapping fra \"prompt_mangler navn\" og henter ut deres keys og values. Keys og values argumentene er \"They're iterator methods that traverse the entire dictionary collection.\" så trenger ikke iter rows. 
+        #  e.g. Polars knows how to build a column from a list of strings. It doesn't know how to build one from a dict_keys view.
+
+        df_med_navn = df.join(mapping_df, on=\"Art\", how=\"left\")
             .with_columns(
-                pl.when(pl.col("Navn").is_null() & pl.col("Navn_ny").is_not_null())
-                .then(pl.col("Navn_ny"))
-                .otherwise(pl.col("Navn"))
-                .alias("Navn")
+                pl.when(pl.col(\"Navn\").is_null() & pl.col(\"Navn_ny\").is_not_null())
+                .then(pl.col(\"Navn_ny\"))
+                .otherwise(pl.col(\"Navn\"))
+                .alias(\"Navn\")
             )
-            .drop("Navn_ny")
+            .drop(\"Navn_ny\")
         )
-    else:
-        # If no names were entered, keep the original dataframe
-        endelig_datasett_for_nedlastning = arter_etter_1990
-    return
 
-
-@app.cell
-def _():
-    return
-
-
-@app.cell
-def _():
-    return
-
-
-@app.cell
-def _():
-    return
-
-
-@app.cell(hide_code=True)
-def _():
-    mo.md(r"""
-    ### Output statestikk som du må sjekke
-    """)
-    return
+        return df_med_navn
+    """,
+    name="*bruk_navn_mapping"
+)
 
 
 if __name__ == "__main__":
