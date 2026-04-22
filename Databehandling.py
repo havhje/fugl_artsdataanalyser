@@ -21,6 +21,17 @@ with app.setup:
     from rich.console import Console
     from rich.table import Table
     from rich.prompt import Prompt
+    from rich.progress import (
+        Progress,
+        SpinnerColumn,
+        BarColumn,
+        TextColumn,
+        TimeElapsedColumn,
+        TimeRemainingColumn,
+        MofNCompleteColumn,
+    )
+    from rich.panel import Panel
+    from rich.rule import Rule
 
 
 @app.cell
@@ -28,6 +39,12 @@ def _():
     DATABASE_URL = "fugl_atributt_data"
     bird_data = duckdb.connect(DATABASE_URL, read_only=False)
     return (bird_data,)
+
+
+@app.cell
+def _():
+    console = Console()
+    return (console,)
 
 
 @app.cell(hide_code=True)
@@ -407,6 +424,7 @@ def _(DESIRED_RANKS, NORTAXA_API_BASE_URL):
 def _(
     DESIRED_RANKS,
     RATE_LIMIT_DELAY,
+    console,
     extract_hierarchy_and_ids,
     fetch_taxon_data,
     get_norwegian_name,
@@ -432,7 +450,7 @@ def _(
 
         # Check if required column exists
         if "validScientificNameId" not in df_work.columns:
-            mo.md("Error: 'validScientificNameId' column not found in input data.")
+            console.print("[bold red]Feil:[/bold red] 'validScientificNameId'-kolonnen finnes ikke i datasettet.")
             return None
 
         # Get unique IDs
@@ -443,16 +461,29 @@ def _(
         taxonomy_data = {}
         family_names = {}
         order_names = {}
+        feilet_ids = []
 
-        # Process with progress bar
-        with mo.status.progress_bar(total=total_ids) as bar:
-            bar.update(0, title="Fetching taxonomy data from NorTaxa API...")
+        # Hent taksonomidata med Rich-fremdriftsindikator
+        with Progress(
+            SpinnerColumn(),
+            TextColumn("[bold blue]{task.description}"),
+            BarColumn(),
+            MofNCompleteColumn(),
+            TimeElapsedColumn(),
+            TimeRemainingColumn(),
+            console=console,
+        ) as progress:
+            task = progress.add_task("Henter taksonomidata fra NorTaxa API...", total=total_ids)
 
             for i, species_id in enumerate(unique_ids):
                 try:
                     species_id = int(species_id)
                 except ValueError, TypeError:
-                    bar.update(i + 1)
+                    progress.update(
+                        task,
+                        advance=1,
+                        description=f"Hopper over ugyldig ID ({i + 1}/{total_ids})",
+                    )
                     continue
 
                 # Fetch species data
@@ -472,13 +503,24 @@ def _(
                         order_data = fetch_taxon_data(order_id)
                         if order_data:
                             order_names[species_id] = get_norwegian_name(order_data)
+                else:
+                    feilet_ids.append(species_id)
 
                 # Rate limiting
                 if RATE_LIMIT_DELAY > 0:
                     time.sleep(RATE_LIMIT_DELAY)
 
-                # Update progress
-                bar.update(i + 1, title=f"Processing ID {species_id} ({i + 1}/{total_ids})")
+                progress.update(
+                    task,
+                    advance=1,
+                    description=f"Henter ID {species_id} ({i + 1}/{total_ids})",
+                )
+
+        # Vis advarsler for mislykkede API-kall
+        if feilet_ids:
+            console.print(
+                f"[yellow]Advarsel:[/yellow] Kunne ikke hente data for {len(feilet_ids)} art-IDer: {feilet_ids[:10]}{'...' if len(feilet_ids) > 10 else ''}"
+            )
 
         # Add taxonomy columns with proper return_dtype
         for rank in DESIRED_RANKS:
@@ -972,7 +1014,15 @@ def test_legg_til_verdi_m1941():
             "category": ["EN", "LC", "VU", "haraball", "NT", "LC", "CR"],
             "Ansvarsarter": ["Yes", "No", "No", "No", "Yes", "No", "No"],
             "Trua arter": ["No", "No", "No", "No", "No", "No", "No"],
-            "Andre spesielt hensynskrevende arter": ["No", "No", "Yes", "No", "No", "Yes", "No"],
+            "Andre spesielt hensynskrevende arter": [
+                "No",
+                "No",
+                "Yes",
+                "No",
+                "No",
+                "Yes",
+                "No",
+            ],
             "Spesielle okologiske former": ["No", "No", "No", "No", "Yes", "No", "No"],
             "Prioriterte arter": ["Yes", "No", "No", "No", "No", "No", "No"],
             "Fredete arter": ["Yes", "No", "No", "No", "No", "No", "No"],
@@ -1005,75 +1055,10 @@ def test_legg_til_verdi_m1941():
     assert ulv_df.get_column("Verdi M1941").eq("Svært stor verdi").all(), "Ulv skal ha svært stor verdi"
 
 
-@app.cell(column=1, hide_code=True)
-def _():
-    mo.md(r"""
-    ### Input data
-    """)
-    return
-
-
-@app.cell
-def _(
-    console,
-    join_navn_til_orginal_df,
-    les_data_og_kjør_alle_funksjoner,
-    prompt_mangler_navn,
-):
-    app = typer.Typer()
-    # har en egen les og skriv fil for typer som viser til den faktiske funksjonen hvor alt skjer
-
-
-    @app.command()
-    def les_data_cli(
-        input_fil_sti: str = typer.Argument(..., help="Sti til CSV-fil med fugledata"),
-        filter_year: int = typer.Option(1990, help="Filtrer observasjoner fra og med dette året"),
-        output: str = typer.Option("output.csv", help="Sti til utfil (CSV)"),
-    ):
-        """Les fugledata fra CSV, berik med artsdatabanken, og skriv resultatet til fil."""
-        df = les_data_og_kjør_alle_funksjoner(input_fil_sti, filter_year)
-        # Sjekk for manglende navn
-        mangler_df = finn_mangler_navn(df)
-        if not mangler_df.is_empty():
-            navn_mapping = prompt_mangler_navn(mangler_df)
-            df = join_navn_til_orginal_df(df, navn_mapping)
-        df.write_csv(output)
-        console.print(f"[green]Skrev {df.shape[0]} rader til {output}[/green]")
-
-    return
-
-
-@app.cell
-def _(add_national_interest_criteria, process_and_enrich_data):
-    def les_data_og_kjør_alle_funksjoner(input_fil_sti: str, filter_year: int = 1990) -> pl.DataFrame:
-        """Les CSV med DuckDB, filtrer på år, og kjør alle berikingsfunksjoner."""
-
-        # Bruker DuckDB direkte for å lese CSV — unngår polars sin ragged-lines feil
-        input_df = duckdb.sql(f"SELECT * FROM read_csv('{input_fil_sti}')").pl()
-
-        input_filtrert_df = input_df.with_columns(pl.col("dateTimeCollected").dt.date()).filter(
-            pl.col("dateTimeCollected") >= date(filter_year, 1, 1)
-        )
-
-        # Kjører alle berikingsfunksjonene
-        df_artsdatabanken = process_and_enrich_data(input_filtrert_df)
-
-        df_alle_funksjoner = (
-            df_artsdatabanken.pipe(add_national_interest_criteria)
-            .pipe(legg_til_kolonne_arteravnasjonal)
-            .pipe(legg_til_verdi_m1941)
-            .pipe(rydd_navn_og_datatyper)
-        )
-
-        return df_alle_funksjoner
-
-    return (les_data_og_kjør_alle_funksjoner,)
-
-
 @app.cell(hide_code=True)
 def _():
     mo.md(r"""
-    ### Legger til manglende artsnavn (dette steget må du gjøre)
+    ### Legger til manglende artsnavn
     """)
     return
 
@@ -1088,10 +1073,7 @@ def finn_mangler_navn(df: pl.DataFrame) -> pl.DataFrame:
 
 
 @app.cell
-def _():
-    console = Console()
-
-
+def _(console):
     def prompt_mangler_navn(mangler_df: pl.DataFrame) -> dict[str, str]:
         """Vis arter uten norsk navn og be bruker skrive inn navn."""
 
@@ -1129,33 +1111,126 @@ def _():
             )  # navn_mapping is a dictionary. The square bracket syntax [art] is how you access a specific slot in that dictionary by key. The variable art holds a string like "Sylvia borin", so this means "the slot in navn_mapping whose key is "Sylvia borin"." Slik at du ber programmet skrive over "value" i key:value nøkkelen til dictionary for den gitte arten (i.e key). Slik python funker så legges også art (i.e. the key) til når python ser at denne mangler i dictionarien når den skal assigne en value (navn) til den gitte keyen.
         return navn_mapping
 
-    return console, prompt_mangler_navn
+    return (prompt_mangler_navn,)
 
 
-app._unparsable_cell(
-    """
-    def join_navn_til_orginal_df(
-        df: pl.DataFrame, navn_mapping: dict[str, str]
-    ) -> pl.DataFrame:  # navn mapping er en dict med key:value som begge er str. hvor f.eks. det latinske navnet er \"key\" og det norske er \"navn\"
-        \"\"\"Oppdater Navn-kolonnen med manuelt oppgitte navn.\"\"\"
+@app.function
+def join_navn_til_orginal_df(
+    df: pl.DataFrame, navn_mapping: dict[str, str]
+) -> pl.DataFrame:  # navn mapping er en dict med key:value som begge er str. hvor f.eks. det latinske navnet er "key" og det norske er "navn"
+    """Oppdater Navn-kolonnen med manuelt oppgitte navn."""
 
-        mapping_df = pl.DataFrame({\"Art\": list(navn_mapping.keys()), \"Navn_ny\": list(navn_mapping.values())}) # dette lager en ny poalrs df med to kolonner art og navn_ny hvor du henter navn mapping fra \"prompt_mangler navn\" og henter ut deres keys og values. Keys og values argumentene er \"They're iterator methods that traverse the entire dictionary collection.\" så trenger ikke iter rows. 
-        #  e.g. Polars knows how to build a column from a list of strings. It doesn't know how to build one from a dict_keys view.
+    mapping_df = pl.DataFrame(
+        {"Art": list(navn_mapping.keys()), "Navn_ny": list(navn_mapping.values())}
+    )  # dette lager en ny poalrs df med to kolonner art og navn_ny hvor du henter navn mapping fra "prompt_mangler navn" og henter ut deres keys og values. Keys og values argumentene er "They're iterator methods that traverse the entire dictionary collection." så trenger ikke iter rows.
+    #  e.g. Polars knows how to build a column from a list of strings. It doesn't know how to build one from a dict_keys view.
 
-        df_med_navn = df.join(mapping_df, on=\"Art\", how=\"left\")
-            .with_columns(
-                pl.when(pl.col(\"Navn\").is_null() & pl.col(\"Navn_ny\").is_not_null())
-                .then(pl.col(\"Navn_ny\"))
-                .otherwise(pl.col(\"Navn\"))
-                .alias(\"Navn\")
-            )
-            .drop(\"Navn_ny\")
+    df_med_navn = (
+        df.join(mapping_df, on="Art", how="left")
+        .with_columns(
+            pl.when(pl.col("Navn").is_null() & pl.col("Navn_ny").is_not_null())
+            .then(pl.col("Navn_ny"))
+            .otherwise(pl.col("Navn"))
+            .alias("Navn")
         )
+        .drop("Navn_ny")
+    )
 
-        return df_med_navn
-    """,
-    name="*bruk_navn_mapping"
-)
+    return df_med_navn
+
+
+@app.cell(column=1, hide_code=True)
+def _():
+    mo.md(r"""
+    ### Setter sammen alt og definerer rich
+    """)
+    return
+
+
+@app.cell
+def _(console, les_data_og_kjør_alle_funksjoner, prompt_mangler_navn):
+    app = typer.Typer()
+    # har en egen les og skriv fil for typer som viser til den faktiske funksjonen hvor alt skjer
+
+
+    @app.command()
+    def les_data_cli(
+        input_fil_sti: str = typer.Argument(..., help="Sti til CSV-fil med fugledata"),
+        filter_year: int = typer.Option(1990, help="Filtrer observasjoner fra og med dette året"),
+        output: str = typer.Option("output.csv", help="Sti til utfil (CSV)"),
+    ):
+        """Les fugledata fra CSV, berik med artsdatabanken, og skriv resultatet til fil."""
+        console.print(Rule("[bold]Fugl Artsdataanalyser[/bold]"))
+        console.print(f"  Inputfil:    [cyan]{input_fil_sti}[/cyan]")
+        console.print(f"  Filter år:   [cyan]{filter_year}[/cyan]")
+        console.print(f"  Utfil:       [cyan]{output}[/cyan]\n")
+
+        console.print(Rule("[bold]Henter og beriker data[/bold]"))
+        df = les_data_og_kjør_alle_funksjoner(input_fil_sti, filter_year)
+
+        # Sjekk for manglende navn
+        console.print(Rule("[bold]Sjekker artsnavn[/bold]"))
+        mangler_df = finn_mangler_navn(df)
+        if not mangler_df.is_empty():
+            navn_mapping = prompt_mangler_navn(mangler_df)
+            df = join_navn_til_orginal_df(df, navn_mapping)
+        else:
+            console.print("  [green]✓[/green] Alle arter har norsk navn")
+
+        console.print(Rule("[bold]Skriver resultat[/bold]"))
+        df.write_parquet(output)
+
+        # Oppsummering
+        unike_arter = df.select("Art").n_unique() if "Art" in df.columns else "—"
+        summary = (
+            f"[bold green]Ferdig![/bold green]\n\n"
+            f"  Rader:          [cyan]{df.height}[/cyan]\n"
+            f"  Kolonner:       [cyan]{df.width}[/cyan]\n"
+            f"  Unike arter:    [cyan]{unike_arter}[/cyan]\n"
+            f"  Skrevet til:    [cyan]{output}[/cyan]"
+        )
+        console.print(Panel(summary, title="Oppsummering", border_style="green"))
+
+    return
+
+
+@app.cell
+def _(add_national_interest_criteria, console, process_and_enrich_data):
+    def les_data_og_kjør_alle_funksjoner(input_fil_sti: str, filter_year: int = 1990) -> pl.DataFrame:
+        """Les CSV med DuckDB, filtrer på år, og kjør alle berikingsfunksjoner."""
+
+        # Bruker DuckDB direkte for å lese CSV — unngår polars sin ragged-lines feil
+        with console.status("[bold blue]Leser CSV-fil med DuckDB..."):
+            input_df = duckdb.sql(f"SELECT * FROM read_csv('{input_fil_sti}')").pl()
+
+        with console.status("[bold blue]Filtrerer observasjoner på år..."):
+            input_filtrert_df = input_df.with_columns(pl.col("dateTimeCollected").dt.date()).filter(
+                pl.col("dateTimeCollected") >= date(filter_year, 1, 1)
+            )
+        console.print(f"  [dim]Filtrert til {input_filtrert_df.height} rader (fra og med {filter_year})[/dim]")
+
+        # Kjører alle berikingsfunksjonene — progress_bar håndteres inne i process_and_enrich_data
+        df_artsdatabanken = process_and_enrich_data(input_filtrert_df)
+
+        with console.status("[bold blue]Legger til kriterier for nasjonal interesse..."):
+            df_steg1 = df_artsdatabanken.pipe(add_national_interest_criteria)
+        console.print("  [green]✓[/green] Kriterier for nasjonal interesse")
+
+        with console.status("[bold blue]Legger til kolonne for arter av nasjonal forvaltningsinteresse..."):
+            df_steg2 = df_steg1.pipe(legg_til_kolonne_arteravnasjonal)
+        console.print("  [green]✓[/green] Arter av nasjonal forvaltningsinteresse")
+
+        with console.status("[bold blue]Legger til M1941-verdier..."):
+            df_steg3 = df_steg2.pipe(legg_til_verdi_m1941)
+        console.print("  [green]✓[/green] M1941-verdier")
+
+        with console.status("[bold blue]Rydder opp i navn og datatyper..."):
+            df_alle_funksjoner = df_steg3.pipe(rydd_navn_og_datatyper)
+        console.print("  [green]✓[/green] Navn og datatyper ryddet")
+
+        return df_alle_funksjoner
+
+    return (les_data_og_kjør_alle_funksjoner,)
 
 
 if __name__ == "__main__":
