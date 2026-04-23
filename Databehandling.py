@@ -74,7 +74,9 @@ def rydd_navn_og_datatyper(df_input: pl.DataFrame) -> pl.DataFrame:
             pl.col("preferredPopularName").alias("Navn"),
             pl.col("validScientificName").alias("Art"),
             pl.col("individualCount")
-            .fill_null("1")  # antar at alle obs = minimum 1 når observatøren ikke har lagt inn spesifitk antall
+            .fill_null(
+                "1"
+            )  # antar at alle obs = minimum 1 når observatøren ikke har lagt inn spesifitk antall
             .str.split("/")  # Noen har en 1/1 antall - aner ikke hva det betyr
             .list.first()  # Take the first number
             .cast(pl.Float64)  # Noen har komma, så må ta til float først
@@ -82,7 +84,9 @@ def rydd_navn_og_datatyper(df_input: pl.DataFrame) -> pl.DataFrame:
             .alias("Antall"),
             pl.col("behavior").alias("Atferd"),
             pl.col("dateTimeCollected").dt.date().alias("Observert dato"),
-            pl.col("coordinateUncertaintyInMeters").alias("Usikkerhet meter").cast(pl.Int64),
+            pl.col("coordinateUncertaintyInMeters")
+            .alias("Usikkerhet meter")
+            .cast(pl.Int64),
             pl.col("FamilieNavn").alias("Familie"),
             pl.col("OrdenNavn").alias("Orden"),
             pl.col("taxonGroupName").alias("Artsgruppe"),
@@ -255,29 +259,49 @@ def test_rydd_navn_og_datatyper():
 
     # ── Test dateTimeCollected → Observert dato (date) ──────────────
     obs_dato = test_result.get_column("Observert dato")
-    assert obs_dato.dtype == pl.Date, f"Observert dato skal være Date, fikk {obs_dato.dtype}"
-    assert obs_dato[0] == dt_date(2022, 5, 15), f"Dato for rad 0 skal være 2022-05-15, fikk {obs_dato[0]}"
-    assert obs_dato[1] == dt_date(2023, 7, 4), f"Dato for rad 1 skal være 2023-07-04, fikk {obs_dato[1]}"
-    assert obs_dato[2] == dt_date(2019, 6, 1), f"Dato for rad 2 skal være 2019-06-01, fikk {obs_dato[2]}"
+    assert obs_dato.dtype == pl.Date, (
+        f"Observert dato skal være Date, fikk {obs_dato.dtype}"
+    )
+    assert obs_dato[0] == dt_date(2022, 5, 15), (
+        f"Dato for rad 0 skal være 2022-05-15, fikk {obs_dato[0]}"
+    )
+    assert obs_dato[1] == dt_date(2023, 7, 4), (
+        f"Dato for rad 1 skal være 2023-07-04, fikk {obs_dato[1]}"
+    )
+    assert obs_dato[2] == dt_date(2019, 6, 1), (
+        f"Dato for rad 2 skal være 2019-06-01, fikk {obs_dato[2]}"
+    )
 
     # ── Test coordinateUncertaintyInMeters → Usikkerhet meter ───────
     usikkerhet = test_result.get_column("Usikkerhet meter")
-    assert usikkerhet.dtype == pl.Int64, f"Usikkerhet meter skal være Int64, fikk {usikkerhet.dtype}"
-    assert usikkerhet[0] == 300, f"Usikkerhet for rad 0 skal være 300, fikk {usikkerhet[0]}"
+    assert usikkerhet.dtype == pl.Int64, (
+        f"Usikkerhet meter skal være Int64, fikk {usikkerhet.dtype}"
+    )
+    assert usikkerhet[0] == 300, (
+        f"Usikkerhet for rad 0 skal være 300, fikk {usikkerhet[0]}"
+    )
     assert usikkerhet[2] == 9, f"Usikkerhet for rad 2 skal være 9, fikk {usikkerhet[2]}"
 
     # ── Test latitude komma → punktum → Float64 ────────────────────
     lat = test_result.get_column("latitude")
     assert lat.dtype == pl.Float64, f"latitude skal være Float64, fikk {lat.dtype}"
-    assert abs(lat[0] - 68.904168) < 1e-5, f"latitude '68,904168' skal bli 68.904168, fikk {lat[0]}"
+    assert abs(lat[0] - 68.904168) < 1e-5, (
+        f"latitude '68,904168' skal bli 68.904168, fikk {lat[0]}"
+    )
     # Latitude med punktum skal også fungere
-    assert abs(lat[2] - 68.974144) < 1e-5, f"latitude '68.974144' (allerede punktum) skal bli 68.974144, fikk {lat[2]}"
+    assert abs(lat[2] - 68.974144) < 1e-5, (
+        f"latitude '68.974144' (allerede punktum) skal bli 68.974144, fikk {lat[2]}"
+    )
 
     # ── Test longitude komma → punktum → Float64 ───────────────────
     lon = test_result.get_column("longitude")
     assert lon.dtype == pl.Float64, f"longitude skal være Float64, fikk {lon.dtype}"
-    assert abs(lon[0] - 15.066918) < 1e-5, f"longitude '15,066918' skal bli 15.066918, fikk {lon[0]}"
-    assert abs(lon[1] - 15.148183) < 1e-5, f"longitude '15,148183' skal bli 15.148183, fikk {lon[1]}"
+    assert abs(lon[0] - 15.066918) < 1e-5, (
+        f"longitude '15,066918' skal bli 15.066918, fikk {lon[0]}"
+    )
+    assert abs(lon[1] - 15.148183) < 1e-5, (
+        f"longitude '15,148183' skal bli 15.148183, fikk {lon[1]}"
+    )
 
     # ── Test at kolonner som ikke omdøpes beholder verdier ──────────
     assert test_result.get_column("Atferd").to_list() == ["singing", None, "flying"], (
@@ -308,13 +332,17 @@ def test_rydd_navn_og_datatyper():
         "POINT (497884 7651480)",
     ], "geometry skal beholde sine verdier uendret"
 
-    assert test_result.get_column("Art av nasjonal forvaltningsinteresse").to_list() == [
+    assert test_result.get_column(
+        "Art av nasjonal forvaltningsinteresse"
+    ).to_list() == [
         "Yes",
         "No",
         "Yes",
     ], "Art av nasjonal forvaltningsinteresse skal beholde sine verdier"
 
-    assert test_result.get_column("Verdi M1941").to_list() == ["C", "D", "B"], "Verdi M1941 skal beholde sine verdier"
+    assert test_result.get_column("Verdi M1941").to_list() == ["C", "D", "B"], (
+        "Verdi M1941 skal beholde sine verdier"
+    )
 
 
 @app.cell(hide_code=True)
@@ -360,7 +388,6 @@ def _(DESIRED_RANKS, NORTAXA_API_BASE_URL):
             print(f"Error fetching ID {scientific_name_id}: {e}")
         return None
 
-
     def extract_hierarchy_and_ids(
         api_data: dict[str, Any] | None,
     ) -> tuple[dict[str, str], int | None, int | None]:
@@ -389,7 +416,6 @@ def _(DESIRED_RANKS, NORTAXA_API_BASE_URL):
                     order_id = level.get("scientificNameId")
 
         return hierarchy, family_id, order_id
-
 
     def get_norwegian_name(api_data: dict[str, Any] | None) -> str | None:
         """Extract Norwegian vernacular name (prioritize Bokmål over Nynorsk).
@@ -450,11 +476,15 @@ def _(
 
         # Check if required column exists
         if "validScientificNameId" not in df_work.columns:
-            console.print("[bold red]Feil:[/bold red] 'validScientificNameId'-kolonnen finnes ikke i datasettet.")
+            console.print(
+                "[bold red]Feil:[/bold red] 'validScientificNameId'-kolonnen finnes ikke i datasettet."
+            )
             return None
 
         # Get unique IDs
-        unique_ids = df_work.select("validScientificNameId").unique().to_series().to_list()
+        unique_ids = (
+            df_work.select("validScientificNameId").unique().to_series().to_list()
+        )
         total_ids = len(unique_ids)
 
         # Storage for results
@@ -473,7 +503,9 @@ def _(
             TimeRemainingColumn(),
             console=console,
         ) as progress:
-            task = progress.add_task("Henter taksonomidata fra NorTaxa API...", total=total_ids)
+            task = progress.add_task(
+                "Henter taksonomidata fra NorTaxa API...", total=total_ids
+            )
 
             for i, species_id in enumerate(unique_ids):
                 try:
@@ -489,7 +521,9 @@ def _(
                 # Fetch species data
                 species_data = fetch_taxon_data(species_id)
                 if species_data:
-                    hierarchy, family_id, order_id = extract_hierarchy_and_ids(species_data)
+                    hierarchy, family_id, order_id = extract_hierarchy_and_ids(
+                        species_data
+                    )
                     taxonomy_data[species_id] = hierarchy
 
                     # Fetch family name if available
@@ -527,7 +561,11 @@ def _(
             df_work = df_work.with_columns(
                 pl.col("validScientificNameId")
                 .map_elements(
-                    lambda x: taxonomy_data.get(int(x), {}).get(rank) if x and x is not None else None,
+                    lambda x: (
+                        taxonomy_data.get(int(x), {}).get(rank)
+                        if x and x is not None
+                        else None
+                    ),
                     return_dtype=pl.Utf8,  # Fixed: Added return_dtype
                 )
                 .alias(rank)
@@ -576,41 +614,75 @@ def _(process_and_enrich_data):
 
         # Test granmeis (4382)
         granmeis = test_result.filter(pl.col("validScientificNameId") == 4382)
-        assert granmeis.get_column("Order").eq("Passeriformes").all(), "Granmeis should be in Passeriformes order"
-        assert granmeis.get_column("Family").eq("Paridae").all(), "Granmeis should be in Paridae family"
-        assert granmeis.get_column("Genus").eq("Poecile").all(), "Granmeis should be in Poecile genus"
+        assert granmeis.get_column("Order").eq("Passeriformes").all(), (
+            "Granmeis should be in Passeriformes order"
+        )
+        assert granmeis.get_column("Family").eq("Paridae").all(), (
+            "Granmeis should be in Paridae family"
+        )
+        assert granmeis.get_column("Genus").eq("Poecile").all(), (
+            "Granmeis should be in Poecile genus"
+        )
         assert granmeis.get_column("FamilieNavn").eq("meisefamilien").all(), (
             "Granmeis should have FamilieNavn 'meisefamilien'"
         )
-        assert granmeis.get_column("OrdenNavn").eq("spurvefugler").all(), "Granmeis should have OrdenNavn 'spurvefugler'"
+        assert granmeis.get_column("OrdenNavn").eq("spurvefugler").all(), (
+            "Granmeis should have OrdenNavn 'spurvefugler'"
+        )
 
         # Test skjeand (204586)
         skjeand = test_result.filter(pl.col("validScientificNameId") == 204586)
-        assert skjeand.get_column("Order").eq("Anseriformes").all(), "Skjeand should be in Anseriformes order"
-        assert skjeand.get_column("Family").eq("Anatidae").all(), "Skjeand should be in Anatidae family"
-        assert skjeand.get_column("Genus").eq("Spatula").all(), "Skjeand should be in Spatula genus"
-        assert skjeand.get_column("FamilieNavn").eq("andefamilien").all(), "Skjeand should have FamilieNavn 'andefamilien'"
-        assert skjeand.get_column("OrdenNavn").eq("andefugler").all(), "Skjeand should have OrdenNavn 'andefugler'"
+        assert skjeand.get_column("Order").eq("Anseriformes").all(), (
+            "Skjeand should be in Anseriformes order"
+        )
+        assert skjeand.get_column("Family").eq("Anatidae").all(), (
+            "Skjeand should be in Anatidae family"
+        )
+        assert skjeand.get_column("Genus").eq("Spatula").all(), (
+            "Skjeand should be in Spatula genus"
+        )
+        assert skjeand.get_column("FamilieNavn").eq("andefamilien").all(), (
+            "Skjeand should have FamilieNavn 'andefamilien'"
+        )
+        assert skjeand.get_column("OrdenNavn").eq("andefugler").all(), (
+            "Skjeand should have OrdenNavn 'andefugler'"
+        )
 
         # Test gråmåke (3677)
         graamake = test_result.filter(pl.col("validScientificNameId") == 3677)
-        assert graamake.get_column("Order").eq("Charadriiformes").all(), "Gråmåke should be in Charadriiformes order"
-        assert graamake.get_column("Family").eq("Laridae").all(), "Gråmåke should be in Laridae family"
-        assert graamake.get_column("Genus").eq("Larus").all(), "Gråmåke should be in Larus genus"
-        assert graamake.get_column("FamilieNavn").eq("måkefamilien").all(), "Gråmåke should have FamilieNavn 'måkefamilien'"
-        assert graamake.get_column("OrdenNavn").eq("vade-, måke- og alkefugler").all(), (
-            "Gråmåke should have OrdenNavn 'vade-, måke- og alkefugler'"
+        assert graamake.get_column("Order").eq("Charadriiformes").all(), (
+            "Gråmåke should be in Charadriiformes order"
         )
+        assert graamake.get_column("Family").eq("Laridae").all(), (
+            "Gråmåke should be in Laridae family"
+        )
+        assert graamake.get_column("Genus").eq("Larus").all(), (
+            "Gråmåke should be in Larus genus"
+        )
+        assert graamake.get_column("FamilieNavn").eq("måkefamilien").all(), (
+            "Gråmåke should have FamilieNavn 'måkefamilien'"
+        )
+        assert (
+            graamake.get_column("OrdenNavn").eq("vade-, måke- og alkefugler").all()
+        ), "Gråmåke should have OrdenNavn 'vade-, måke- og alkefugler'"
 
         # Test hønsehauk (295741)
         honsehauk = test_result.filter(pl.col("validScientificNameId") == 295741)
-        assert honsehauk.get_column("Order").eq("Accipitriformes").all(), "Hønsehauk should be in Accipitriformes order"
-        assert honsehauk.get_column("Family").eq("Accipitridae").all(), "Hønsehauk should be in Accipitridae family"
-        assert honsehauk.get_column("Genus").eq("Astur ").all(), "Hønsehauk should be in Astur genus"
+        assert honsehauk.get_column("Order").eq("Accipitriformes").all(), (
+            "Hønsehauk should be in Accipitriformes order"
+        )
+        assert honsehauk.get_column("Family").eq("Accipitridae").all(), (
+            "Hønsehauk should be in Accipitridae family"
+        )
+        assert honsehauk.get_column("Genus").eq("Astur ").all(), (
+            "Hønsehauk should be in Astur genus"
+        )
         assert honsehauk.get_column("FamilieNavn").eq("haukefamilien").all(), (
             "Hønsehauk should have FamilieNavn 'haukefamilien'"
         )
-        assert honsehauk.get_column("OrdenNavn").eq("haukefugler").all(), "Hønsehauk should have OrdenNavn 'rovfugler'"
+        assert honsehauk.get_column("OrdenNavn").eq("haukefugler").all(), (
+            "Hønsehauk should have OrdenNavn 'rovfugler'"
+        )
 
     return
 
@@ -641,7 +713,9 @@ def _add_national_interest_criteria(bird_data):
         """
 
         # Load Excel with criteria
-        df_arter_nf = bird_data.execute("SELECT * FROM arter_av_nasjonal_forvaltningsinteresse").pl()
+        df_arter_nf = bird_data.execute(
+            "SELECT * FROM arter_av_nasjonal_forvaltningsinteresse"
+        ).pl()
 
         # Get criteria columns
         criteria_cols = [
@@ -700,7 +774,12 @@ def _add_national_interest_criteria(bird_data):
                 suffix="_fallback",
             )
             # Tar en second join på artsnavn, legger til alle criteria_data en gang til med eget suffix = fallback
-            .with_columns(*[pl.coalesce(c, f"{c}_fallback").fill_null("Treff ikke funnet") for c in criteria_cols_clean])
+            .with_columns(
+                *[
+                    pl.coalesce(c, f"{c}_fallback").fill_null("Treff ikke funnet")
+                    for c in criteria_cols_clean
+                ]
+            )
             # bruker coalece som sier velg først join 1 (c), hvis det finnes null verdier bruk verdiene i join 2 (c_fallback)
             .drop(([f"{c}_fallback" for c in criteria_cols_clean]))
             .drop(pl.col("vitenskapelig_navn_mdir"), pl.col("arts_id_mdir"))
@@ -760,82 +839,142 @@ def _(add_national_interest_criteria):
         # Test havelle (3506) – nært trua art og andre spesielt hensynskrevende
         havelle = test_result.filter(pl.col("validScientificNameId") == 3506)
         assert havelle.height > 0, "Havelle ikke funnet i resultatet"
-        assert havelle.get_column("Ansvarsarter").eq("No").all(), "Havelle er ikke en ansvarsart"
-        assert havelle.get_column("Trua arter").eq("No").all(), "Havelle er ikke en trua art"
-        assert havelle.get_column("Andre spesielt hensynskrevende arter").eq("Yes").all(), (
-            "Havelle er en andre spesielt hensynskrevende art"
+        assert havelle.get_column("Ansvarsarter").eq("No").all(), (
+            "Havelle er ikke en ansvarsart"
         )
+        assert havelle.get_column("Trua arter").eq("No").all(), (
+            "Havelle er ikke en trua art"
+        )
+        assert (
+            havelle.get_column("Andre spesielt hensynskrevende arter").eq("Yes").all()
+        ), "Havelle er en andre spesielt hensynskrevende art"
         assert havelle.get_column("Spesielle okologiske former").eq("No").all(), (
             "Havelle er ikke en spesiell økologisk form"
         )
-        assert havelle.get_column("Prioriterte arter").eq("No").all(), "Havelle er ikke en prioritert art"
-        assert havelle.get_column("Fredete arter").eq("No").all(), "Havelle er ikke en fredet art"
+        assert havelle.get_column("Prioriterte arter").eq("No").all(), (
+            "Havelle er ikke en prioritert art"
+        )
+        assert havelle.get_column("Fredete arter").eq("No").all(), (
+            "Havelle er ikke en fredet art"
+        )
         assert havelle.get_column("NT").eq("Yes").all(), "Havelle er en nært trua art"
-        assert havelle.get_column("Fremmede arter").eq("No").all(), "Havelle er ikke en fremmed art"
+        assert havelle.get_column("Fremmede arter").eq("No").all(), (
+            "Havelle er ikke en fremmed art"
+        )
 
         # Test svarthalespove (3768) – trua art og prioritert art
         svarthalespove = test_result.filter(pl.col("validScientificNameId") == 3768)
         assert svarthalespove.height > 0, "Svarthalespove ikke funnet i resultatet"
-        assert svarthalespove.get_column("Ansvarsarter").eq("No").all(), "Svarthalespove er ikke en ansvarsart"
-        assert svarthalespove.get_column("Trua arter").eq("Yes").all(), "Svarthalespove er en trua art"
-        assert svarthalespove.get_column("Andre spesielt hensynskrevende arter").eq("No").all(), (
-            "Svarthalespove er ikke en andre spesielt hensynskrevende art"
+        assert svarthalespove.get_column("Ansvarsarter").eq("No").all(), (
+            "Svarthalespove er ikke en ansvarsart"
         )
-        assert svarthalespove.get_column("Spesielle okologiske former").eq("No").all(), (
-            "Svarthalespove er ikke en spesiell økologisk form"
+        assert svarthalespove.get_column("Trua arter").eq("Yes").all(), (
+            "Svarthalespove er en trua art"
         )
-        assert svarthalespove.get_column("Prioriterte arter").eq("Yes").all(), "Svarthalespove er en prioritert art"
-        assert svarthalespove.get_column("Fredete arter").eq("No").all(), "Svarthalespove er ikke en fredet art"
-        assert svarthalespove.get_column("NT").eq("No").all(), "Svarthalespove er ikke en nært trua art"
-        assert svarthalespove.get_column("Fremmede arter").eq("No").all(), "Svarthalespove er ikke en fremmed art"
+        assert (
+            svarthalespove.get_column("Andre spesielt hensynskrevende arter")
+            .eq("No")
+            .all()
+        ), "Svarthalespove er ikke en andre spesielt hensynskrevende art"
+        assert (
+            svarthalespove.get_column("Spesielle okologiske former").eq("No").all()
+        ), "Svarthalespove er ikke en spesiell økologisk form"
+        assert svarthalespove.get_column("Prioriterte arter").eq("Yes").all(), (
+            "Svarthalespove er en prioritert art"
+        )
+        assert svarthalespove.get_column("Fredete arter").eq("No").all(), (
+            "Svarthalespove er ikke en fredet art"
+        )
+        assert svarthalespove.get_column("NT").eq("No").all(), (
+            "Svarthalespove er ikke en nært trua art"
+        )
+        assert svarthalespove.get_column("Fremmede arter").eq("No").all(), (
+            "Svarthalespove er ikke en fremmed art"
+        )
 
         # Test hønsehauk (295741) – trua art (matchet via vitenskapelig navn-fallback)
         hønsehauk = test_result.filter(pl.col("validScientificNameId") == 295741)
         assert hønsehauk.height > 0, "Hønsehauk ikke funnet i resultatet"
-        assert hønsehauk.get_column("Ansvarsarter").eq("No").all(), "Hønsehauk er ikke en ansvarsart"
-        assert hønsehauk.get_column("Trua arter").eq("Yes").all(), "Hønsehauk er en trua art"
-        assert hønsehauk.get_column("Andre spesielt hensynskrevende arter").eq("No").all(), (
-            "Hønsehauk er ikke en andre spesielt hensynskrevende art"
+        assert hønsehauk.get_column("Ansvarsarter").eq("No").all(), (
+            "Hønsehauk er ikke en ansvarsart"
         )
+        assert hønsehauk.get_column("Trua arter").eq("Yes").all(), (
+            "Hønsehauk er en trua art"
+        )
+        assert (
+            hønsehauk.get_column("Andre spesielt hensynskrevende arter").eq("No").all()
+        ), "Hønsehauk er ikke en andre spesielt hensynskrevende art"
         assert hønsehauk.get_column("Spesielle okologiske former").eq("No").all(), (
             "Hønsehauk er ikke en spesiell økologisk form"
         )
-        assert hønsehauk.get_column("Prioriterte arter").eq("No").all(), "Hønsehauk er ikke en prioritert art"
-        assert hønsehauk.get_column("Fredete arter").eq("No").all(), "Hønsehauk er ikke en fredet art"
-        assert hønsehauk.get_column("NT").eq("No").all(), "Hønsehauk er ikke en nært trua art"
-        assert hønsehauk.get_column("Fremmede arter").eq("No").all(), "Hønsehauk er ikke en fremmed art"
+        assert hønsehauk.get_column("Prioriterte arter").eq("No").all(), (
+            "Hønsehauk er ikke en prioritert art"
+        )
+        assert hønsehauk.get_column("Fredete arter").eq("No").all(), (
+            "Hønsehauk er ikke en fredet art"
+        )
+        assert hønsehauk.get_column("NT").eq("No").all(), (
+            "Hønsehauk er ikke en nært trua art"
+        )
+        assert hønsehauk.get_column("Fremmede arter").eq("No").all(), (
+            "Hønsehauk er ikke en fremmed art"
+        )
 
         # Test dverggås (3478) – ansvarsart, trua art og prioritert art
         dverggås = test_result.filter(pl.col("validScientificNameId") == 3478)
         assert dverggås.height > 0, "Dverggås ikke funnet i resultatet"
-        assert dverggås.get_column("Ansvarsarter").eq("Yes").all(), "Dverggås er en ansvarsart"
-        assert dverggås.get_column("Trua arter").eq("Yes").all(), "Dverggås er en trua art"
-        assert dverggås.get_column("Andre spesielt hensynskrevende arter").eq("No").all(), (
-            "Dverggås er ikke en andre spesielt hensynskrevende art"
+        assert dverggås.get_column("Ansvarsarter").eq("Yes").all(), (
+            "Dverggås er en ansvarsart"
         )
+        assert dverggås.get_column("Trua arter").eq("Yes").all(), (
+            "Dverggås er en trua art"
+        )
+        assert (
+            dverggås.get_column("Andre spesielt hensynskrevende arter").eq("No").all()
+        ), "Dverggås er ikke en andre spesielt hensynskrevende art"
         assert dverggås.get_column("Spesielle okologiske former").eq("No").all(), (
             "Dverggås er ikke en spesiell økologisk form"
         )
-        assert dverggås.get_column("Prioriterte arter").eq("Yes").all(), "Dverggås er en prioritert art"
-        assert dverggås.get_column("Fredete arter").eq("No").all(), "Dverggås er ikke en fredet art"
-        assert dverggås.get_column("NT").eq("No").all(), "Dverggås er ikke en nært trua art"
-        assert dverggås.get_column("Fremmede arter").eq("No").all(), "Dverggås er ikke en fremmed art"
+        assert dverggås.get_column("Prioriterte arter").eq("Yes").all(), (
+            "Dverggås er en prioritert art"
+        )
+        assert dverggås.get_column("Fredete arter").eq("No").all(), (
+            "Dverggås er ikke en fredet art"
+        )
+        assert dverggås.get_column("NT").eq("No").all(), (
+            "Dverggås er ikke en nært trua art"
+        )
+        assert dverggås.get_column("Fremmede arter").eq("No").all(), (
+            "Dverggås er ikke en fremmed art"
+        )
 
         # Test kanadagås (3495) – fremmed art
         kanadagås = test_result.filter(pl.col("validScientificNameId") == 3495)
         assert kanadagås.height > 0, "Kanadagås ikke funnet i resultatet"
-        assert kanadagås.get_column("Ansvarsarter").eq("No").all(), "Kanadagås er ikke en ansvarsart"
-        assert kanadagås.get_column("Trua arter").eq("No").all(), "Kanadagås er ikke en trua art"
-        assert kanadagås.get_column("Andre spesielt hensynskrevende arter").eq("No").all(), (
-            "Kanadagås er ikke en andre spesielt hensynskrevende art"
+        assert kanadagås.get_column("Ansvarsarter").eq("No").all(), (
+            "Kanadagås er ikke en ansvarsart"
         )
+        assert kanadagås.get_column("Trua arter").eq("No").all(), (
+            "Kanadagås er ikke en trua art"
+        )
+        assert (
+            kanadagås.get_column("Andre spesielt hensynskrevende arter").eq("No").all()
+        ), "Kanadagås er ikke en andre spesielt hensynskrevende art"
         assert kanadagås.get_column("Spesielle okologiske former").eq("No").all(), (
             "Kanadagås er ikke en spesiell økologisk form"
         )
-        assert kanadagås.get_column("Prioriterte arter").eq("No").all(), "Kanadagås er ikke en prioritert art"
-        assert kanadagås.get_column("Fredete arter").eq("No").all(), "Kanadagås er ikke en fredet art"
-        assert kanadagås.get_column("NT").eq("No").all(), "Kanadagås er ikke en nært trua art"
-        assert kanadagås.get_column("Fremmede arter").eq("Yes").all(), "Kanadagås er en fremmed art"
+        assert kanadagås.get_column("Prioriterte arter").eq("No").all(), (
+            "Kanadagås er ikke en prioritert art"
+        )
+        assert kanadagås.get_column("Fredete arter").eq("No").all(), (
+            "Kanadagås er ikke en fredet art"
+        )
+        assert kanadagås.get_column("NT").eq("No").all(), (
+            "Kanadagås er ikke en nært trua art"
+        )
+        assert kanadagås.get_column("Fremmede arter").eq("Yes").all(), (
+            "Kanadagås er en fremmed art"
+        )
 
         # Test ID som ikke finnes (999999) -> "Treff ikke funnet"
         missing = test_result.filter(pl.col("validScientificNameId") == 999999)
@@ -894,7 +1033,9 @@ def legg_til_kolonne_arteravnasjonal(input_df: pl.DataFrame) -> pl.DataFrame:
     category_list = (
         pl.concat_list(  # slår sammen alle anf til en kolonne, men merk List Concatenation  = packing items into a list within a single row ( noe annet enn a stacke tabbeller)
             *[
-                pl.when(pl.col(col) == "Yes").then(pl.lit(col))  # erstatter YES/NO med kolonne navnet
+                pl.when(pl.col(col) == "Yes").then(
+                    pl.lit(col)
+                )  # erstatter YES/NO med kolonne navnet
                 for col in category_columns
             ]
         ).list.drop_nulls()  # fjerner null verdier slik at du ikke får NT, null, null, Fremmed art
@@ -1072,6 +1213,79 @@ def finn_mangler_navn(df: pl.DataFrame) -> pl.DataFrame:
     return mangler_df
 
 
+@app.function
+def test_finn_mangler_navn():
+    sample_df = pl.DataFrame(
+        {
+            "Art": [
+                "Bubo bubo",
+                "Passer domesticus",
+                "Vulpes lagopus",
+                "Neogale vison",
+                "Anser erythropus",
+                "Lynx lynx",
+                "Canis lupus",
+            ],
+            "Navn": [
+                "Hubro",
+                "Gråspurv",
+                None,  # Fjellrev mangler norsk navn
+                "Villmink",
+                None,  # Dverggås mangler norsk navn
+                "Gaupe",
+                None,  # Ulv mangler norsk navn
+            ],
+            "Familie": [
+                "Strigidae",
+                "Passeridae",
+                "Canidae",
+                "Mustelidae",
+                "Anatidae",
+                "Felidae",
+                "Canidae",
+            ],
+            "Orden": [
+                "Strigiformes",
+                "Passeriformes",
+                "Carnivora",
+                "Carnivora",
+                "Anseriformes",
+                "Carnivora",
+                "Carnivora",
+            ],
+            "category": ["EN", "LC", "VU", "haraball", "NT", "LC", "CR"],
+        }
+    )
+
+    result = finn_mangler_navn(sample_df)
+
+    # Should find exactly the 3 rows with Navn == null
+    assert result.height == 3, f"Forventet 3 arter uten navn, fikk {result.height}"
+
+    # Should only contain the correct columns
+    assert result.columns == ["Art", "Navn", "Familie", "Orden"]
+
+    # All returned rows should have null Navn
+    assert result.get_column("Navn").is_null().all(), "Alle returnerte rader skal ha null Navn"
+
+    # The specific species missing names
+    arter_uten_navn = set(
+        result.get_column("Art").to_list()
+    )  # bruker set istenden for list, for da betyr ikke rekkefølgen av variablene noe. Sets ignore order, so {"A", "B"} == {"B", "A"} is True. If you used lists instead, ["A", "B"] == ["B", "A"] would be False. This makes the assertion robust — you don't care which order the rows came in, just which species are present.
+    assert arter_uten_navn == {"Vulpes lagopus", "Anser erythropus", "Canis lupus"}, (
+        f"Feil arter returnert: {arter_uten_navn}"
+    )
+
+    # Should be sorted by Art
+    art_list = result.get_column("Art").to_list()
+    assert art_list == sorted(art_list), "Resultatet skal være sortert etter Art"
+
+    # Test with no missing names — should return empty DataFrame
+    complete_df = sample_df.with_columns(pl.col("Navn").fill_null("Ukjent"))
+    empty_result = finn_mangler_navn(complete_df)
+    assert empty_result.height == 0, "Skal returnere tom DataFrame når alle har navn"
+
+
 @app.cell
 def _(console):
     def prompt_mangler_navn(mangler_df: pl.DataFrame) -> dict[str, str]:
@@ -1114,11 +1328,54 @@ def _(console):
     return (prompt_mangler_navn,)
 
 
+@app.cell
+def _(prompt_mangler_navn):
+    def test_prompt_mangler_navn():
+        """Test prompt_mangler_navn with mocked user input."""
+
+        mangler_df = pl.DataFrame(
+            {
+                "Art": ["Vulpes lagopus", "Canis lupus"],
+                "Navn": [None, None],
+                "Familie": ["Canidae", "Canidae"],
+                "Orden": ["Carnivora", "Carnivora"],
+            }
+        )
+
+        # Empty DataFrame → returns empty dict, no prompts
+        empty_df = pl.DataFrame(
+            {"Art": [], "Navn": [], "Familie": [], "Orden": []},
+            schema={"Art": pl.Utf8, "Navn": pl.Utf8, "Familie": pl.Utf8, "Orden": pl.Utf8},
+        )
+        assert prompt_mangler_navn(empty_df) == {}, "Tom DataFrame skal gi tom dict"
+
+        # Happy path: user provides valid names
+        with patch.object(
+            Prompt, "ask", side_effect=["Fjellrev", "Ulv"]
+        ):  # patch.object er fra unittests og lar deg mocke den menneskelige inputen som rich ber om i terminalen.
+            result = prompt_mangler_navn(mangler_df)
+
+        assert result == {
+            "Vulpes lagopus": "Fjellrev",
+            "Canis lupus": "Ulv",
+        }, f"Forventet riktig mapping, fikk {result}"
+
+        # Blank input → should raise typer.Exit
+        with patch.object(Prompt, "ask", side_effect=["Fjellrev", "   "]):
+            with pytest.raises(typer.Exit):
+                prompt_mangler_navn(mangler_df)
+
+    return
+
+
 @app.function
 def join_navn_til_orginal_df(
     df: pl.DataFrame, navn_mapping: dict[str, str]
 ) -> pl.DataFrame:  # navn mapping er en dict med key:value som begge er str. hvor f.eks. det latinske navnet er "key" og det norske er "navn"
     """Oppdater Navn-kolonnen med manuelt oppgitte navn."""
+
+    if not navn_mapping:
+        return df
 
     mapping_df = pl.DataFrame(
         {"Art": list(navn_mapping.keys()), "Navn_ny": list(navn_mapping.values())}
@@ -1139,6 +1396,71 @@ def join_navn_til_orginal_df(
     return df_med_navn
 
 
+@app.function
+def test_join_navn_til_orginal_df():
+    """Test that join_navn_til_orginal_df fills in missing names correctly."""
+
+    df = pl.DataFrame(
+        {
+            "Art": [
+                "Bubo bubo",
+                "Passer domesticus",
+                "Vulpes lagopus",
+                "Canis lupus",
+                "Anser erythropus",
+            ],
+            "Navn": [
+                "Hubro",  # already has a name
+                "Gråspurv",  # already has a name
+                None,  # missing — should be filled
+                None,  # missing — should be filled
+                None,  # missing — but NOT in mapping
+            ],
+            "Familie": ["Strigidae", "Passeridae", "Canidae", "Canidae", "Anatidae"],
+        }
+    )
+
+    mapping = {
+        "Vulpes lagopus": "Fjellrev",
+        "Canis lupus": "Ulv",
+    }
+
+    # Null names are filled from the mapping ─────────────────────
+    result = join_navn_til_orginal_df(df, mapping)
+
+    fjellrev = result.filter(pl.col("Art") == "Vulpes lagopus")
+    assert fjellrev.get_column("Navn").to_list() == ["Fjellrev"], "Vulpes lagopus skal få navnet Fjellrev"
+    # Må bruke to list, get_column returnerer kun er polars series som ikke er det samme som en list
+
+    ulv = result.filter(pl.col("Art") == "Canis lupus")
+    assert ulv.get_column("Navn").to_list() == ["Ulv"], "Canis lupus skal få navnet Ulv"
+
+    # Existing names are NOT overwritten ─────────────────────────
+    hubro = result.filter(pl.col("Art") == "Bubo bubo")
+    assert hubro.get_column("Navn").to_list() == ["Hubro"], "Bubo bubo har allerede navn — skal ikke overskrives"
+
+    graaspurv = result.filter(pl.col("Art") == "Passer domesticus")
+    assert graaspurv.get_column("Navn").to_list() == ["Gråspurv"], (
+        "Passer domesticus har allerede navn — skal ikke overskrives"
+    )
+
+    # Null names NOT in mapping stay null ────────────────────────
+    dverggaas = result.filter(pl.col("Art") == "Anser erythropus")
+    assert dverggaas.get_column("Navn").to_list() == [None], "Anser erythropus er ikke i mapping — skal forbli null"
+
+    # Row count unchanged (left join, no extra rows) ────────────
+    assert result.height == df.height, f"Radantall skal være uendret: forventet {_df.height}, fikk {result.height}"
+
+    # Temporary column Navn_ny is dropped ────────────────────────
+    assert "Navn_ny" not in result.columns, "Hjelpkolonnen Navn_ny skal være fjernet"
+
+    # Empty mapping → nothing changes ────────────────────────────
+    result_empty = join_navn_til_orginal_df(df, {})
+    assert result_empty.get_column("Navn").to_list() == df.get_column("Navn").to_list(), (
+        "Tom mapping skal ikke endre noe"
+    )
+
+
 @app.cell(column=1, hide_code=True)
 def _():
     mo.md(r"""
@@ -1149,15 +1471,14 @@ def _():
 
 @app.cell
 def _(console, les_data_og_kjør_alle_funksjoner, prompt_mangler_navn):
-    app = typer.Typer()
-    # har en egen les og skriv fil for typer som viser til den faktiske funksjonen hvor alt skjer
+    cli_app = typer.Typer()
 
 
-    @app.command()
+    @cli_app.command()
     def les_data_cli(
         input_fil_sti: str = typer.Argument(..., help="Sti til CSV-fil med fugledata"),
         filter_year: int = typer.Option(1990, help="Filtrer observasjoner fra og med dette året"),
-        output: str = typer.Option("output.csv", help="Sti til utfil (CSV)"),
+        output: str = typer.Option("output.parquet", help="Sti til utfil (Parquet)"),
     ):
         """Les fugledata fra CSV, berik med artsdatabanken, og skriv resultatet til fil."""
         console.print(Rule("[bold]Fugl Artsdataanalyser[/bold]"))
@@ -1191,6 +1512,10 @@ def _(console, les_data_og_kjør_alle_funksjoner, prompt_mangler_navn):
         )
         console.print(Panel(summary, title="Oppsummering", border_style="green"))
 
+
+    # Kjør Typer CLI kun i script-modus (uv run Databehandling.py -- ...)
+    if mo.app_meta().mode == "script":
+        cli_app()
     return
 
 
