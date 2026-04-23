@@ -1,40 +1,26 @@
 {
   "version": "1",
   "metadata": {
-    "marimo_version": "0.23.0",
+    "marimo_version": "0.23.2",
     "script_metadata_hash": null
   },
   "cells": [
     {
       "id": "setup",
       "code_hash": "74aeb1d18306fdb71e93eb52eed87d87",
-      "outputs": [
-        {
-          "type": "data",
-          "data": {
-            "text/plain": ""
-          }
-        }
-      ],
+      "outputs": [],
       "console": []
     },
     {
       "id": "Hbol",
-      "code_hash": "218e0cccdc228d767e07dc2e9724ce54",
+      "code_hash": "e5e801593f5fd55670d679f7b6a5f868",
       "outputs": [],
       "console": []
     },
     {
       "id": "MJUe",
       "code_hash": "3bc9d46fd8b2baa2e56803e32e3f98fe",
-      "outputs": [
-        {
-          "type": "data",
-          "data": {
-            "text/plain": ""
-          }
-        }
-      ],
+      "outputs": [],
       "console": []
     },
     {
@@ -91,61 +77,26 @@
     {
       "id": "SFPL",
       "code_hash": "03c76cc8fe9ae19397186f52469073fd",
-      "outputs": [
-        {
-          "type": "data",
-          "data": {
-            "text/plain": ""
-          }
-        }
-      ],
+      "outputs": [],
       "console": []
     },
     {
       "id": "BYtC",
-      "code_hash": "b7aadb84063e274e9be28ae527a3039c",
-      "outputs": [
-        {
-          "type": "data",
-          "data": {
-            "text/plain": ""
-          }
-        }
-      ],
+      "code_hash": "55fbdcf858418760b13a6949634adf84",
+      "outputs": [],
       "console": []
     },
     {
       "id": "RGSE",
-      "code_hash": "29d79e5234ea6db4f005b2cb8207cb29",
-      "outputs": [
-        {
-          "type": "data",
-          "data": {
-            "text/plain": ""
-          }
-        }
-      ],
+      "code_hash": "0cc85dc52b415fb751095f99b3752e5f",
+      "outputs": [],
       "console": []
     },
     {
       "id": "Kclp",
-      "code_hash": "d0ff6ae8b594813a1a8013a0cde82161",
-      "outputs": [
-        {
-          "type": "data",
-          "data": {
-            "text/plain": ""
-          }
-        }
-      ],
-      "console": [
-        {
-          "type": "stream",
-          "name": "stdout",
-          "text": "\u001b[32m.\u001b[0m\u001b[33m                                                                        [100%]\u001b[0m\n=================================== Overview ===================================\nPassed Tests:\n\u001b[1m\u001b[32m\u001b[22m\u2713\u001b[0m\u001b[0m Databehandling.py::test_process_and_enrich_data\n\nSummary:\nTotal: 1, Passed: 1, Failed: 0, Errors: 0, Skipped: 0\n",
-          "mimetype": "text/plain"
-        }
-      ]
+      "code_hash": "a5b824a645a7736a7afd50aef2b001bf",
+      "outputs": [],
+      "console": []
     },
     {
       "id": "emfo",
@@ -212,13 +163,13 @@
     },
     {
       "id": "TqIu",
-      "code_hash": "cf623a2c4dca80680fa2f1f407f1a05d",
+      "code_hash": "81c093a41a12500fb750f403fa25dbcc",
       "outputs": [],
       "console": []
     },
     {
       "id": "Vxnm",
-      "code_hash": "710e6bdbf171f57aff48ec7049f84c37",
+      "code_hash": "2fbe9c47c444c2fb7f4c71c2b37ed00f",
       "outputs": [],
       "console": []
     },
@@ -237,60 +188,39 @@
     },
     {
       "id": "ulZA",
-      "code_hash": "1081708cf24d7038e9573fd49f35b0f9",
+      "code_hash": "8ded888229e60b75d0bef7a54d40c184",
       "outputs": [],
       "console": []
     },
     {
       "id": "ecfG",
-      "code_hash": "80d3a806469d99158bff33c36c662676",
+      "code_hash": "d2f46c96d796a4bc160a969c57906163",
       "outputs": [],
       "console": []
     },
     {
       "id": "Pvdt",
-      "code_hash": "38f01bb5678cdfdff0f5eeb9e0ac80b6",
+      "code_hash": "f16daa3cdba6f529c836bf656eb0e17e",
       "outputs": [],
       "console": []
     },
     {
       "id": "ZBYS",
-      "code_hash": "fd2b17bf46f76dbad24684317d557116",
+      "code_hash": "b1a77a4cceee2fe674466ac858423a12",
       "outputs": [],
       "console": []
     },
     {
       "id": "aLJB",
       "code_hash": "61bae9686644176c99b96d9c7257ef2a",
-      "outputs": [
-        {
-          "type": "data",
-          "data": {
-            "text/plain": ""
-          }
-        }
-      ],
+      "outputs": [],
       "console": []
     },
     {
       "id": "nHfw",
-      "code_hash": "df23b74179e2f7a917f0872e99d55061",
-      "outputs": [
-        {
-          "type": "data",
-          "data": {
-            "text/plain": ""
-          }
-        }
-      ],
-      "console": [
-        {
-          "type": "stream",
-          "name": "stdout",
-          "text": "\u001b[32m.\u001b[0m\u001b[33m                                                                        [100%]\u001b[0m\n=================================== Overview ===================================\nPassed Tests:\n\u001b[1m\u001b[32m\u001b[22m\u2713\u001b[0m\u001b[0m .::test_join_navn_til_orginal_df\n\nSummary:\nTotal: 1, Passed: 1, Failed: 0, Errors: 0, Skipped: 0\n",
-          "mimetype": "text/plain"
-        }
-      ]
+      "code_hash": "4f014faffa5a08a2159cdb06ae3c43f8",
+      "outputs": [],
+      "console": []
     },
     {
       "id": "xXTn",
@@ -313,7 +243,7 @@
     },
     {
       "id": "pHFh",
-      "code_hash": "d3f37bdc843fc346ccfa421611a68668",
+      "code_hash": "14739e71298bf1ee8fde45d0443defa8",
       "outputs": [],
       "console": []
     }

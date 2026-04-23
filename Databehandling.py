@@ -1,6 +1,6 @@
 import marimo
 
-__generated_with = "0.23.0"
+__generated_with = "0.23.2"
 app = marimo.App(width="columns")
 
 with app.setup:
@@ -164,7 +164,7 @@ def test_rydd_navn_og_datatyper():
     # ── Antall rader skal være uendret ──────────────────────────────
     assert test_result.height == 3, f"Forventet 3 rader, fikk {test_result.height}"
 
-    # ── Alle forventede kolonner skal finnes ────────────────────────
+    # ── Alle forventede kolonner skal finnes 
     expected_cols = [
         "Kategori",
         "Art av nasjonal forvaltningsinteresse",
