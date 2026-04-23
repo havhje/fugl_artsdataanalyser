@@ -21,6 +21,12 @@
     {
       "id": "Hbol",
       "code_hash": "218e0cccdc228d767e07dc2e9724ce54",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "MJUe",
+      "code_hash": "3bc9d46fd8b2baa2e56803e32e3f98fe",
       "outputs": [
         {
           "type": "data",
@@ -32,7 +38,7 @@
       "console": []
     },
     {
-      "id": "MJUe",
+      "id": "vblA",
       "code_hash": "ae65b27ccd3060a1cdee7080008f8e01",
       "outputs": [
         {
@@ -45,7 +51,7 @@
       "console": []
     },
     {
-      "id": "vblA",
+      "id": "bkHC",
       "code_hash": "aae9b7496d94e1388a1a7e9745859762",
       "outputs": [
         {
@@ -58,40 +64,19 @@
       "console": []
     },
     {
-      "id": "bkHC",
-      "code_hash": "1ffa18851366cc02f8c8ac11e21911b8",
-      "outputs": [
-        {
-          "type": "data",
-          "data": {
-            "text/plain": ""
-          }
-        }
-      ],
+      "id": "lEQa",
+      "code_hash": "9447dc8583b781b89127d3d03c8ef03f",
+      "outputs": [],
       "console": []
     },
     {
-      "id": "lEQa",
-      "code_hash": "321fd2f78561f807c1567705af58c951",
-      "outputs": [
-        {
-          "type": "data",
-          "data": {
-            "text/plain": ""
-          }
-        }
-      ],
-      "console": [
-        {
-          "type": "stream",
-          "name": "stdout",
-          "text": "\u001b[32m.\u001b[0m\u001b[33m                                                                        [100%]\u001b[0m\n=================================== Overview ===================================\nPassed Tests:\n\u001b[1m\u001b[32m\u001b[22m\u2713\u001b[0m\u001b[0m .::test_rydd_navn_og_datatyper\n\nSummary:\nTotal: 1, Passed: 1, Failed: 0, Errors: 0, Skipped: 0\n",
-          "mimetype": "text/plain"
-        }
-      ]
+      "id": "PKri",
+      "code_hash": "d6dda5ac5f8eb5beed8d0dcf577025f7",
+      "outputs": [],
+      "console": []
     },
     {
-      "id": "PKri",
+      "id": "Xref",
       "code_hash": "8a2aaea25d28ed7cc1132dab98577296",
       "outputs": [
         {
@@ -104,7 +89,7 @@
       "console": []
     },
     {
-      "id": "Xref",
+      "id": "SFPL",
       "code_hash": "03c76cc8fe9ae19397186f52469073fd",
       "outputs": [
         {
@@ -117,21 +102,8 @@
       "console": []
     },
     {
-      "id": "SFPL",
-      "code_hash": "f9f2e8922a59138b8ebbb2411432f482",
-      "outputs": [
-        {
-          "type": "data",
-          "data": {
-            "text/plain": ""
-          }
-        }
-      ],
-      "console": []
-    },
-    {
       "id": "BYtC",
-      "code_hash": "c7fe6c8432234f16df4f9b412c25e542",
+      "code_hash": "b7aadb84063e274e9be28ae527a3039c",
       "outputs": [
         {
           "type": "data",
@@ -144,7 +116,20 @@
     },
     {
       "id": "RGSE",
-      "code_hash": "2ba1236656f7c9157c8cdb8a600b4e2f",
+      "code_hash": "29d79e5234ea6db4f005b2cb8207cb29",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Kclp",
+      "code_hash": "d0ff6ae8b594813a1a8013a0cde82161",
       "outputs": [
         {
           "type": "data",
@@ -163,7 +148,7 @@
       ]
     },
     {
-      "id": "Kclp",
+      "id": "emfo",
       "code_hash": "d92f9ed2b36c80ef8728273902ce3f15",
       "outputs": [
         {
@@ -176,40 +161,19 @@
       "console": []
     },
     {
-      "id": "emfo",
-      "code_hash": "56c957a471dc21e12668fb3524776020",
-      "outputs": [
-        {
-          "type": "data",
-          "data": {
-            "text/plain": ""
-          }
-        }
-      ],
+      "id": "Hstk",
+      "code_hash": "e51c94c16781f60886c40f50e0abb357",
+      "outputs": [],
       "console": []
     },
     {
-      "id": "Hstk",
-      "code_hash": "03b7d6809ca724a53df5110fc99e1344",
-      "outputs": [
-        {
-          "type": "data",
-          "data": {
-            "text/plain": ""
-          }
-        }
-      ],
-      "console": [
-        {
-          "type": "stream",
-          "name": "stdout",
-          "text": "\u001b[32m.\u001b[0m\u001b[33m                                                                        [100%]\u001b[0m\n=================================== Overview ===================================\nPassed Tests:\n\u001b[1m\u001b[32m\u001b[22m\u2713\u001b[0m\u001b[0m Databehandling.py::test_add_national_interest_criteria\n\nSummary:\nTotal: 1, Passed: 1, Failed: 0, Errors: 0, Skipped: 0\n",
-          "mimetype": "text/plain"
-        }
-      ]
+      "id": "nWHF",
+      "code_hash": "ba9f399920ad15b678c4afeaedeac31f",
+      "outputs": [],
+      "console": []
     },
     {
-      "id": "nWHF",
+      "id": "iLit",
       "code_hash": "dda1e72ac50c6417612a74b4eff27eba",
       "outputs": [
         {
@@ -222,40 +186,19 @@
       "console": []
     },
     {
-      "id": "iLit",
-      "code_hash": "dc98c1bcb2242ec3594484d8b31b9b99",
-      "outputs": [
-        {
-          "type": "data",
-          "data": {
-            "text/plain": ""
-          }
-        }
-      ],
+      "id": "ZHCJ",
+      "code_hash": "8ef6a431d023c6e296e255f1b58d2720",
+      "outputs": [],
       "console": []
     },
     {
-      "id": "ZHCJ",
+      "id": "ROlb",
       "code_hash": "b5009442b1b32a0c44e20f8722e83789",
-      "outputs": [
-        {
-          "type": "data",
-          "data": {
-            "text/plain": ""
-          }
-        }
-      ],
-      "console": [
-        {
-          "type": "stream",
-          "name": "stdout",
-          "text": "\u001b[32m.\u001b[0m\u001b[33m                                                                        [100%]\u001b[0m\n=================================== Overview ===================================\nPassed Tests:\n\u001b[1m\u001b[32m\u001b[22m\u2713\u001b[0m\u001b[0m .::test_legg_til_kolonne_arteravnasjonal\n\nSummary:\nTotal: 1, Passed: 1, Failed: 0, Errors: 0, Skipped: 0\n",
-          "mimetype": "text/plain"
-        }
-      ]
+      "outputs": [],
+      "console": []
     },
     {
-      "id": "ROlb",
+      "id": "qnkX",
       "code_hash": "014174002aa4cf3b1bda533c973342b4",
       "outputs": [
         {
@@ -268,80 +211,20 @@
       "console": []
     },
     {
-      "id": "qnkX",
+      "id": "TqIu",
       "code_hash": "cf623a2c4dca80680fa2f1f407f1a05d",
-      "outputs": [
-        {
-          "type": "data",
-          "data": {
-            "text/plain": ""
-          }
-        }
-      ],
+      "outputs": [],
       "console": []
     },
     {
-      "id": "TqIu",
-      "code_hash": "710e6bdbf171f57aff48ec7049f84c37",
-      "outputs": [
-        {
-          "type": "data",
-          "data": {
-            "text/plain": ""
-          }
-        }
-      ],
-      "console": [
-        {
-          "type": "stream",
-          "name": "stdout",
-          "text": "\u001b[32m.\u001b[0m\u001b[33m                                                                        [100%]\u001b[0m\n=================================== Overview ===================================\nPassed Tests:\n\u001b[1m\u001b[32m\u001b[22m\u2713\u001b[0m\u001b[0m .::test_legg_til_verdi_m1941\n\nSummary:\nTotal: 1, Passed: 1, Failed: 0, Errors: 0, Skipped: 0\n",
-          "mimetype": "text/plain"
-        }
-      ]
-    },
-    {
       "id": "Vxnm",
-      "code_hash": "10eab9fe24a69fc2527626f0dac574ac",
-      "outputs": [
-        {
-          "type": "data",
-          "data": {
-            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"setter-sammen-alt-og-definerer-rich\">Setter sammen alt og definerer rich</h3></span>"
-          }
-        }
-      ],
+      "code_hash": "710e6bdbf171f57aff48ec7049f84c37",
+      "outputs": [],
       "console": []
     },
     {
       "id": "DnEU",
-      "code_hash": "0224db70a5514788263dcf5d9cecd5ec",
-      "outputs": [
-        {
-          "type": "data",
-          "data": {
-            "text/plain": ""
-          }
-        }
-      ],
-      "console": []
-    },
-    {
-      "id": "ulZA",
-      "code_hash": "d3f37bdc843fc346ccfa421611a68668",
-      "outputs": [
-        {
-          "type": "data",
-          "data": {
-            "text/plain": ""
-          }
-        }
-      ],
-      "console": []
-    },
-    {
-      "id": "ecfG",
-      "code_hash": "be927f05d8e8adb4c41a62eabb9e3975",
+      "code_hash": "b83d98e9c7a5910b657eeafb190dc38a",
       "outputs": [
         {
           "type": "data",
@@ -353,20 +236,31 @@
       "console": []
     },
     {
-      "id": "Pvdt",
+      "id": "ulZA",
       "code_hash": "1081708cf24d7038e9573fd49f35b0f9",
-      "outputs": [
-        {
-          "type": "data",
-          "data": {
-            "text/plain": ""
-          }
-        }
-      ],
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "ecfG",
+      "code_hash": "80d3a806469d99158bff33c36c662676",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "Pvdt",
+      "code_hash": "38f01bb5678cdfdff0f5eeb9e0ac80b6",
+      "outputs": [],
       "console": []
     },
     {
       "id": "ZBYS",
+      "code_hash": "fd2b17bf46f76dbad24684317d557116",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "aLJB",
       "code_hash": "61bae9686644176c99b96d9c7257ef2a",
       "outputs": [
         {
@@ -379,28 +273,8 @@
       "console": []
     },
     {
-      "id": "aEft",
-      "code_hash": "4d70c02b64dbde349f794d5ed488e67c",
-      "outputs": [
-        {
-          "type": "error",
-          "ename": "exception",
-          "evalue": "name 'navn_mapping' is not defined",
-          "traceback": null
-        }
-      ],
-      "console": [
-        {
-          "type": "stream",
-          "name": "stderr",
-          "text": "<span class=\"codehilite\"><div class=\"highlight\"><pre><span></span><span class=\"gt\">Traceback (most recent call last):</span>\n  File <span class=\"nb\">&quot;/tmp/marimo_17612/__marimo__cell_aEft_.py&quot;</span>, line <span class=\"m\">1</span>, in <span class=\"n\">&lt;module&gt;</span>\n<span class=\"w\">    </span><span class=\"n\">mapping_df</span> <span class=\"o\">=</span> <span class=\"n\">pl</span><span class=\"o\">.</span><span class=\"n\">DataFrame</span><span class=\"p\">({</span><span class=\"s2\">&quot;Art&quot;</span><span class=\"p\">:</span> <span class=\"nb\">list</span><span class=\"p\">(</span><span class=\"n\">navn_mapping</span><span class=\"o\">.</span><span class=\"n\">keys</span><span class=\"p\">()),</span> <span class=\"s2\">&quot;Navn_ny&quot;</span><span class=\"p\">:</span> <span class=\"nb\">list</span><span class=\"p\">(</span><span class=\"n\">navn_mapping</span><span class=\"o\">.</span><span class=\"n\">values</span><span class=\"p\">())})</span>\n<span class=\"w\">                                           </span><span class=\"pm\">^^^^^^^^^^^^</span>\n<span class=\"gr\">NameError</span>: <span class=\"n\">name &#39;navn_mapping&#39; is not defined</span>\n</pre></div>\n</span>",
-          "mimetype": "application/vnd.marimo+traceback"
-        }
-      ]
-    },
-    {
-      "id": "aLJB",
-      "code_hash": "f16daa3cdba6f529c836bf656eb0e17e",
+      "id": "nHfw",
+      "code_hash": "df23b74179e2f7a917f0872e99d55061",
       "outputs": [
         {
           "type": "data",
@@ -409,6 +283,38 @@
           }
         }
       ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stdout",
+          "text": "\u001b[32m.\u001b[0m\u001b[33m                                                                        [100%]\u001b[0m\n=================================== Overview ===================================\nPassed Tests:\n\u001b[1m\u001b[32m\u001b[22m\u2713\u001b[0m\u001b[0m .::test_join_navn_til_orginal_df\n\nSummary:\nTotal: 1, Passed: 1, Failed: 0, Errors: 0, Skipped: 0\n",
+          "mimetype": "text/plain"
+        }
+      ]
+    },
+    {
+      "id": "xXTn",
+      "code_hash": "10eab9fe24a69fc2527626f0dac574ac",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"setter-sammen-alt-og-definerer-rich\">Setter sammen alt og definerer rich</h3></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "AjVT",
+      "code_hash": "8e6ef924fcfd59a6331194ad9892531f",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "pHFh",
+      "code_hash": "d3f37bdc843fc346ccfa421611a68668",
+      "outputs": [],
       "console": []
     }
   ]

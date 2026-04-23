@@ -37,7 +37,7 @@ with app.setup:
 @app.cell
 def _():
     DATABASE_URL = "fugl_atributt_data"
-    bird_data = duckdb.connect(DATABASE_URL, read_only=False)
+    bird_data = duckdb.connect(DATABASE_URL, read_only=True)
     return (bird_data,)
 
 
@@ -409,7 +409,8 @@ def _(DESIRED_RANKS, NORTAXA_API_BASE_URL):
             for level in api_data["higherClassification"]:
                 rank = level.get("taxonRank")
                 if rank in DESIRED_RANKS:
-                    hierarchy[rank] = level.get("scientificName")
+                    name = level.get("scientificName")
+                    hierarchy[rank] = name.strip() if name else None
                 if rank == "Family":
                     family_id = level.get("scientificNameId")
                 elif rank == "Order":
@@ -508,6 +509,17 @@ def _(
             )
 
             for i, species_id in enumerate(unique_ids):
+                # Validate ID before processing — avoids exception-driven control flow
+                if (
+                    species_id is None or species_id != species_id
+                ):  # catches None and NaN
+                    progress.update(
+                        task,
+                        advance=1,
+                        description=f"Hopper over ugyldig ID ({i + 1}/{total_ids})",
+                    )
+                    continue
+
                 try:
                     species_id = int(species_id)
                 except ValueError, TypeError:
@@ -556,38 +568,29 @@ def _(
                 f"[yellow]Advarsel:[/yellow] Kunne ikke hente data for {len(feilet_ids)} art-IDer: {feilet_ids[:10]}{'...' if len(feilet_ids) > 10 else ''}"
             )
 
-        # Add taxonomy columns with proper return_dtype
-        for rank in DESIRED_RANKS:
-            df_work = df_work.with_columns(
-                pl.col("validScientificNameId")
-                .map_elements(
-                    lambda x: (
-                        taxonomy_data.get(int(x), {}).get(rank)
-                        if x and x is not None
-                        else None
-                    ),
-                    return_dtype=pl.Utf8,  # Fixed: Added return_dtype
-                )
-                .alias(rank)
-            )
-
-        # Add Norwegian names with proper return_dtype
-        df_work = df_work.with_columns(
-            [
-                pl.col("validScientificNameId")
-                .map_elements(
-                    lambda x: family_names.get(int(x)) if x and x is not None else None,
-                    return_dtype=pl.Utf8,  # Fixed: Added return_dtype
-                )
-                .alias("FamilieNavn"),
-                pl.col("validScientificNameId")
-                .map_elements(
-                    lambda x: order_names.get(int(x)) if x and x is not None else None,
-                    return_dtype=pl.Utf8,  # Fixed: Added return_dtype
-                )
-                .alias("OrdenNavn"),
-            ]
+        taxonomy_rows = [
+            {"validScientificNameId": sid, **{r: h.get(r) for r in DESIRED_RANKS}}
+            for sid, h in taxonomy_data.items()
+        ]
+        taxonomy_lookup = pl.DataFrame(taxonomy_rows).with_columns(
+            pl.col("validScientificNameId").cast(df_work["validScientificNameId"].dtype)
         )
+
+        name_rows = [
+            {
+                "validScientificNameId": sid,
+                "FamilieNavn": family_names.get(sid),
+                "OrdenNavn": order_names.get(sid),
+            }
+            for sid in set(list(family_names.keys()) + list(order_names.keys()))
+        ]
+        name_lookup = pl.DataFrame(name_rows).with_columns(
+            pl.col("validScientificNameId").cast(df_work["validScientificNameId"].dtype)
+        )
+
+        df_work = df_work.join(
+            taxonomy_lookup, on="validScientificNameId", how="left"
+        ).join(name_lookup, on="validScientificNameId", how="left")
 
         return df_work
 
@@ -674,7 +677,7 @@ def _(process_and_enrich_data):
         assert honsehauk.get_column("Family").eq("Accipitridae").all(), (
             "Hønsehauk should be in Accipitridae family"
         )
-        assert honsehauk.get_column("Genus").eq("Astur ").all(), (
+        assert honsehauk.get_column("Genus").eq("Astur").all(), (
             "Hønsehauk should be in Astur genus"
         )
         assert honsehauk.get_column("FamilieNavn").eq("haukefamilien").all(), (
@@ -1126,9 +1129,15 @@ def legg_til_verdi_m1941(df: pl.DataFrame) -> pl.DataFrame:
         DataFrame with the added ``Verdi M1941`` column.
     """
     return df.with_columns(
-        pl.when((pl.col("category").is_in(["EN", "CR"])) | (pl.col("Prioriterte arter") == "Yes"))
+        pl.when(
+            (pl.col("category").is_in(["EN", "CR"]))
+            | (pl.col("Prioriterte arter") == "Yes")
+        )
         .then(pl.lit("Svært stor verdi"))
-        .when((pl.col("category") == "VU") | (pl.col("Andre spesielt hensynskrevende arter") == "Yes"))
+        .when(
+            (pl.col("category") == "VU")
+            | (pl.col("Andre spesielt hensynskrevende arter") == "Yes")
+        )
         .then(pl.lit("Stor verdi"))
         .when(pl.col("category") == "NT")
         .then(pl.lit("Middels verdi"))
@@ -1175,25 +1184,39 @@ def test_legg_til_verdi_m1941():
     result = legg_til_verdi_m1941(sample_df)
 
     hubro_df = result.filter(pl.col("species") == "Hubro")
-    assert hubro_df.get_column("Verdi M1941").eq("Svært stor verdi").all(), "Hubro skal ha svært stor verdi"
+    assert hubro_df.get_column("Verdi M1941").eq("Svært stor verdi").all(), (
+        "Hubro skal ha svært stor verdi"
+    )
 
     gråspurv_df = result.filter(pl.col("species") == "Gråspurv")
-    assert gråspurv_df.get_column("Verdi M1941").eq("Noe verdi").all(), "Gråspurv skal ha noe verdi"
+    assert gråspurv_df.get_column("Verdi M1941").eq("Noe verdi").all(), (
+        "Gråspurv skal ha noe verdi"
+    )
 
     fjellrev_df = result.filter(pl.col("species") == "Fjellrev")
-    assert fjellrev_df.get_column("Verdi M1941").eq("Stor verdi").all(), "Fjellrev skal ha stor verdi"
+    assert fjellrev_df.get_column("Verdi M1941").eq("Stor verdi").all(), (
+        "Fjellrev skal ha stor verdi"
+    )
 
     villmink_df = result.filter(pl.col("species") == "Villmink")
-    assert villmink_df.get_column("Verdi M1941").eq("Ikke definert").all(), "Villmink skal ha ikke deffinert"
+    assert villmink_df.get_column("Verdi M1941").eq("Ikke definert").all(), (
+        "Villmink skal ha ikke deffinert"
+    )
 
     dverggås_df = result.filter(pl.col("species") == "Dverggås")
-    assert dverggås_df.get_column("Verdi M1941").eq("Middels verdi").all(), "Dverggås skal ha middels verdi"
+    assert dverggås_df.get_column("Verdi M1941").eq("Middels verdi").all(), (
+        "Dverggås skal ha middels verdi"
+    )
 
     gaupe_df = result.filter(pl.col("species") == "Gaupe")
-    assert gaupe_df.get_column("Verdi M1941").eq("Stor verdi").all(), "Gaupe skal ha stor verdi"
+    assert gaupe_df.get_column("Verdi M1941").eq("Stor verdi").all(), (
+        "Gaupe skal ha stor verdi"
+    )
 
     ulv_df = result.filter(pl.col("species") == "Ulv")
-    assert ulv_df.get_column("Verdi M1941").eq("Svært stor verdi").all(), "Ulv skal ha svært stor verdi"
+    assert ulv_df.get_column("Verdi M1941").eq("Svært stor verdi").all(), (
+        "Ulv skal ha svært stor verdi"
+    )
 
 
 @app.cell(hide_code=True)
@@ -1208,7 +1231,12 @@ def _():
 def finn_mangler_navn(df: pl.DataFrame) -> pl.DataFrame:
     """Finn arter som mangler norsk navn (Navn-kolonnen er null)."""
 
-    mangler_df = df.filter(pl.col("Navn").is_null()).select(["Art", "Navn", "Familie", "Orden"]).unique().sort("Art")
+    mangler_df = (
+        df.filter(pl.col("Navn").is_null())
+        .select(["Art", "Navn", "Familie", "Orden"])
+        .unique()
+        .sort("Art")
+    )
 
     return mangler_df
 
@@ -1266,7 +1294,9 @@ def test_finn_mangler_navn():
     assert result.columns == ["Art", "Navn", "Familie", "Orden"]
 
     # All returned rows should have null Navn
-    assert result.get_column("Navn").is_null().all(), "Alle returnerte rader skal ha null Navn"
+    assert result.get_column("Navn").is_null().all(), (
+        "Alle returnerte rader skal ha null Navn"
+    )
 
     # The specific species missing names
     arter_uten_navn = set(
@@ -1315,10 +1345,10 @@ def _(console):
         navn_mapping = {}  # lager en dictionary som fylles av for loopen under
         for art in arter:
             navn = Prompt.ask(f"  [cyan]{art}[/cyan]")
-            if (
-                not navn.strip()
-            ):  # strip er å ta bort alle whitespacses, etc. Sånn at du kun evaluerer om det faktisk er tomt
-                console.print(f"\n[bold red]Feil:[/bold red] Du må skrive inn navn for {art}. Avbryter.")
+            if not navn.strip():  # strip er å ta bort alle whitespacses, etc. Sånn at du kun evaluerer om det faktisk er tomt
+                console.print(
+                    f"\n[bold red]Feil:[/bold red] Du må skrive inn navn for {art}. Avbryter."
+                )
                 raise typer.Exit(code=1)
             navn_mapping[art] = (
                 navn.strip()
@@ -1345,7 +1375,12 @@ def _(prompt_mangler_navn):
         # Empty DataFrame → returns empty dict, no prompts
         empty_df = pl.DataFrame(
             {"Art": [], "Navn": [], "Familie": [], "Orden": []},
-            schema={"Art": pl.Utf8, "Navn": pl.Utf8, "Familie": pl.Utf8, "Orden": pl.Utf8},
+            schema={
+                "Art": pl.Utf8,
+                "Navn": pl.Utf8,
+                "Familie": pl.Utf8,
+                "Orden": pl.Utf8,
+            },
         )
         assert prompt_mangler_navn(empty_df) == {}, "Tom DataFrame skal gi tom dict"
 
@@ -1429,7 +1464,9 @@ def test_join_navn_til_orginal_df():
     result = join_navn_til_orginal_df(df, mapping)
 
     fjellrev = result.filter(pl.col("Art") == "Vulpes lagopus")
-    assert fjellrev.get_column("Navn").to_list() == ["Fjellrev"], "Vulpes lagopus skal få navnet Fjellrev"
+    assert fjellrev.get_column("Navn").to_list() == ["Fjellrev"], (
+        "Vulpes lagopus skal få navnet Fjellrev"
+    )
     # Må bruke to list, get_column returnerer kun er polars series som ikke er det samme som en list
 
     ulv = result.filter(pl.col("Art") == "Canis lupus")
@@ -1437,7 +1474,9 @@ def test_join_navn_til_orginal_df():
 
     # Existing names are NOT overwritten ─────────────────────────
     hubro = result.filter(pl.col("Art") == "Bubo bubo")
-    assert hubro.get_column("Navn").to_list() == ["Hubro"], "Bubo bubo har allerede navn — skal ikke overskrives"
+    assert hubro.get_column("Navn").to_list() == ["Hubro"], (
+        "Bubo bubo har allerede navn — skal ikke overskrives"
+    )
 
     graaspurv = result.filter(pl.col("Art") == "Passer domesticus")
     assert graaspurv.get_column("Navn").to_list() == ["Gråspurv"], (
@@ -1446,19 +1485,23 @@ def test_join_navn_til_orginal_df():
 
     # Null names NOT in mapping stay null ────────────────────────
     dverggaas = result.filter(pl.col("Art") == "Anser erythropus")
-    assert dverggaas.get_column("Navn").to_list() == [None], "Anser erythropus er ikke i mapping — skal forbli null"
+    assert dverggaas.get_column("Navn").to_list() == [None], (
+        "Anser erythropus er ikke i mapping — skal forbli null"
+    )
 
     # Row count unchanged (left join, no extra rows) ────────────
-    assert result.height == df.height, f"Radantall skal være uendret: forventet {_df.height}, fikk {result.height}"
+    assert result.height == df.height, (
+        f"Radantall skal være uendret: forventet {df.height}, fikk {result.height}"
+    )
 
     # Temporary column Navn_ny is dropped ────────────────────────
     assert "Navn_ny" not in result.columns, "Hjelpkolonnen Navn_ny skal være fjernet"
 
     # Empty mapping → nothing changes ────────────────────────────
     result_empty = join_navn_til_orginal_df(df, {})
-    assert result_empty.get_column("Navn").to_list() == df.get_column("Navn").to_list(), (
-        "Tom mapping skal ikke endre noe"
-    )
+    assert (
+        result_empty.get_column("Navn").to_list() == df.get_column("Navn").to_list()
+    ), "Tom mapping skal ikke endre noe"
 
 
 @app.cell(column=1, hide_code=True)
@@ -1529,9 +1572,14 @@ def _(add_national_interest_criteria, console, process_and_enrich_data):
             input_df = duckdb.sql(f"SELECT * FROM read_csv('{input_fil_sti}')").pl()
 
         with console.status("[bold blue]Filtrerer observasjoner på år..."):
+            # OBS: Observasjoner uten dato (null) filtreres også bort her.
+            # null >= date returnerer null, som .filter() behandler som False.
+            null_count = input_df.select(pl.col("dateTimeCollected").is_null().sum()).item()
             input_filtrert_df = input_df.with_columns(pl.col("dateTimeCollected").dt.date()).filter(
                 pl.col("dateTimeCollected") >= date(filter_year, 1, 1)
             )
+        if null_count > 0:
+            console.print(f"  [yellow]Advarsel:[/yellow] {null_count} observasjoner uten dato fjernet")
         console.print(f"  [dim]Filtrert til {input_filtrert_df.height} rader (fra og med {filter_year})[/dim]")
 
         # Kjører alle berikingsfunksjonene — progress_bar håndteres inne i process_and_enrich_data
@@ -1539,19 +1587,19 @@ def _(add_national_interest_criteria, console, process_and_enrich_data):
 
         with console.status("[bold blue]Legger til kriterier for nasjonal interesse..."):
             df_steg1 = df_artsdatabanken.pipe(add_national_interest_criteria)
-        console.print("  [green]✓[/green] Kriterier for nasjonal interesse")
+        console.print("  [green]✓[/green] Lagt til Arter av nasjonal forvaltningsinteresse")
 
         with console.status("[bold blue]Legger til kolonne for arter av nasjonal forvaltningsinteresse..."):
             df_steg2 = df_steg1.pipe(legg_til_kolonne_arteravnasjonal)
-        console.print("  [green]✓[/green] Arter av nasjonal forvaltningsinteresse")
+        console.print("  [green]✓[/green] Arter av nasjonal forvaltningsinteresse summert til en kolonne")
 
         with console.status("[bold blue]Legger til M1941-verdier..."):
             df_steg3 = df_steg2.pipe(legg_til_verdi_m1941)
-        console.print("  [green]✓[/green] M1941-verdier")
+        console.print("  [green]✓[/green] Lagt til M1941-verdier")
 
         with console.status("[bold blue]Rydder opp i navn og datatyper..."):
             df_alle_funksjoner = df_steg3.pipe(rydd_navn_og_datatyper)
-        console.print("  [green]✓[/green] Navn og datatyper ryddet")
+        console.print("  [green]✓[/green] Ryddet navn, kolonner og datatyper")
 
         return df_alle_funksjoner
 
