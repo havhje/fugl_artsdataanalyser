@@ -7,243 +7,187 @@
   "cells": [
     {
       "id": "setup",
-      "code_hash": "74aeb1d18306fdb71e93eb52eed87d87",
+      "code_hash": null,
       "outputs": [],
       "console": []
     },
     {
       "id": "Hbol",
-      "code_hash": "e5e801593f5fd55670d679f7b6a5f868",
+      "code_hash": null,
       "outputs": [],
       "console": []
     },
     {
       "id": "MJUe",
-      "code_hash": "3bc9d46fd8b2baa2e56803e32e3f98fe",
+      "code_hash": null,
       "outputs": [],
       "console": []
     },
     {
       "id": "vblA",
-      "code_hash": "ae65b27ccd3060a1cdee7080008f8e01",
-      "outputs": [
-        {
-          "type": "data",
-          "data": {
-            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"utility-functions\">Utility functions</h2></span>"
-          }
-        }
-      ],
+      "code_hash": null,
+      "outputs": [],
       "console": []
     },
     {
       "id": "bkHC",
-      "code_hash": "aae9b7496d94e1388a1a7e9745859762",
-      "outputs": [
-        {
-          "type": "data",
-          "data": {
-            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"rydder-opp-i-navn-og-datatyper\">Rydder opp i navn og datatyper</h3></span>"
-          }
-        }
-      ],
+      "code_hash": null,
+      "outputs": [],
       "console": []
     },
     {
       "id": "lEQa",
-      "code_hash": "9447dc8583b781b89127d3d03c8ef03f",
+      "code_hash": null,
       "outputs": [],
       "console": []
     },
     {
       "id": "PKri",
-      "code_hash": "d6dda5ac5f8eb5beed8d0dcf577025f7",
+      "code_hash": null,
       "outputs": [],
       "console": []
     },
     {
       "id": "Xref",
-      "code_hash": "8a2aaea25d28ed7cc1132dab98577296",
-      "outputs": [
-        {
-          "type": "data",
-          "data": {
-            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"api-fra-artsdatabanken\">API fra artsdatabanken</h3></span>"
-          }
-        }
-      ],
+      "code_hash": null,
+      "outputs": [],
       "console": []
     },
     {
       "id": "SFPL",
-      "code_hash": "03c76cc8fe9ae19397186f52469073fd",
+      "code_hash": null,
       "outputs": [],
       "console": []
     },
     {
       "id": "BYtC",
-      "code_hash": "55fbdcf858418760b13a6949634adf84",
+      "code_hash": null,
       "outputs": [],
       "console": []
     },
     {
       "id": "RGSE",
-      "code_hash": "0cc85dc52b415fb751095f99b3752e5f",
+      "code_hash": null,
       "outputs": [],
       "console": []
     },
     {
       "id": "Kclp",
-      "code_hash": "a5b824a645a7736a7afd50aef2b001bf",
+      "code_hash": null,
       "outputs": [],
       "console": []
     },
     {
       "id": "emfo",
-      "code_hash": "d92f9ed2b36c80ef8728273902ce3f15",
-      "outputs": [
-        {
-          "type": "data",
-          "data": {
-            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"arter-av-nasjonal-forvaltningsinteresse\">Arter av nasjonal forvaltningsinteresse</h3></span>"
-          }
-        }
-      ],
+      "code_hash": null,
+      "outputs": [],
       "console": []
     },
     {
       "id": "Hstk",
-      "code_hash": "e51c94c16781f60886c40f50e0abb357",
+      "code_hash": null,
       "outputs": [],
       "console": []
     },
     {
       "id": "nWHF",
-      "code_hash": "ba9f399920ad15b678c4afeaedeac31f",
+      "code_hash": null,
       "outputs": [],
       "console": []
     },
     {
       "id": "iLit",
-      "code_hash": "dda1e72ac50c6417612a74b4eff27eba",
-      "outputs": [
-        {
-          "type": "data",
-          "data": {
-            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"lager-en-ny-kolonne-som-inneholder-mulige-verdier-av-arter-av-nasjonal-forvaltning\">Lager en ny kolonne som inneholder mulige verdier av arter av nasjonal forvaltning</h3></span>"
-          }
-        }
-      ],
+      "code_hash": null,
+      "outputs": [],
       "console": []
     },
     {
       "id": "ZHCJ",
-      "code_hash": "8ef6a431d023c6e296e255f1b58d2720",
+      "code_hash": null,
       "outputs": [],
       "console": []
     },
     {
       "id": "ROlb",
-      "code_hash": "b5009442b1b32a0c44e20f8722e83789",
+      "code_hash": null,
       "outputs": [],
       "console": []
     },
     {
       "id": "qnkX",
-      "code_hash": "014174002aa4cf3b1bda533c973342b4",
-      "outputs": [
-        {
-          "type": "data",
-          "data": {
-            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"legger-til-en-kolonne-med-verdi-fra-m1941\">Legger til en kolonne med verdi fra M1941</h3></span>"
-          }
-        }
-      ],
+      "code_hash": null,
+      "outputs": [],
       "console": []
     },
     {
       "id": "TqIu",
-      "code_hash": "81c093a41a12500fb750f403fa25dbcc",
+      "code_hash": null,
       "outputs": [],
       "console": []
     },
     {
       "id": "Vxnm",
-      "code_hash": "2fbe9c47c444c2fb7f4c71c2b37ed00f",
+      "code_hash": null,
       "outputs": [],
       "console": []
     },
     {
       "id": "DnEU",
-      "code_hash": "b83d98e9c7a5910b657eeafb190dc38a",
-      "outputs": [
-        {
-          "type": "data",
-          "data": {
-            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"legger-til-manglende-artsnavn\">Legger til manglende artsnavn</h3></span>"
-          }
-        }
-      ],
+      "code_hash": null,
+      "outputs": [],
       "console": []
     },
     {
       "id": "ulZA",
-      "code_hash": "8ded888229e60b75d0bef7a54d40c184",
+      "code_hash": null,
       "outputs": [],
       "console": []
     },
     {
       "id": "ecfG",
-      "code_hash": "d2f46c96d796a4bc160a969c57906163",
+      "code_hash": null,
       "outputs": [],
       "console": []
     },
     {
       "id": "Pvdt",
-      "code_hash": "f16daa3cdba6f529c836bf656eb0e17e",
+      "code_hash": null,
       "outputs": [],
       "console": []
     },
     {
       "id": "ZBYS",
-      "code_hash": "b1a77a4cceee2fe674466ac858423a12",
+      "code_hash": null,
       "outputs": [],
       "console": []
     },
     {
       "id": "aLJB",
-      "code_hash": "61bae9686644176c99b96d9c7257ef2a",
+      "code_hash": null,
       "outputs": [],
       "console": []
     },
     {
       "id": "nHfw",
-      "code_hash": "4f014faffa5a08a2159cdb06ae3c43f8",
+      "code_hash": null,
       "outputs": [],
       "console": []
     },
     {
       "id": "xXTn",
-      "code_hash": "10eab9fe24a69fc2527626f0dac574ac",
-      "outputs": [
-        {
-          "type": "data",
-          "data": {
-            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"setter-sammen-alt-og-definerer-rich\">Setter sammen alt og definerer rich</h3></span>"
-          }
-        }
-      ],
+      "code_hash": null,
+      "outputs": [],
       "console": []
     },
     {
       "id": "AjVT",
-      "code_hash": "8e6ef924fcfd59a6331194ad9892531f",
+      "code_hash": null,
       "outputs": [],
       "console": []
     },
     {
       "id": "pHFh",
-      "code_hash": "14739e71298bf1ee8fde45d0443defa8",
+      "code_hash": null,
       "outputs": [],
       "console": []
     }
