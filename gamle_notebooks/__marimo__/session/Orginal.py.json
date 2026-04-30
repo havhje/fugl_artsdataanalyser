@@ -1,0 +1,315 @@
+{
+  "version": "1",
+  "metadata": {
+    "marimo_version": "0.23.2",
+    "script_metadata_hash": null
+  },
+  "cells": [
+    {
+      "id": "Hbol",
+      "code_hash": "59491a0599000be8520aa344be983d52",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"kart\">Kart</h3></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "MJUe",
+      "code_hash": "e2be82061a8537cf491e355cb5fe5f74",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "vblA",
+      "code_hash": "94154aa77f9c7ecea65ff8fa4d9c0e9d",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "bkHC",
+      "code_hash": "24c80b0b78f09f712bf78808fde75a9c",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "lEQa",
+      "code_hash": "90d6db8197fd22afb485bffb9a3644a5",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "PKri",
+      "code_hash": "1c9b2087332884275f25c7ada042cb36",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "Xref",
+      "code_hash": "13c1b31cd40294b3c21d7cea17367989",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h4 id=\"punktkart\">Punktkart</h4></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "SFPL",
+      "code_hash": "e323a903adf05d09432b74fa2c5218ce",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "BYtC",
+      "code_hash": "f89a0e95aef9482cb9ceb817820a1526",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "RGSE",
+      "code_hash": "dc85372d3017c80d44947fc14c616eaf",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<marimo-ui-element object-id='RGSE-0' random-id='08862a95-cc48-5166-f1e8-ce7f52aef95c'><marimo-file-browser data-initial-value='[]' data-label='null' data-initial-path='&quot;/home/havhje/koding/fugl_artsdataanalyser&quot;' data-selection-mode='&quot;file&quot;' data-filetypes='[]' data-multiple='true' data-restrict-navigation='false'></marimo-file-browser></marimo-ui-element>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Kclp",
+      "code_hash": "c6efd0eca1da2f16bf6f635f060b01d5",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<pre class='text-xs'>&#x27;/home/havhje/koding/fugl_artsdataanalyser/data_csv_gammel/output.parquet&#x27;</pre>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Hstk",
+      "code_hash": "ed93b5aec339fec87a0de74faee5a30a",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<marimo-ui-element object-id='Hstk-0' random-id='21d583c6-cc1e-ad7a-8267-d501be758453'><marimo-table data-initial-value='[]' data-label='null' data-data='&quot;[{&#92;&quot;_marimo_row_id&#92;&quot;:0,&#92;&quot;Kategori&#92;&quot;:&#92;&quot;LC&#92;&quot;,&#92;&quot;Art av nasjonal forvaltningsinteresse&#92;&quot;:&#92;&quot;Nei&#92;&quot;,&#92;&quot;Verdi M1941&#92;&quot;:&#92;&quot;Noe verdi&#92;&quot;,&#92;&quot;Navn&#92;&quot;:&#92;&quot;dompap&#92;&quot;,&#92;&quot;Art&#92;&quot;:&#92;&quot;Pyrrhula pyrrhula&#92;&quot;,&#92;&quot;Antall&#92;&quot;:6,&#92;&quot;Atferd&#92;&quot;:null,&#92;&quot;Observert dato&#92;&quot;:&#92;&quot;2018-01-27&#92;&quot;,&#92;&quot;Usikkerhet meter&#92;&quot;:null,&#92;&quot;Familie&#92;&quot;:&#92;&quot;finkefamilien&#92;&quot;,&#92;&quot;Orden&#92;&quot;:&#92;&quot;spurvefugler&#92;&quot;,&#92;&quot;Artsgruppe&#92;&quot;:&#92;&quot;Fugler&#92;&quot;,&#92;&quot;Observat&#92;&#92;u00f8r&#92;&quot;:&#92;&quot;Torunn Holm&#92;&quot;,&#92;&quot;Lokalitet&#92;&quot;:&#92;&quot;Sommar&#92;&#92;u00f8yveien 21&#92;&quot;,&#92;&quot;Kommune&#92;&quot;:&#92;&quot;&#92;&#92;u00d8ksnes&#92;&quot;,&#92;&quot;Fylke&#92;&quot;:&#92;&quot;Nordland&#92;&quot;,&#92;&quot;Taksonomisk niv&#92;&#92;u00e5&#92;&quot;:&#92;&quot;species&#92;&quot;,&#92;&quot;Ansvarsarter&#92;&quot;:&#92;&quot;Treff ikke funnet&#92;&quot;,&#92;&quot;Andre spesielt hensynskrevende arter&#92;&quot;:&#92;&quot;Treff ikke funnet&#92;&quot;,&#92;&quot;Spesielle &#92;&#92;u00f8kologiske former&#92;&quot;:&#92;&quot;Treff ikke funnet&#92;&quot;,&#92;&quot;Prioriterte arter&#92;&quot;:&#92;&quot;Treff ikke funnet&#92;&quot;,&#92;&quot;Fredete arter&#92;&quot;:&#92;&quot;Treff ikke funnet&#92;&quot;,&#92;&quot;Fremmede arter&#92;&quot;:&#92;&quot;Treff ikke funnet&#92;&quot;,&#92;&quot;latitude&#92;&quot;:68.904168,&#92;&quot;longitude&#92;&quot;:15.066918,&#92;&quot;geometry&#92;&quot;:&#92;&quot;POINT (502688 7643678)&#92;&quot;,&#92;&quot;Artens ID&#92;&quot;:4263},{&#92;&quot;_marimo_row_id&#92;&quot;:1,&#92;&quot;Kategori&#92;&quot;:&#92;&quot;LC&#92;&quot;,&#92;&quot;Art av nasjonal forvaltningsinteresse&#92;&quot;:&#92;&quot;Nei&#92;&quot;,&#92;&quot;Verdi M1941&#92;&quot;:&#92;&quot;Noe verdi&#92;&quot;,&#92;&quot;Navn&#92;&quot;:&#92;&quot;kr&#92;&#92;u00e5ke&#92;&quot;,&#92;&quot;Art&#92;&quot;:&#92;&quot;Corvus cornix&#92;&quot;,&#92;&quot;Antall&#92;&quot;:14,&#92;&quot;Atferd&#92;&quot;:null,&#92;&quot;Observert dato&#92;&quot;:&#92;&quot;2022-09-07&#92;&quot;,&#92;&quot;Usikkerhet meter&#92;&quot;:300,&#92;&quot;Familie&#92;&quot;:&#92;&quot;kr&#92;&#92;u00e5kefamilien&#92;&quot;,&#92;&quot;Orden&#92;&quot;:&#92;&quot;spurvefugler&#92;&quot;,&#92;&quot;Artsgruppe&#92;&quot;:&#92;&quot;Fugler&#92;&quot;,&#92;&quot;Observat&#92;&#92;u00f8r&#92;&quot;:&#92;&quot;Eirik Kristoffersen&#92;&quot;,&#92;&quot;Lokalitet&#92;&quot;:&#92;&quot;Strengelv&#92;&#92;u00e5gfjorden, &#92;&#92;u00d8ksnes, No&#92;&quot;,&#92;&quot;Kommune&#92;&quot;:&#92;&quot;&#92;&#92;u00d8ksnes&#92;&quot;,&#92;&quot;Fylke&#92;&quot;:&#92;&quot;Nordland&#92;&quot;,&#92;&quot;Taksonomisk niv&#92;&#92;u00e5&#92;&quot;:&#92;&quot;species&#92;&quot;,&#92;&quot;Ansvarsarter&#92;&quot;:&#92;&quot;Treff ikke funnet&#92;&quot;,&#92;&quot;Andre spesielt hensynskrevende arter&#92;&quot;:&#92;&quot;Treff ikke funnet&#92;&quot;,&#92;&quot;Spesielle &#92;&#92;u00f8kologiske former&#92;&quot;:&#92;&quot;Treff ikke funnet&#92;&quot;,&#92;&quot;Prioriterte arter&#92;&quot;:&#92;&quot;Treff ikke funnet&#92;&quot;,&#92;&quot;Fredete arter&#92;&quot;:&#92;&quot;Treff ikke funnet&#92;&quot;,&#92;&quot;Fremmede arter&#92;&quot;:&#92;&quot;Treff ikke funnet&#92;&quot;,&#92;&quot;latitude&#92;&quot;:68.962388,&#92;&quot;longitude&#92;&quot;:15.148183,&#92;&quot;geometry&#92;&quot;:&#92;&quot;POINT (505937 7650175)&#92;&quot;,&#92;&quot;Artens ID&#92;&quot;:4164},{&#92;&quot;_marimo_row_id&#92;&quot;:2,&#92;&quot;Kategori&#92;&quot;:&#92;&quot;NT&#92;&quot;,&#92;&quot;Art av nasjonal forvaltningsinteresse&#92;&quot;:&#92;&quot;NT&#92;&quot;,&#92;&quot;Verdi M1941&#92;&quot;:&#92;&quot;Middels verdi&#92;&quot;,&#92;&quot;Navn&#92;&quot;:&#92;&quot;tjeld&#92;&quot;,&#92;&quot;Art&#92;&quot;:&#92;&quot;Haematopus ostralegus&#92;&quot;,&#92;&quot;Antall&#92;&quot;:1,&#92;&quot;Atferd&#92;&quot;:null,&#92;&quot;Observert dato&#92;&quot;:&#92;&quot;2019-06-01&#92;&quot;,&#92;&quot;Usikkerhet meter&#92;&quot;:9,&#92;&quot;Familie&#92;&quot;:&#92;&quot;tjeldfamilien&#92;&quot;,&#92;&quot;Orden&#92;&quot;:&#92;&quot;vade-, m&#92;&#92;u00e5ke- og alkefugler&#92;&quot;,&#92;&quot;Artsgruppe&#92;&quot;:&#92;&quot;Fugler&#92;&quot;,&#92;&quot;Observat&#92;&#92;u00f8r&#92;&quot;:null,&#92;&quot;Lokalitet&#92;&quot;:null,&#92;&quot;Kommune&#92;&quot;:&#92;&quot;&#92;&#92;u00d8ksnes&#92;&quot;,&#92;&quot;Fylke&#92;&quot;:&#92;&quot;Nordland&#92;&quot;,&#92;&quot;Taksonomisk niv&#92;&#92;u00e5&#92;&quot;:&#92;&quot;species&#92;&quot;,&#92;&quot;Ansvarsarter&#92;&quot;:&#92;&quot;No&#92;&quot;,&#92;&quot;Andre spesielt hensynskrevende arter&#92;&quot;:&#92;&quot;No&#92;&quot;,&#92;&quot;Spesielle &#92;&#92;u00f8kologiske former&#92;&quot;:&#92;&quot;No&#92;&quot;,&#92;&quot;Prioriterte arter&#92;&quot;:&#92;&quot;No&#92;&quot;,&#92;&quot;Fredete arter&#92;&quot;:&#92;&quot;No&#92;&quot;,&#92;&quot;Fremmede arter&#92;&quot;:&#92;&quot;No&#92;&quot;,&#92;&quot;latitude&#92;&quot;:68.974144,&#92;&quot;longitude&#92;&quot;:14.947151,&#92;&quot;geometry&#92;&quot;:&#92;&quot;POINT (497884 7651480)&#92;&quot;,&#92;&quot;Artens ID&#92;&quot;:3664},{&#92;&quot;_marimo_row_id&#92;&quot;:3,&#92;&quot;Kategori&#92;&quot;:&#92;&quot;NT&#92;&quot;,&#92;&quot;Art av nasjonal forvaltningsinteresse&#92;&quot;:&#92;&quot;NT&#92;&quot;,&#92;&quot;Verdi M1941&#92;&quot;:&#92;&quot;Middels verdi&#92;&quot;,&#92;&quot;Navn&#92;&quot;:&#92;&quot;tjeld&#92;&quot;,&#92;&quot;Art&#92;&quot;:&#92;&quot;Haematopus ostralegus&#92;&quot;,&#92;&quot;Antall&#92;&quot;:1,&#92;&quot;Atferd&#92;&quot;:null,&#92;&quot;Observert dato&#92;&quot;:&#92;&quot;2019-06-18&#92;&quot;,&#92;&quot;Usikkerhet meter&#92;&quot;:5,&#92;&quot;Familie&#92;&quot;:&#92;&quot;tjeldfamilien&#92;&quot;,&#92;&quot;Orden&#92;&quot;:&#92;&quot;vade-, m&#92;&#92;u00e5ke- og alkefugler&#92;&quot;,&#92;&quot;Artsgruppe&#92;&quot;:&#92;&quot;Fugler&#92;&quot;,&#92;&quot;Observat&#92;&#92;u00f8r&#92;&quot;:null,&#92;&quot;Lokalitet&#92;&quot;:null,&#92;&quot;Kommune&#92;&quot;:&#92;&quot;&#92;&#92;u00d8ksnes&#92;&quot;,&#92;&quot;Fylke&#92;&quot;:&#92;&quot;Nordland&#92;&quot;,&#92;&quot;Taksonomisk niv&#92;&#92;u00e5&#92;&quot;:&#92;&quot;species&#92;&quot;,&#92;&quot;Ansvarsarter&#92;&quot;:&#92;&quot;No&#92;&quot;,&#92;&quot;Andre spesielt hensynskrevende arter&#92;&quot;:&#92;&quot;No&#92;&quot;,&#92;&quot;Spesielle &#92;&#92;u00f8kologiske former&#92;&quot;:&#92;&quot;No&#92;&quot;,&#92;&quot;Prioriterte arter&#92;&quot;:&#92;&quot;No&#92;&quot;,&#92;&quot;Fredete arter&#92;&quot;:&#92;&quot;No&#92;&quot;,&#92;&quot;Fremmede arter&#92;&quot;:&#92;&quot;No&#92;&quot;,&#92;&quot;latitude&#92;&quot;:68.966011,&#92;&quot;longitude&#92;&quot;:14.950371,&#92;&quot;geometry&#92;&quot;:&#92;&quot;POINT (498012 7650573)&#92;&quot;,&#92;&quot;Artens ID&#92;&quot;:3664},{&#92;&quot;_marimo_row_id&#92;&quot;:4,&#92;&quot;Kategori&#92;&quot;:&#92;&quot;LC&#92;&quot;,&#92;&quot;Art av nasjonal forvaltningsinteresse&#92;&quot;:&#92;&quot;Ansvarsarter&#92;&quot;,&#92;&quot;Verdi M1941&#92;&quot;:&#92;&quot;Noe verdi&#92;&quot;,&#92;&quot;Navn&#92;&quot;:&#92;&quot;gr&#92;&#92;u00e5trost&#92;&quot;,&#92;&quot;Art&#92;&quot;:&#92;&quot;Turdus pilaris&#92;&quot;,&#92;&quot;Antall&#92;&quot;:6,&#92;&quot;Atferd&#92;&quot;:&#92;&quot;possiblereproductive&#92;&quot;,&#92;&quot;Observert dato&#92;&quot;:&#92;&quot;2011-06-09&#92;&quot;,&#92;&quot;Usikkerhet meter&#92;&quot;:300,&#92;&quot;Familie&#92;&quot;:&#92;&quot;trostefamilien&#92;&quot;,&#92;&quot;Orden&#92;&quot;:&#92;&quot;spurvefugler&#92;&quot;,&#92;&quot;Artsgruppe&#92;&quot;:&#92;&quot;Fugler&#92;&quot;,&#92;&quot;Observat&#92;&#92;u00f8r&#92;&quot;:&#92;&quot;Fredrik Broms&#92;&quot;,&#92;&quot;Lokalitet&#92;&quot;:&#92;&quot;Husjord, St&#92;&#92;u00f8, &#92;&#92;u00d8ksnes, No&#92;&quot;,&#92;&quot;Kommune&#92;&quot;:&#92;&quot;&#92;&#92;u00d8ksnes&#92;&quot;,&#92;&quot;Fylke&#92;&quot;:&#92;&quot;Nordland&#92;&quot;,&#92;&quot;Taksonomisk niv&#92;&#92;u00e5&#92;&quot;:&#92;&quot;species&#92;&quot;,&#92;&quot;Ansvarsarter&#92;&quot;:&#92;&quot;Yes&#92;&quot;,&#92;&quot;Andre spesielt hensynskrevende arter&#92;&quot;:&#92;&quot;No&#92;&quot;,&#92;&quot;Spesielle &#92;&#92;u00f8kologiske former&#92;&quot;:&#92;&quot;No&#92;&quot;,&#92;&quot;Prioriterte arter&#92;&quot;:&#92;&quot;No&#92;&quot;,&#92;&quot;Fredete arter&#92;&quot;:&#92;&quot;No&#92;&quot;,&#92;&quot;Fremmede arter&#92;&quot;:&#92;&quot;No&#92;&quot;,&#92;&quot;latitude&#92;&quot;:69.016574,&#92;&quot;longitude&#92;&quot;:15.143224,&#92;&quot;geometry&#92;&quot;:&#92;&quot;POINT (505724 7656217)&#92;&quot;,&#92;&quot;Artens ID&#92;&quot;:4559},{&#92;&quot;_marimo_row_id&#92;&quot;:5,&#92;&quot;Kategori&#92;&quot;:&#92;&quot;LC&#92;&quot;,&#92;&quot;Art av nasjonal forvaltningsinteresse&#92;&quot;:&#92;&quot;Nei&#92;&quot;,&#92;&quot;Verdi M1941&#92;&quot;:&#92;&quot;Noe verdi&#92;&quot;,&#92;&quot;Navn&#92;&quot;:&#92;&quot;gr&#92;&#92;u00e5g&#92;&#92;u00e5s&#92;&quot;,&#92;&quot;Art&#92;&quot;:&#92;&quot;Anser anser&#92;&quot;,&#92;&quot;Antall&#92;&quot;:25,&#92;&quot;Atferd&#92;&quot;:&#92;&quot;reproductive&#92;&quot;,&#92;&quot;Observert dato&#92;&quot;:&#92;&quot;2017-06-20&#92;&quot;,&#92;&quot;Usikkerhet meter&#92;&quot;:562,&#92;&quot;Familie&#92;&quot;:&#92;&quot;andefamilien&#92;&quot;,&#92;&quot;Orden&#92;&quot;:&#92;&quot;andefugler&#92;&quot;,&#92;&quot;Artsgruppe&#92;&quot;:&#92;&quot;Fugler&#92;&quot;,&#92;&quot;Observat&#92;&#92;u00f8r&#92;&quot;:&#92;&quot;Oddvar Hegg&#92;&#92;u00f8y&#92;&quot;,&#92;&quot;Lokalitet&#92;&quot;:&#92;&quot;Oppmyrbukta, Sommar&#92;&#92;u00f8ya, &#92;&#92;u00d8ksnes, No&#92;&quot;,&#92;&quot;Kommune&#92;&quot;:&#92;&quot;&#92;&#92;u00d8ksnes&#92;&quot;,&#92;&quot;Fylke&#92;&quot;:&#92;&quot;Nordland&#92;&quot;,&#92;&quot;Taksonomisk niv&#92;&#92;u00e5&#92;&quot;:&#92;&quot;species&#92;&quot;,&#92;&quot;Ansvarsarter&#92;&quot;:&#92;&quot;Treff ikke funnet&#92;&quot;,&#92;&quot;Andre spesielt hensynskrevende arter&#92;&quot;:&#92;&quot;Treff ikke funnet&#92;&quot;,&#92;&quot;Spesielle &#92;&#92;u00f8kologiske former&#92;&quot;:&#92;&quot;Treff ikke funnet&#92;&quot;,&#92;&quot;Prioriterte arter&#92;&quot;:&#92;&quot;Treff ikke funnet&#92;&quot;,&#92;&quot;Fredete arter&#92;&quot;:&#92;&quot;Treff ikke funnet&#92;&quot;,&#92;&quot;Fremmede arter&#92;&quot;:&#92;&quot;Treff ikke funnet&#92;&quot;,&#92;&quot;latitude&#92;&quot;:68.897325,&#92;&quot;longitude&#92;&quot;:15.088948,&#92;&quot;geometry&#92;&quot;:&#92;&quot;POINT (503574 7642916)&#92;&quot;,&#92;&quot;Artens ID&#92;&quot;:3471},{&#92;&quot;_marimo_row_id&#92;&quot;:6,&#92;&quot;Kategori&#92;&quot;:&#92;&quot;NT&#92;&quot;,&#92;&quot;Art av nasjonal forvaltningsinteresse&#92;&quot;:&#92;&quot;NT&#92;&quot;,&#92;&quot;Verdi M1941&#92;&quot;:&#92;&quot;Middels verdi&#92;&quot;,&#92;&quot;Navn&#92;&quot;:&#92;&quot;tjeld&#92;&quot;,&#92;&quot;Art&#92;&quot;:&#92;&quot;Haematopus ostralegus&#92;&quot;,&#92;&quot;Antall&#92;&quot;:1,&#92;&quot;Atferd&#92;&quot;:null,&#92;&quot;Observert dato&#92;&quot;:&#92;&quot;2020-06-27&#92;&quot;,&#92;&quot;Usikkerhet meter&#92;&quot;:4,&#92;&quot;Familie&#92;&quot;:&#92;&quot;tjeldfamilien&#92;&quot;,&#92;&quot;Orden&#92;&quot;:&#92;&quot;vade-, m&#92;&#92;u00e5ke- og alkefugler&#92;&quot;,&#92;&quot;Artsgruppe&#92;&quot;:&#92;&quot;Fugler&#92;&quot;,&#92;&quot;Observat&#92;&#92;u00f8r&#92;&quot;:null,&#92;&quot;Lokalitet&#92;&quot;:null,&#92;&quot;Kommune&#92;&quot;:&#92;&quot;&#92;&#92;u00d8ksnes&#92;&quot;,&#92;&quot;Fylke&#92;&quot;:&#92;&quot;Nordland&#92;&quot;,&#92;&quot;Taksonomisk niv&#92;&#92;u00e5&#92;&quot;:&#92;&quot;species&#92;&quot;,&#92;&quot;Ansvarsarter&#92;&quot;:&#92;&quot;No&#92;&quot;,&#92;&quot;Andre spesielt hensynskrevende arter&#92;&quot;:&#92;&quot;No&#92;&quot;,&#92;&quot;Spesielle &#92;&#92;u00f8kologiske former&#92;&quot;:&#92;&quot;No&#92;&quot;,&#92;&quot;Prioriterte arter&#92;&quot;:&#92;&quot;No&#92;&quot;,&#92;&quot;Fredete arter&#92;&quot;:&#92;&quot;No&#92;&quot;,&#92;&quot;Fremmede arter&#92;&quot;:&#92;&quot;No&#92;&quot;,&#92;&quot;latitude&#92;&quot;:68.953916,&#92;&quot;longitude&#92;&quot;:14.932053,&#92;&quot;geometry&#92;&quot;:&#92;&quot;POINT (497277 7649225)&#92;&quot;,&#92;&quot;Artens ID&#92;&quot;:3664},{&#92;&quot;_marimo_row_id&#92;&quot;:7,&#92;&quot;Kategori&#92;&quot;:&#92;&quot;NT&#92;&quot;,&#92;&quot;Art av nasjonal forvaltningsinteresse&#92;&quot;:&#92;&quot;NT&#92;&quot;,&#92;&quot;Verdi M1941&#92;&quot;:&#92;&quot;Middels verdi&#92;&quot;,&#92;&quot;Navn&#92;&quot;:&#92;&quot;tjeld&#92;&quot;,&#92;&quot;Art&#92;&quot;:&#92;&quot;Haematopus ostralegus&#92;&quot;,&#92;&quot;Antall&#92;&quot;:1,&#92;&quot;Atferd&#92;&quot;:null,&#92;&quot;Observert dato&#92;&quot;:&#92;&quot;2018-06-29&#92;&quot;,&#92;&quot;Usikkerhet meter&#92;&quot;:18,&#92;&quot;Familie&#92;&quot;:&#92;&quot;tjeldfamilien&#92;&quot;,&#92;&quot;Orden&#92;&quot;:&#92;&quot;vade-, m&#92;&#92;u00e5ke- og alkefugler&#92;&quot;,&#92;&quot;Artsgruppe&#92;&quot;:&#92;&quot;Fugler&#92;&quot;,&#92;&quot;Observat&#92;&#92;u00f8r&#92;&quot;:null,&#92;&quot;Lokalitet&#92;&quot;:null,&#92;&quot;Kommune&#92;&quot;:&#92;&quot;&#92;&#92;u00d8ksnes&#92;&quot;,&#92;&quot;Fylke&#92;&quot;:&#92;&quot;Nordland&#92;&quot;,&#92;&quot;Taksonomisk niv&#92;&#92;u00e5&#92;&quot;:&#92;&quot;species&#92;&quot;,&#92;&quot;Ansvarsarter&#92;&quot;:&#92;&quot;No&#92;&quot;,&#92;&quot;Andre spesielt hensynskrevende arter&#92;&quot;:&#92;&quot;No&#92;&quot;,&#92;&quot;Spesielle &#92;&#92;u00f8kologiske former&#92;&quot;:&#92;&quot;No&#92;&quot;,&#92;&quot;Prioriterte arter&#92;&quot;:&#92;&quot;No&#92;&quot;,&#92;&quot;Fredete arter&#92;&quot;:&#92;&quot;No&#92;&quot;,&#92;&quot;Fremmede arter&#92;&quot;:&#92;&quot;No&#92;&quot;,&#92;&quot;latitude&#92;&quot;:68.974606,&#92;&quot;longitude&#92;&quot;:14.946815,&#92;&quot;geometry&#92;&quot;:&#92;&quot;POINT (497870 7651532)&#92;&quot;,&#92;&quot;Artens ID&#92;&quot;:3664},{&#92;&quot;_marimo_row_id&#92;&quot;:8,&#92;&quot;Kategori&#92;&quot;:&#92;&quot;LC&#92;&quot;,&#92;&quot;Art av nasjonal forvaltningsinteresse&#92;&quot;:&#92;&quot;Nei&#92;&quot;,&#92;&quot;Verdi M1941&#92;&quot;:&#92;&quot;Noe verdi&#92;&quot;,&#92;&quot;Navn&#92;&quot;:&#92;&quot;kj&#92;&#92;u00f8ttmeis&#92;&quot;,&#92;&quot;Art&#92;&quot;:&#92;&quot;Parus major&#92;&quot;,&#92;&quot;Antall&#92;&quot;:2,&#92;&quot;Atferd&#92;&quot;:null,&#92;&quot;Observert dato&#92;&quot;:&#92;&quot;2025-01-26&#92;&quot;,&#92;&quot;Usikkerhet meter&#92;&quot;:null,&#92;&quot;Familie&#92;&quot;:&#92;&quot;meisefamilien&#92;&quot;,&#92;&quot;Orden&#92;&quot;:&#92;&quot;spurvefugler&#92;&quot;,&#92;&quot;Artsgruppe&#92;&quot;:&#92;&quot;Fugler&#92;&quot;,&#92;&quot;Observat&#92;&#92;u00f8r&#92;&quot;:&#92;&quot;Ann-Rita Heitmann&#92;&quot;,&#92;&quot;Lokalitet&#92;&quot;:&#92;&quot;Myre&#92;&quot;,&#92;&quot;Kommune&#92;&quot;:&#92;&quot;&#92;&#92;u00d8ksnes&#92;&quot;,&#92;&quot;Fylke&#92;&quot;:&#92;&quot;Nordland&#92;&quot;,&#92;&quot;Taksonomisk niv&#92;&#92;u00e5&#92;&quot;:&#92;&quot;species&#92;&quot;,&#92;&quot;Ansvarsarter&#92;&quot;:&#92;&quot;Treff ikke funnet&#92;&quot;,&#92;&quot;Andre spesielt hensynskrevende arter&#92;&quot;:&#92;&quot;Treff ikke funnet&#92;&quot;,&#92;&quot;Spesielle &#92;&#92;u00f8kologiske former&#92;&quot;:&#92;&quot;Treff ikke funnet&#92;&quot;,&#92;&quot;Prioriterte arter&#92;&quot;:&#92;&quot;Treff ikke funnet&#92;&quot;,&#92;&quot;Fredete arter&#92;&quot;:&#92;&quot;Treff ikke funnet&#92;&quot;,&#92;&quot;Fremmede arter&#92;&quot;:&#92;&quot;Treff ikke funnet&#92;&quot;,&#92;&quot;latitude&#92;&quot;:68.920172,&#92;&quot;longitude&#92;&quot;:15.055482,&#92;&quot;geometry&#92;&quot;:&#92;&quot;POINT (502227 7645462)&#92;&quot;,&#92;&quot;Artens ID&#92;&quot;:4372},{&#92;&quot;_marimo_row_id&#92;&quot;:9,&#92;&quot;Kategori&#92;&quot;:&#92;&quot;NT&#92;&quot;,&#92;&quot;Art av nasjonal forvaltningsinteresse&#92;&quot;:&#92;&quot;NT&#92;&quot;,&#92;&quot;Verdi M1941&#92;&quot;:&#92;&quot;Middels verdi&#92;&quot;,&#92;&quot;Navn&#92;&quot;:&#92;&quot;tjeld&#92;&quot;,&#92;&quot;Art&#92;&quot;:&#92;&quot;Haematopus ostralegus&#92;&quot;,&#92;&quot;Antall&#92;&quot;:1,&#92;&quot;Atferd&#92;&quot;:null,&#92;&quot;Observert dato&#92;&quot;:&#92;&quot;2017-07-07&#92;&quot;,&#92;&quot;Usikkerhet meter&#92;&quot;:8,&#92;&quot;Familie&#92;&quot;:&#92;&quot;tjeldfamilien&#92;&quot;,&#92;&quot;Orden&#92;&quot;:&#92;&quot;vade-, m&#92;&#92;u00e5ke- og alkefugler&#92;&quot;,&#92;&quot;Artsgruppe&#92;&quot;:&#92;&quot;Fugler&#92;&quot;,&#92;&quot;Observat&#92;&#92;u00f8r&#92;&quot;:null,&#92;&quot;Lokalitet&#92;&quot;:null,&#92;&quot;Kommune&#92;&quot;:&#92;&quot;&#92;&#92;u00d8ksnes&#92;&quot;,&#92;&quot;Fylke&#92;&quot;:&#92;&quot;Nordland&#92;&quot;,&#92;&quot;Taksonomisk niv&#92;&#92;u00e5&#92;&quot;:&#92;&quot;species&#92;&quot;,&#92;&quot;Ansvarsarter&#92;&quot;:&#92;&quot;No&#92;&quot;,&#92;&quot;Andre spesielt hensynskrevende arter&#92;&quot;:&#92;&quot;No&#92;&quot;,&#92;&quot;Spesielle &#92;&#92;u00f8kologiske former&#92;&quot;:&#92;&quot;No&#92;&quot;,&#92;&quot;Prioriterte arter&#92;&quot;:&#92;&quot;No&#92;&quot;,&#92;&quot;Fredete arter&#92;&quot;:&#92;&quot;No&#92;&quot;,&#92;&quot;Fremmede arter&#92;&quot;:&#92;&quot;No&#92;&quot;,&#92;&quot;latitude&#92;&quot;:68.953897,&#92;&quot;longitude&#92;&quot;:14.947382,&#92;&quot;geometry&#92;&quot;:&#92;&quot;POINT (497891 7649222)&#92;&quot;,&#92;&quot;Artens ID&#92;&quot;:3664},{&#92;&quot;_marimo_row_id&#92;&quot;:10,&#92;&quot;Kategori&#92;&quot;:&#92;&quot;LC&#92;&quot;,&#92;&quot;Art av nasjonal forvaltningsinteresse&#92;&quot;:&#92;&quot;Nei&#92;&quot;,&#92;&quot;Verdi M1941&#92;&quot;:&#92;&quot;Noe verdi&#92;&quot;,&#92;&quot;Navn&#92;&quot;:&#92;&quot;kr&#92;&#92;u00e5ke&#92;&quot;,&#92;&quot;Art&#92;&quot;:&#92;&quot;Corvus cornix&#92;&quot;,&#92;&quot;Antall&#92;&quot;:2,&#92;&quot;Atferd&#92;&quot;:null,&#92;&quot;Observert dato&#92;&quot;:&#92;&quot;2018-08-26&#92;&quot;,&#92;&quot;Usikkerhet meter&#92;&quot;:500,&#92;&quot;Familie&#92;&quot;:&#92;&quot;kr&#92;&#92;u00e5kefamilien&#92;&quot;,&#92;&quot;Orden&#92;&quot;:&#92;&quot;spurvefugler&#92;&quot;,&#92;&quot;Artsgruppe&#92;&quot;:&#92;&quot;Fugler&#92;&quot;,&#92;&quot;Observat&#92;&#92;u00f8r&#92;&quot;:&#92;&quot;Stig  Rasmussen&#92;&quot;,&#92;&quot;Lokalitet&#92;&quot;:&#92;&quot;Strengelv&#92;&#92;u00e5gfjorden - Straumen, &#92;&#92;u00d8ksnes, No&#92;&quot;,&#92;&quot;Kommune&#92;&quot;:&#92;&quot;&#92;&#92;u00d8ksnes&#92;&quot;,&#92;&quot;Fylke&#92;&quot;:&#92;&quot;Nordland&#92;&quot;,&#92;&quot;Taksonomisk niv&#92;&#92;u00e5&#92;&quot;:&#92;&quot;species&#92;&quot;,&#92;&quot;Ansvarsarter&#92;&quot;:&#92;&quot;Treff ikke funnet&#92;&quot;,&#92;&quot;Andre spesielt hensynskrevende arter&#92;&quot;:&#92;&quot;Treff ikke funnet&#92;&quot;,&#92;&quot;Spesielle &#92;&#92;u00f8kologiske former&#92;&quot;:&#92;&quot;Treff ikke funnet&#92;&quot;,&#92;&quot;Prioriterte arter&#92;&quot;:&#92;&quot;Treff ikke funnet&#92;&quot;,&#92;&quot;Fredete arter&#92;&quot;:&#92;&quot;Treff ikke funnet&#92;&quot;,&#92;&quot;Fremmede arter&#92;&quot;:&#92;&quot;Treff ikke funnet&#92;&quot;,&#92;&quot;latitude&#92;&quot;:68.96401,&#92;&quot;longitude&#92;&quot;:15.155819,&#92;&quot;geometry&#92;&quot;:&#92;&quot;POINT (506242 7650357)&#92;&quot;,&#92;&quot;Artens ID&#92;&quot;:4164},{&#92;&quot;_marimo_row_id&#92;&quot;:11,&#92;&quot;Kategori&#92;&quot;:&#92;&quot;NT&#92;&quot;,&#92;&quot;Art av nasjonal forvaltningsinteresse&#92;&quot;:&#92;&quot;NT&#92;&quot;,&#92;&quot;Verdi M1941&#92;&quot;:&#92;&quot;Middels verdi&#92;&quot;,&#92;&quot;Navn&#92;&quot;:&#92;&quot;tjeld&#92;&quot;,&#92;&quot;Art&#92;&quot;:&#92;&quot;Haematopus ostralegus&#92;&quot;,&#92;&quot;Antall&#92;&quot;:1,&#92;&quot;Atferd&#92;&quot;:null,&#92;&quot;Observert dato&#92;&quot;:&#92;&quot;2020-06-12&#92;&quot;,&#92;&quot;Usikkerhet meter&#92;&quot;:5,&#92;&quot;Familie&#92;&quot;:&#92;&quot;tjeldfamilien&#92;&quot;,&#92;&quot;Orden&#92;&quot;:&#92;&quot;vade-, m&#92;&#92;u00e5ke- og alkefugler&#92;&quot;,&#92;&quot;Artsgruppe&#92;&quot;:&#92;&quot;Fugler&#92;&quot;,&#92;&quot;Observat&#92;&#92;u00f8r&#92;&quot;:null,&#92;&quot;Lokalitet&#92;&quot;:null,&#92;&quot;Kommune&#92;&quot;:&#92;&quot;&#92;&#92;u00d8ksnes&#92;&quot;,&#92;&quot;Fylke&#92;&quot;:&#92;&quot;Nordland&#92;&quot;,&#92;&quot;Taksonomisk niv&#92;&#92;u00e5&#92;&quot;:&#92;&quot;species&#92;&quot;,&#92;&quot;Ansvarsarter&#92;&quot;:&#92;&quot;No&#92;&quot;,&#92;&quot;Andre spesielt hensynskrevende arter&#92;&quot;:&#92;&quot;No&#92;&quot;,&#92;&quot;Spesielle &#92;&#92;u00f8kologiske former&#92;&quot;:&#92;&quot;No&#92;&quot;,&#92;&quot;Prioriterte arter&#92;&quot;:&#92;&quot;No&#92;&quot;,&#92;&quot;Fredete arter&#92;&quot;:&#92;&quot;No&#92;&quot;,&#92;&quot;Fremmede arter&#92;&quot;:&#92;&quot;No&#92;&quot;,&#92;&quot;latitude&#92;&quot;:68.965546,&#92;&quot;longitude&#92;&quot;:14.945966,&#92;&quot;geometry&#92;&quot;:&#92;&quot;POINT (497836 7650521)&#92;&quot;,&#92;&quot;Artens ID&#92;&quot;:3664},{&#92;&quot;_marimo_row_id&#92;&quot;:12,&#92;&quot;Kategori&#92;&quot;:&#92;&quot;LC&#92;&quot;,&#92;&quot;Art av nasjonal forvaltningsinteresse&#92;&quot;:&#92;&quot;Ansvarsarter&#92;&quot;,&#92;&quot;Verdi M1941&#92;&quot;:&#92;&quot;Noe verdi&#92;&quot;,&#92;&quot;Navn&#92;&quot;:&#92;&quot;bergirisk&#92;&quot;,&#92;&quot;Art&#92;&quot;:&#92;&quot;Linaria flavirostris&#92;&quot;,&#92;&quot;Antall&#92;&quot;:1,&#92;&quot;Atferd&#92;&quot;:&#92;&quot;moving&#92;&quot;,&#92;&quot;Observert dato&#92;&quot;:&#92;&quot;2022-07-12&#92;&quot;,&#92;&quot;Usikkerhet meter&#92;&quot;:10,&#92;&quot;Familie&#92;&quot;:&#92;&quot;finkefamilien&#92;&quot;,&#92;&quot;Orden&#92;&quot;:&#92;&quot;spurvefugler&#92;&quot;,&#92;&quot;Artsgruppe&#92;&quot;:&#92;&quot;Fugler&#92;&quot;,&#92;&quot;Observat&#92;&#92;u00f8r&#92;&quot;:&#92;&quot;Rune Solvang&#92;&quot;,&#92;&quot;Lokalitet&#92;&quot;:&#92;&quot;Okshammerdalen, &#92;&#92;u00d8ksnes, No&#92;&quot;,&#92;&quot;Kommune&#92;&quot;:&#92;&quot;&#92;&#92;u00d8ksnes&#92;&quot;,&#92;&quot;Fylke&#92;&quot;:&#92;&quot;Nordland&#92;&quot;,&#92;&quot;Taksonomisk niv&#92;&#92;u00e5&#92;&quot;:&#92;&quot;species&#92;&quot;,&#92;&quot;Ansvarsarter&#92;&quot;:&#92;&quot;Yes&#92;&quot;,&#92;&quot;Andre spesielt hensynskrevende arter&#92;&quot;:&#92;&quot;No&#92;&quot;,&#92;&quot;Spesielle &#92;&#92;u00f8kologiske former&#92;&quot;:&#92;&quot;No&#92;&quot;,&#92;&quot;Prioriterte arter&#92;&quot;:&#92;&quot;No&#92;&quot;,&#92;&quot;Fredete arter&#92;&quot;:&#92;&quot;No&#92;&quot;,&#92;&quot;Fremmede arter&#92;&quot;:&#92;&quot;No&#92;&quot;,&#92;&quot;latitude&#92;&quot;:68.964035,&#92;&quot;longitude&#92;&quot;:15.027072,&#92;&quot;geometry&#92;&quot;:&#92;&quot;POINT (501084 7650352)&#92;&quot;,&#92;&quot;Artens ID&#92;&quot;:204597},{&#92;&quot;_marimo_row_id&#92;&quot;:13,&#92;&quot;Kategori&#92;&quot;:&#92;&quot;LC&#92;&quot;,&#92;&quot;Art av nasjonal forvaltningsinteresse&#92;&quot;:&#92;&quot;Nei&#92;&quot;,&#92;&quot;Verdi M1941&#92;&quot;:&#92;&quot;Noe verdi&#92;&quot;,&#92;&quot;Navn&#92;&quot;:&#92;&quot;kj&#92;&#92;u00f8ttmeis&#92;&quot;,&#92;&quot;Art&#92;&quot;:&#92;&quot;Parus major&#92;&quot;,&#92;&quot;Antall&#92;&quot;:4,&#92;&quot;Atferd&#92;&quot;:null,&#92;&quot;Observert dato&#92;&quot;:&#92;&quot;2022-01-30&#92;&quot;,&#92;&quot;Usikkerhet meter&#92;&quot;:null,&#92;&quot;Familie&#92;&quot;:&#92;&quot;meisefamilien&#92;&quot;,&#92;&quot;Orden&#92;&quot;:&#92;&quot;spurvefugler&#92;&quot;,&#92;&quot;Artsgruppe&#92;&quot;:&#92;&quot;Fugler&#92;&quot;,&#92;&quot;Observat&#92;&#92;u00f8r&#92;&quot;:&#92;&quot;Unni Kl&#92;&#92;u00e6boe Berglund&#92;&quot;,&#92;&quot;Lokalitet&#92;&quot;:&#92;&quot;Langenes&#92;&quot;,&#92;&quot;Kommune&#92;&quot;:&#92;&quot;&#92;&#92;u00d8ksnes&#92;&quot;,&#92;&quot;Fylke&#92;&quot;:&#92;&quot;Nordland&#92;&quot;,&#92;&quot;Taksonomisk niv&#92;&#92;u00e5&#92;&quot;:&#92;&quot;species&#92;&quot;,&#92;&quot;Ansvarsarter&#92;&quot;:&#92;&quot;Treff ikke funnet&#92;&quot;,&#92;&quot;Andre spesielt hensynskrevende arter&#92;&quot;:&#92;&quot;Treff ikke funnet&#92;&quot;,&#92;&quot;Spesielle &#92;&#92;u00f8kologiske former&#92;&quot;:&#92;&quot;Treff ikke funnet&#92;&quot;,&#92;&quot;Prioriterte arter&#92;&quot;:&#92;&quot;Treff ikke funnet&#92;&quot;,&#92;&quot;Fredete arter&#92;&quot;:&#92;&quot;Treff ikke funnet&#92;&quot;,&#92;&quot;Fremmede arter&#92;&quot;:&#92;&quot;Treff ikke funnet&#92;&quot;,&#92;&quot;latitude&#92;&quot;:69.015819,&#92;&quot;longitude&#92;&quot;:15.145701,&#92;&quot;geometry&#92;&quot;:&#92;&quot;POINT (505823 7656133)&#92;&quot;,&#92;&quot;Artens ID&#92;&quot;:4372},{&#92;&quot;_marimo_row_id&#92;&quot;:14,&#92;&quot;Kategori&#92;&quot;:&#92;&quot;CR&#92;&quot;,&#92;&quot;Art av nasjonal forvaltningsinteresse&#92;&quot;:&#92;&quot;Trua arter&#92;&quot;,&#92;&quot;Verdi M1941&#92;&quot;:&#92;&quot;Sv&#92;&#92;u00e6rt stor verdi&#92;&quot;,&#92;&quot;Navn&#92;&quot;:&#92;&quot;svarthalespove&#92;&quot;,&#92;&quot;Art&#92;&quot;:&#92;&quot;Limosa limosa&#92;&quot;,&#92;&quot;Antall&#92;&quot;:1,&#92;&quot;Atferd&#92;&quot;:null,&#92;&quot;Observert dato&#92;&quot;:&#92;&quot;2011-07-30&#92;&quot;,&#92;&quot;Usikkerhet meter&#92;&quot;:300,&#92;&quot;Familie&#92;&quot;:&#92;&quot;snipefamilien&#92;&quot;,&#92;&quot;Orden&#92;&quot;:&#92;&quot;vade-, m&#92;&#92;u00e5ke- og alkefugler&#92;&quot;,&#92;&quot;Artsgruppe&#92;&quot;:&#92;&quot;Fugler&#92;&quot;,&#92;&quot;Observat&#92;&#92;u00f8r&#92;&quot;:&#92;&quot;Frantz Sortland&#92;&quot;,&#92;&quot;Lokalitet&#92;&quot;:&#92;&quot;Strengelv&#92;&#92;u00e5gfjorden, &#92;&#92;u00d8ksnes, No&#92;&quot;,&#92;&quot;Kommune&#92;&quot;:&#92;&quot;&#92;&#92;u00d8ksnes&#92;&quot;,&#92;&quot;Fylke&#92;&quot;:&#92;&quot;Nordland&#92;&quot;,&#92;&quot;Taksonomisk niv&#92;&#92;u00e5&#92;&quot;:&#92;&quot;species&#92;&quot;,&#92;&quot;Ansvarsarter&#92;&quot;:&#92;&quot;No&#92;&quot;,&#92;&quot;Andre spesielt hensynskrevende arter&#92;&quot;:&#92;&quot;No&#92;&quot;,&#92;&quot;Spesielle &#92;&#92;u00f8kologiske former&#92;&quot;:&#92;&quot;No&#92;&quot;,&#92;&quot;Prioriterte arter&#92;&quot;:&#92;&quot;No&#92;&quot;,&#92;&quot;Fredete arter&#92;&quot;:&#92;&quot;No&#92;&quot;,&#92;&quot;Fremmede arter&#92;&quot;:&#92;&quot;No&#92;&quot;,&#92;&quot;latitude&#92;&quot;:68.962388,&#92;&quot;longitude&#92;&quot;:15.148183,&#92;&quot;geometry&#92;&quot;:&#92;&quot;POINT (505937 7650175)&#92;&quot;,&#92;&quot;Artens ID&#92;&quot;:3767},{&#92;&quot;_marimo_row_id&#92;&quot;:15,&#92;&quot;Kategori&#92;&quot;:&#92;&quot;NT&#92;&quot;,&#92;&quot;Art av nasjonal forvaltningsinteresse&#92;&quot;:&#92;&quot;Andre spesielt hensynskrevende arter, NT&#92;&quot;,&#92;&quot;Verdi M1941&#92;&quot;:&#92;&quot;Stor verdi&#92;&quot;,&#92;&quot;Navn&#92;&quot;:&#92;&quot;havelle&#92;&quot;,&#92;&quot;Art&#92;&quot;:&#92;&quot;Clangula hyemalis&#92;&quot;,&#92;&quot;Antall&#92;&quot;:1,&#92;&quot;Atferd&#92;&quot;:&#92;&quot;feeding&#92;&quot;,&#92;&quot;Observert dato&#92;&quot;:&#92;&quot;2018-12-08&#92;&quot;,&#92;&quot;Usikkerhet meter&#92;&quot;:500,&#92;&quot;Familie&#92;&quot;:&#92;&quot;andefamilien&#92;&quot;,&#92;&quot;Orden&#92;&quot;:&#92;&quot;andefugler&#92;&quot;,&#92;&quot;Artsgruppe&#92;&quot;:&#92;&quot;Fugler&#92;&quot;,&#92;&quot;Observat&#92;&#92;u00f8r&#92;&quot;:&#92;&quot;Stig  Rasmussen&#92;&quot;,&#92;&quot;Lokalitet&#92;&quot;:&#92;&quot;Strengelv&#92;&#92;u00e5gfjorden - Straumen, &#92;&#92;u00d8ksnes, No&#92;&quot;,&#92;&quot;Kommune&#92;&quot;:&#92;&quot;&#92;&#92;u00d8ksnes&#92;&quot;,&#92;&quot;Fylke&#92;&quot;:&#92;&quot;Nordland&#92;&quot;,&#92;&quot;Taksonomisk niv&#92;&#92;u00e5&#92;&quot;:&#92;&quot;species&#92;&quot;,&#92;&quot;Ansvarsarter&#92;&quot;:&#92;&quot;No&#92;&quot;,&#92;&quot;Andre spesielt hensynskrevende arter&#92;&quot;:&#92;&quot;Yes&#92;&quot;,&#92;&quot;Spesielle &#92;&#92;u00f8kologiske former&#92;&quot;:&#92;&quot;No&#92;&quot;,&#92;&quot;Prioriterte arter&#92;&quot;:&#92;&quot;No&#92;&quot;,&#92;&quot;Fredete arter&#92;&quot;:&#92;&quot;No&#92;&quot;,&#92;&quot;Fremmede arter&#92;&quot;:&#92;&quot;No&#92;&quot;,&#92;&quot;latitude&#92;&quot;:68.96401,&#92;&quot;longitude&#92;&quot;:15.155819,&#92;&quot;geometry&#92;&quot;:&#92;&quot;POINT (506242 7650357)&#92;&quot;,&#92;&quot;Artens ID&#92;&quot;:3506},{&#92;&quot;_marimo_row_id&#92;&quot;:16,&#92;&quot;Kategori&#92;&quot;:&#92;&quot;VU&#92;&quot;,&#92;&quot;Art av nasjonal forvaltningsinteresse&#92;&quot;:&#92;&quot;Trua arter&#92;&quot;,&#92;&quot;Verdi M1941&#92;&quot;:&#92;&quot;Stor verdi&#92;&quot;,&#92;&quot;Navn&#92;&quot;:&#92;&quot;gr&#92;&#92;u00e5m&#92;&#92;u00e5ke&#92;&quot;,&#92;&quot;Art&#92;&quot;:&#92;&quot;Larus argentatus&#92;&quot;,&#92;&quot;Antall&#92;&quot;:2,&#92;&quot;Atferd&#92;&quot;:null,&#92;&quot;Observert dato&#92;&quot;:&#92;&quot;2019-02-23&#92;&quot;,&#92;&quot;Usikkerhet meter&#92;&quot;:500,&#92;&quot;Familie&#92;&quot;:&#92;&quot;m&#92;&#92;u00e5kefamilien&#92;&quot;,&#92;&quot;Orden&#92;&quot;:&#92;&quot;vade-, m&#92;&#92;u00e5ke- og alkefugler&#92;&quot;,&#92;&quot;Artsgruppe&#92;&quot;:&#92;&quot;Fugler&#92;&quot;,&#92;&quot;Observat&#92;&#92;u00f8r&#92;&quot;:&#92;&quot;Stig  Rasmussen&#92;&quot;,&#92;&quot;Lokalitet&#92;&quot;:&#92;&quot;Grunnfjord naturreservat, &#92;&#92;u00d8ksnes, No&#92;&quot;,&#92;&quot;Kommune&#92;&quot;:&#92;&quot;&#92;&#92;u00d8ksnes&#92;&quot;,&#92;&quot;Fylke&#92;&quot;:&#92;&quot;Nordland&#92;&quot;,&#92;&quot;Taksonomisk niv&#92;&#92;u00e5&#92;&quot;:&#92;&quot;species&#92;&quot;,&#92;&quot;Ansvarsarter&#92;&quot;:&#92;&quot;No&#92;&quot;,&#92;&quot;Andre spesielt hensynskrevende arter&#92;&quot;:&#92;&quot;No&#92;&quot;,&#92;&quot;Spesielle &#92;&#92;u00f8kologiske former&#92;&quot;:&#92;&quot;No&#92;&quot;,&#92;&quot;Prioriterte arter&#92;&quot;:&#92;&quot;No&#92;&quot;,&#92;&quot;Fredete arter&#92;&quot;:&#92;&quot;No&#92;&quot;,&#92;&quot;Fremmede arter&#92;&quot;:&#92;&quot;No&#92;&quot;,&#92;&quot;latitude&#92;&quot;:68.937872,&#92;&quot;longitude&#92;&quot;:15.19485,&#92;&quot;geometry&#92;&quot;:&#92;&quot;POINT (507815 7647447)&#92;&quot;,&#92;&quot;Artens ID&#92;&quot;:3677},{&#92;&quot;_marimo_row_id&#92;&quot;:17,&#92;&quot;Kategori&#92;&quot;:&#92;&quot;NT&#92;&quot;,&#92;&quot;Art av nasjonal forvaltningsinteresse&#92;&quot;:&#92;&quot;NT&#92;&quot;,&#92;&quot;Verdi M1941&#92;&quot;:&#92;&quot;Middels verdi&#92;&quot;,&#92;&quot;Navn&#92;&quot;:&#92;&quot;sm&#92;&#92;u00e5spove&#92;&quot;,&#92;&quot;Art&#92;&quot;:&#92;&quot;Numenius phaeopus&#92;&quot;,&#92;&quot;Antall&#92;&quot;:2,&#92;&quot;Atferd&#92;&quot;:&#92;&quot;possiblereproductive&#92;&quot;,&#92;&quot;Observert dato&#92;&quot;:&#92;&quot;2020-07-11&#92;&quot;,&#92;&quot;Usikkerhet meter&#92;&quot;:100,&#92;&quot;Familie&#92;&quot;:&#92;&quot;snipefamilien&#92;&quot;,&#92;&quot;Orden&#92;&quot;:&#92;&quot;vade-, m&#92;&#92;u00e5ke- og alkefugler&#92;&quot;,&#92;&quot;Artsgruppe&#92;&quot;:&#92;&quot;Fugler&#92;&quot;,&#92;&quot;Observat&#92;&#92;u00f8r&#92;&quot;:&#92;&quot;Oddvar Hegg&#92;&#92;u00f8y&#92;&quot;,&#92;&quot;Lokalitet&#92;&quot;:&#92;&quot;Grunnfjorden, Grunnfjorden naturreservat, &#92;&#92;u00d8ksnes, No&#92;&quot;,&#92;&quot;Kommune&#92;&quot;:&#92;&quot;&#92;&#92;u00d8ksnes&#92;&quot;,&#92;&quot;Fylke&#92;&quot;:&#92;&quot;Nordland&#92;&quot;,&#92;&quot;Taksonomisk niv&#92;&#92;u00e5&#92;&quot;:&#92;&quot;species&#92;&quot;,&#92;&quot;Ansvarsarter&#92;&quot;:&#92;&quot;No&#92;&quot;,&#92;&quot;Andre spesielt hensynskrevende arter&#92;&quot;:&#92;&quot;No&#92;&quot;,&#92;&quot;Spesielle &#92;&#92;u00f8kologiske former&#92;&quot;:&#92;&quot;No&#92;&quot;,&#92;&quot;Prioriterte arter&#92;&quot;:&#92;&quot;No&#92;&quot;,&#92;&quot;Fredete arter&#92;&quot;:&#92;&quot;No&#92;&quot;,&#92;&quot;Fremmede arter&#92;&quot;:&#92;&quot;No&#92;&quot;,&#92;&quot;latitude&#92;&quot;:68.940161,&#92;&quot;longitude&#92;&quot;:15.18646,&#92;&quot;geometry&#92;&quot;:&#92;&quot;POINT (507478 7647701)&#92;&quot;,&#92;&quot;Artens ID&#92;&quot;:3776},{&#92;&quot;_marimo_row_id&#92;&quot;:18,&#92;&quot;Kategori&#92;&quot;:&#92;&quot;LC&#92;&quot;,&#92;&quot;Art av nasjonal forvaltningsinteresse&#92;&quot;:&#92;&quot;Nei&#92;&quot;,&#92;&quot;Verdi M1941&#92;&quot;:&#92;&quot;Noe verdi&#92;&quot;,&#92;&quot;Navn&#92;&quot;:&#92;&quot;l&#92;&#92;u00f8vsanger&#92;&quot;,&#92;&quot;Art&#92;&quot;:&#92;&quot;Phylloscopus trochilus&#92;&quot;,&#92;&quot;Antall&#92;&quot;:2,&#92;&quot;Atferd&#92;&quot;:&#92;&quot;stationary&#92;&quot;,&#92;&quot;Observert dato&#92;&quot;:&#92;&quot;2020-08-03&#92;&quot;,&#92;&quot;Usikkerhet meter&#92;&quot;:1,&#92;&quot;Familie&#92;&quot;:&#92;&quot;bladsangerfamilien&#92;&quot;,&#92;&quot;Orden&#92;&quot;:&#92;&quot;spurvefugler&#92;&quot;,&#92;&quot;Artsgruppe&#92;&quot;:&#92;&quot;Fugler&#92;&quot;,&#92;&quot;Observat&#92;&#92;u00f8r&#92;&quot;:&#92;&quot;Espen Sundet Nilsen|Morten Tjemsland&#92;&quot;,&#92;&quot;Lokalitet&#92;&quot;:&#92;&quot;Ner-Langvadalsvatnet, &#92;&#92;u00d8ksnes, No&#92;&quot;,&#92;&quot;Kommune&#92;&quot;:&#92;&quot;&#92;&#92;u00d8ksnes&#92;&quot;,&#92;&quot;Fylke&#92;&quot;:&#92;&quot;Nordland&#92;&quot;,&#92;&quot;Taksonomisk niv&#92;&#92;u00e5&#92;&quot;:&#92;&quot;species&#92;&quot;,&#92;&quot;Ansvarsarter&#92;&quot;:&#92;&quot;Treff ikke funnet&#92;&quot;,&#92;&quot;Andre spesielt hensynskrevende arter&#92;&quot;:&#92;&quot;Treff ikke funnet&#92;&quot;,&#92;&quot;Spesielle &#92;&#92;u00f8kologiske former&#92;&quot;:&#92;&quot;Treff ikke funnet&#92;&quot;,&#92;&quot;Prioriterte arter&#92;&quot;:&#92;&quot;Treff ikke funnet&#92;&quot;,&#92;&quot;Fredete arter&#92;&quot;:&#92;&quot;Treff ikke funnet&#92;&quot;,&#92;&quot;Fremmede arter&#92;&quot;:&#92;&quot;Treff ikke funnet&#92;&quot;,&#92;&quot;latitude&#92;&quot;:68.99939,&#92;&quot;longitude&#92;&quot;:15.060759,&#92;&quot;geometry&#92;&quot;:&#92;&quot;POINT (502430 7654295)&#92;&quot;,&#92;&quot;Artens ID&#92;&quot;:4472},{&#92;&quot;_marimo_row_id&#92;&quot;:19,&#92;&quot;Kategori&#92;&quot;:&#92;&quot;LC&#92;&quot;,&#92;&quot;Art av nasjonal forvaltningsinteresse&#92;&quot;:&#92;&quot;Ansvarsarter&#92;&quot;,&#92;&quot;Verdi M1941&#92;&quot;:&#92;&quot;Noe verdi&#92;&quot;,&#92;&quot;Navn&#92;&quot;:&#92;&quot;heipiplerke&#92;&quot;,&#92;&quot;Art&#92;&quot;:&#92;&quot;Anthus pratensis&#92;&quot;,&#92;&quot;Antall&#92;&quot;:2,&#92;&quot;Atferd&#92;&quot;:&#92;&quot;possiblereproductive&#92;&quot;,&#92;&quot;Observert dato&#92;&quot;:&#92;&quot;2021-07-04&#92;&quot;,&#92;&quot;Usikkerhet meter&#92;&quot;:1373,&#92;&quot;Familie&#92;&quot;:&#92;&quot;erlefamilien&#92;&quot;,&#92;&quot;Orden&#92;&quot;:&#92;&quot;spurvefugler&#92;&quot;,&#92;&quot;Artsgruppe&#92;&quot;:&#92;&quot;Fugler&#92;&quot;,&#92;&quot;Observat&#92;&#92;u00f8r&#92;&quot;:&#92;&quot;Odd Rune Einmo&#92;&quot;,&#92;&quot;Lokalitet&#92;&quot;:&#92;&quot;H&#92;&#92;u00f8ljanmyra naturreservat, &#92;&#92;u00d8ksnes, No&#92;&quot;,&#92;&quot;Kommune&#92;&quot;:&#92;&quot;&#92;&#92;u00d8ksnes&#92;&quot;,&#92;&quot;Fylke&#92;&quot;:&#92;&quot;Nordland&#92;&quot;,&#92;&quot;Taksonomisk niv&#92;&#92;u00e5&#92;&quot;:&#92;&quot;species&#92;&quot;,&#92;&quot;Ansvarsarter&#92;&quot;:&#92;&quot;Yes&#92;&quot;,&#92;&quot;Andre spesielt hensynskrevende arter&#92;&quot;:&#92;&quot;No&#92;&quot;,&#92;&quot;Spesielle &#92;&#92;u00f8kologiske former&#92;&quot;:&#92;&quot;No&#92;&quot;,&#92;&quot;Prioriterte arter&#92;&quot;:&#92;&quot;No&#92;&quot;,&#92;&quot;Fredete arter&#92;&quot;:&#92;&quot;No&#92;&quot;,&#92;&quot;Fremmede arter&#92;&quot;:&#92;&quot;No&#92;&quot;,&#92;&quot;latitude&#92;&quot;:68.996054,&#92;&quot;longitude&#92;&quot;:15.162358,&#92;&quot;geometry&#92;&quot;:&#92;&quot;POLYGON ((507156 7653547, 506785 7653527, 506780 7653537, 506177 7653561, 506107 7653441, 506085 7653469, 506071 7653486, 505913 7653370, 505840 7653341, 505798 7653344, 505695 7653353, 505685 7653476, 505976 7653885, 506002 7654283, 506004 7654288, 506659 7654427, 506955 7654659, 507156 7653547))&#92;&quot;,&#92;&quot;Artens ID&#92;&quot;:4322}]&quot;' data-total-rows='16534' data-total-columns='27' data-max-columns='50' data-banner-text='&quot;&quot;' data-pagination='true' data-page-size='20' data-field-types='[[&quot;Kategori&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;Art av nasjonal forvaltningsinteresse&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;Verdi M1941&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;Navn&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;Art&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;Antall&quot;,[&quot;integer&quot;,&quot;i64&quot;]],[&quot;Atferd&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;Observert dato&quot;,[&quot;date&quot;,&quot;date&quot;]],[&quot;Usikkerhet meter&quot;,[&quot;integer&quot;,&quot;i64&quot;]],[&quot;Familie&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;Orden&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;Artsgruppe&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;Observat\u00f8r&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;Lokalitet&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;Kommune&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;Fylke&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;Taksonomisk niv\u00e5&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;Ansvarsarter&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;Andre spesielt hensynskrevende arter&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;Spesielle \u00f8kologiske former&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;Prioriterte arter&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;Fredete arter&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;Fremmede arter&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;latitude&quot;,[&quot;number&quot;,&quot;f64&quot;]],[&quot;longitude&quot;,[&quot;number&quot;,&quot;f64&quot;]],[&quot;geometry&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;Artens ID&quot;,[&quot;integer&quot;,&quot;i64&quot;]]]' data-selection='&quot;multi&quot;' data-show-filters='true' data-show-download='true' data-show-column-summaries='true' data-show-data-types='true' data-show-page-size-selector='true' data-show-column-explorer='true' data-show-chart-builder='true' data-row-headers='[]' data-has-stable-row-id='true' data-lazy='false' data-preload='false'></marimo-table></marimo-ui-element>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "nWHF",
+      "code_hash": "d0c4a508495a7e0539ac4c9998e525b4",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "iLit",
+      "code_hash": "f293fca339dc68686789c2d0ab66bbea",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "ZHCJ",
+      "code_hash": "c164ce2f2d387016c4567e3a1cb2bafa",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "ROlb",
+      "code_hash": "f1778e98688795bd0c9cdfe4889cdd93",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "qnkX",
+      "code_hash": "3c77e4a01c25bdca0f805c63365f2470",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "TqIu",
+      "code_hash": "93dac4819998b250e3147fd85be2c233",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "Vxnm",
+      "code_hash": "f4b1b68d5fbda0c17854c98815edc617",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"tid\">Tid</h3></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "DnEU",
+      "code_hash": "dd6cb121e87274ad69d6a218b636ed74",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "ulZA",
+      "code_hash": "bc61a255ba5482c9aa6033d39be2191f",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h4 id=\"arter-pr-ar-mangler-stderror-som-for-fig-under\">Arter pr. \u00e5r (mangler std.error, som for fig under)</h4></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "ecfG",
+      "code_hash": "e8f688eb65a96cd251ded996ea395d8e",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "Pvdt",
+      "code_hash": "11db3c4f49f485c0c530f28aadbffecd",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h4 id=\"gjsnitt-obsindivider-pr-maned-for-hele-datasettet\">Gj.snitt obs/individer pr. m\u00e5ned for hele datasettet</h4></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "ZBYS",
+      "code_hash": "97631c7685010cb7c826fbfe60216141",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "aLJB",
+      "code_hash": "2389f2e3171679ab46605f9171bc3f60",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "nHfw",
+      "code_hash": "91c415b3e1150867df4beb67e4a05c4b",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"figurer\">Figurer</h3></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "xXTn",
+      "code_hash": "47305d20314f0da5aedd363b5374c5da",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "AjVT",
+      "code_hash": "bd667a1e674a087521660d5c0cab4a87",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "pHFh",
+      "code_hash": "c8e047119b7fc981e830ce12438203b8",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "NCOB",
+      "code_hash": "5d7f375bfffdfb479206bf8c37d041a7",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h4 id=\"arter\">Arter</h4></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "aqbW",
+      "code_hash": "4c33165e8f4c10fe4baa115a057bb87c",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "TRpd",
+      "code_hash": "f3c54150c61e6dfc3fc1f3a207b76287",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "TXez",
+      "code_hash": "9ee4565db0689c21aa3a53d0f2567bd7",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "dNNg",
+      "code_hash": "37c96c83431da23bd1965afa3b2af3a5",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "yCnT",
+      "code_hash": "e4929350783f712853ef36536618d7c3",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "wlCL",
+      "code_hash": "b4db60fc2e4220d8f847a6cdcf23e691",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h4 id=\"atferd\">Atferd</h4></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "kqZH",
+      "code_hash": "22986bc42c21da82d5ab38d6738c7a33",
+      "outputs": [],
+      "console": []
+    }
+  ]
+}
