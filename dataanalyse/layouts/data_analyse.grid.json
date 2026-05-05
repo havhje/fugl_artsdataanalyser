@@ -1,9 +1,9 @@
 {
   "type": "grid",
   "data": {
-    "columns": 24,
-    "rowHeight": 20,
-    "maxWidth": 1400,
+    "columns": 30,
+    "rowHeight": 40,
+    "maxWidth": 2400,
     "bordered": true,
     "cells": [
       {
@@ -13,8 +13,8 @@
         "position": [
           0,
           0,
-          16,
-          9
+          15,
+          6
         ],
         "scrollable": true,
         "side": "left"
@@ -24,12 +24,34 @@
       },
       {
         "position": [
+          15,
           0,
-          9,
-          24,
-          39
-        ],
-        "scrollable": true
+          15,
+          6
+        ]
+      },
+      {
+        "position": [
+          0,
+          6,
+          30,
+          20
+        ]
+      },
+      {
+        "position": null
+      },
+      {
+        "position": null
+      },
+      {
+        "position": null
+      },
+      {
+        "position": null
+      },
+      {
+        "position": null
       },
       {
         "position": null

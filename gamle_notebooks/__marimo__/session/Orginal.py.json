@@ -21,32 +21,80 @@
     {
       "id": "MJUe",
       "code_hash": "e2be82061a8537cf491e355cb5fe5f74",
-      "outputs": [],
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
       "console": []
     },
     {
       "id": "vblA",
       "code_hash": "94154aa77f9c7ecea65ff8fa4d9c0e9d",
-      "outputs": [],
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
       "console": []
     },
     {
       "id": "bkHC",
       "code_hash": "24c80b0b78f09f712bf78808fde75a9c",
-      "outputs": [],
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><marimo-ui-element object-id='vblA-0' random-id='2c3f1828-2d7f-0882-5a1f-c34690bfd8f2'><marimo-dropdown data-initial-value='[&quot;carto-positron&quot;]' data-label='&quot;&lt;span class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&gt;&lt;span class=&#92;&quot;paragraph&#92;&quot;&gt;Select a base map style:&lt;/span&gt;&lt;/span&gt;&quot;' data-options='[&quot;carto-positron&quot;,&quot;carto-darkmatter&quot;,&quot;open-street-map&quot;]' data-allow-select-none='false' data-searchable='false' data-full-width='false'></marimo-dropdown></marimo-ui-element><marimo-ui-element object-id='vblA-1' random-id='cdf45c78-80fc-2eb9-3aab-44a599b0f5aa'><marimo-checkbox data-initial-value='true' data-label='&quot;&lt;span class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&gt;&lt;span class=&#92;&quot;paragraph&#92;&quot;&gt;Show Satellite Imagery&lt;/span&gt;&lt;/span&gt;&quot;' data-disabled='false'></marimo-checkbox></marimo-ui-element></div>"
+          }
+        }
+      ],
       "console": []
     },
     {
       "id": "lEQa",
       "code_hash": "90d6db8197fd22afb485bffb9a3644a5",
-      "outputs": [],
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<marimo-ui-element object-id='lEQa-0' random-id='ebc56618-cc1b-196e-5f06-dbc4dc169f4d'><marimo-dropdown data-initial-value='[&quot;Antall observasjoner&quot;]' data-label='&quot;&lt;span class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&gt;&lt;span class=&#92;&quot;paragraph&#92;&quot;&gt;Aggregation mode:&lt;/span&gt;&lt;/span&gt;&quot;' data-options='[&quot;Antall observasjoner&quot;,&quot;Sum individer&quot;]' data-allow-select-none='false' data-searchable='false' data-full-width='false'></marimo-dropdown></marimo-ui-element>"
+          }
+        }
+      ],
       "console": []
     },
     {
       "id": "PKri",
       "code_hash": "1c9b2087332884275f25c7ada042cb36",
-      "outputs": [],
-      "console": []
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "exception",
+          "evalue": "negative dimensions are not allowed",
+          "traceback": null
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stderr",
+          "text": "/tmp/marimo_79199/__marimo__cell_PKri_.py:12: DeprecationWarning: create_hexbin_mapbox() is deprecated and will be removed in the next major version. Please use create_hexbin_map() instead. Learn more at: https://plotly.com/python/mapbox-to-maplibre/\n  fig_hex = ff.create_hexbin_mapbox(\n/home/havhje/koding/fugl_artsdataanalyser/.venv/lib/python3.14/site-packages/plotly/figure_factory/_hexbin_map.py:116: RuntimeWarning: invalid value encountered in cast\n  ny = np.ceil(Dy / dy).astype(int)\n/home/havhje/koding/fugl_artsdataanalyser/.venv/lib/python3.14/site-packages/plotly/figure_factory/_hexbin_map.py:132: RuntimeWarning: overflow encountered in scalar multiply\n  n = nx1 * ny1 + nx2 * ny2\n",
+          "mimetype": "text/plain"
+        },
+        {
+          "type": "stream",
+          "name": "stderr",
+          "text": "<span class=\"codehilite\"><div class=\"highlight\"><pre><span></span><span class=\"gt\">Traceback (most recent call last):</span>\n  File <span class=\"nb\">&quot;/tmp/marimo_79199/__marimo__cell_PKri_.py&quot;</span>, line <span class=\"m\">12</span>, in <span class=\"n\">&lt;module&gt;</span>\n<span class=\"w\">    </span><span class=\"n\">fig_hex</span> <span class=\"o\">=</span> <span class=\"n\">ff</span><span class=\"o\">.</span><span class=\"n\">create_hexbin_mapbox</span><span class=\"p\">(</span>\n<span class=\"w\">    </span>    <span class=\"n\">data_frame</span><span class=\"o\">=</span><span class=\"n\">artsdata_kart</span><span class=\"p\">,</span>\n<span class=\"w\">    </span><span class=\"o\">...&lt;</span><span class=\"mi\">10</span> <span class=\"n\">lines</span><span class=\"o\">&gt;...</span>\n<span class=\"w\">    </span>    <span class=\"n\">agg_func</span><span class=\"o\">=</span><span class=\"n\">agg_func_param</span><span class=\"p\">,</span>  <span class=\"c1\"># None for count, np.sum for sum</span>\n<span class=\"w\">    </span><span class=\"p\">)</span>\n  File <span class=\"nb\">&quot;/home/havhje/koding/fugl_artsdataanalyser/.venv/lib/python3.14/site-packages/plotly/figure_factory/_hexbin_map.py&quot;</span>, line <span class=\"m\">546</span>, in <span class=\"n\">create_hexbin_mapbox</span>\n<span class=\"w\">    </span><span class=\"k\">return</span> <span class=\"n\">create_hexbin_map</span><span class=\"p\">(</span><span class=\"o\">*</span><span class=\"n\">args</span><span class=\"p\">,</span> <span class=\"o\">**</span><span class=\"n\">kwargs</span><span class=\"p\">)</span>\n  File <span class=\"nb\">&quot;/home/havhje/koding/fugl_artsdataanalyser/.venv/lib/python3.14/site-packages/plotly/figure_factory/_hexbin_map.py&quot;</span>, line <span class=\"m\">380</span>, in <span class=\"n\">create_hexbin_map</span>\n<span class=\"w\">    </span><span class=\"n\">hexagons_lats</span><span class=\"p\">,</span> <span class=\"n\">hexagons_lons</span><span class=\"p\">,</span> <span class=\"n\">hexagons_ids</span><span class=\"p\">,</span> <span class=\"n\">count</span> <span class=\"o\">=</span> <span class=\"n\">_compute_wgs84_hexbin</span><span class=\"p\">(</span>\n<span class=\"w\">                                                        </span><span class=\"pm\">~~~~~~~~~~~~~~~~~~~~~^</span>\n<span class=\"w\">    </span>    <span class=\"n\">lat</span><span class=\"o\">=</span><span class=\"n\">args</span><span class=\"p\">[</span><span class=\"s2\">&quot;data_frame&quot;</span><span class=\"p\">]</span><span class=\"o\">.</span><span class=\"n\">get_column</span><span class=\"p\">(</span><span class=\"n\">args</span><span class=\"p\">[</span><span class=\"s2\">&quot;lat&quot;</span><span class=\"p\">])</span><span class=\"o\">.</span><span class=\"n\">to_numpy</span><span class=\"p\">(),</span>\n<span class=\"w\">        </span><span class=\"pm\">^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^</span>\n<span class=\"w\">    </span><span class=\"o\">...&lt;</span><span class=\"mi\">7</span> <span class=\"n\">lines</span><span class=\"o\">&gt;...</span>\n<span class=\"w\">    </span>    <span class=\"n\">native_namespace</span><span class=\"o\">=</span><span class=\"n\">native_namespace</span><span class=\"p\">,</span>\n<span class=\"w\">        </span><span class=\"pm\">^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^</span>\n<span class=\"w\">    </span><span class=\"p\">)</span>\n<span class=\"w\">    </span><span class=\"pm\">^</span>\n  File <span class=\"nb\">&quot;/home/havhje/koding/fugl_artsdataanalyser/.venv/lib/python3.14/site-packages/plotly/figure_factory/_hexbin_map.py&quot;</span>, line <span class=\"m\">284</span>, in <span class=\"n\">_compute_wgs84_hexbin</span>\n<span class=\"w\">    </span><span class=\"n\">hxs</span><span class=\"p\">,</span> <span class=\"n\">hys</span><span class=\"p\">,</span> <span class=\"n\">centers</span><span class=\"p\">,</span> <span class=\"n\">agreggated_value</span> <span class=\"o\">=</span> <span class=\"n\">_compute_hexbin</span><span class=\"p\">(</span>\n<span class=\"w\">                                          </span><span class=\"pm\">~~~~~~~~~~~~~~~^</span>\n<span class=\"w\">    </span>    <span class=\"n\">x</span><span class=\"p\">,</span> <span class=\"n\">y</span><span class=\"p\">,</span> <span class=\"n\">x_range</span><span class=\"p\">,</span> <span class=\"n\">y_range</span><span class=\"p\">,</span> <span class=\"n\">color</span><span class=\"p\">,</span> <span class=\"n\">nx</span><span class=\"p\">,</span> <span class=\"n\">agg_func</span><span class=\"p\">,</span> <span class=\"n\">min_count</span>\n<span class=\"w\">        </span><span class=\"pm\">^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^</span>\n<span class=\"w\">    </span><span class=\"p\">)</span>\n<span class=\"w\">    </span><span class=\"pm\">^</span>\n  File <span class=\"nb\">&quot;/home/havhje/koding/fugl_artsdataanalyser/.venv/lib/python3.14/site-packages/plotly/figure_factory/_hexbin_map.py&quot;</span>, line <span class=\"m\">139</span>, in <span class=\"n\">_compute_hexbin</span>\n<span class=\"w\">    </span><span class=\"n\">lattice1</span> <span class=\"o\">=</span> <span class=\"n\">np</span><span class=\"o\">.</span><span class=\"n\">zeros</span><span class=\"p\">((</span><span class=\"n\">nx1</span><span class=\"p\">,</span> <span class=\"n\">ny1</span><span class=\"p\">))</span>\n<span class=\"gr\">ValueError</span>: <span class=\"n\">negative dimensions are not allowed</span>\n</pre></div>\n</span>",
+          "mimetype": "application/vnd.marimo+traceback"
+        }
+      ]
     },
     {
       "id": "Xref",

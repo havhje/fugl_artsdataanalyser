@@ -6,6 +6,7 @@ app = marimo.App(width="columns", layout_file="layouts/data_analyse.grid.json")
 with app.setup:
     import marimo as mo
     import polars as pl
+    import leafmap.foliumap as leafmap
 
 
 @app.cell
@@ -18,10 +19,18 @@ def _():
 @app.cell
 def _(valgt_fil):
     file_info = valgt_fil.value[0]
-    arter_df = pl.read_parquet (file_info.path)
+    arter_df = pl.read_parquet(file_info.path)
     artsdata_df = mo.ui.table(arter_df, page_size=20)
-
     return (artsdata_df,)
+
+
+@app.cell(hide_code=True)
+def _():
+    mo.md(r"""
+    ### Dataanalyse
+    "Info om notatboken her"
+    """)
+    return
 
 
 @app.cell
@@ -30,7 +39,43 @@ def _(artsdata_df):
     return
 
 
-@app.cell(column=1)
+@app.cell(column=1, hide_code=True)
+def _():
+    mo.md(r"""
+    #Kart
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _():
+    mo.md(r"""
+    ## Må gjøre om polars til pd df for leafmapkart??
+    """)
+    return
+
+
+@app.cell
+def _():
+    m = leafmap.Map()
+    m
+    return
+
+
+@app.cell
+def _(artsdata_df):
+    Map = leafmap.Map()
+    Map.add_points_from_xy(artsdata_df, x="longitude", y="latitude")
+    Map
+    return
+
+
+@app.cell(column=2)
+def _():
+    return
+
+
+@app.cell(column=3)
 def _():
     return
 

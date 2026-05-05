@@ -64,7 +64,7 @@ def _(
     np,
     satellite_toggle,
 ):
-    # Set parameters based on aggregation mode
+    # Set parameters based on aggregation mode?
     if aggregation_mode.value == "Antall observasjoner":
         color_param = None
         agg_func_param = None

@@ -6,8 +6,8 @@
   },
   "cells": [
     {
-      "id": "Hbol",
-      "code_hash": "ce4194fff5fe8b0eebb7a09769bc0473",
+      "id": "setup",
+      "code_hash": "9bb0a8b73655371a257756f3f1952148",
       "outputs": [
         {
           "type": "data",
@@ -19,9 +19,68 @@
       "console": []
     },
     {
-      "id": "xNDr",
+      "id": "Hbol",
+      "code_hash": "57064c99e8cf5c263185e9d676417b14",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<marimo-ui-element object-id='Hbol-0' random-id='1bbe5ef9-6b56-05ee-dca5-176f8e8fa180'><marimo-file-browser data-initial-value='[]' data-label='null' data-initial-path='&quot;/home/havhje/koding/fugl_artsdataanalyser&quot;' data-selection-mode='&quot;file&quot;' data-filetypes='[]' data-multiple='true' data-restrict-navigation='false'></marimo-file-browser></marimo-ui-element>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "MJUe",
+      "code_hash": "8765558fadc3a925b771d3d511702e36",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "vblA",
+      "code_hash": "da3f0d741203173de5c55f44d6b4fd8e",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"dataanalyse\">Dataanalyse</h3>\n<span class=\"paragraph\">\"Info om notatboken her\"</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "bkHC",
       "code_hash": null,
-      "outputs": [],
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "lEQa",
+      "code_hash": "b385acdb6b13bdc6537dc69402f795c3",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h1 id=\"kart\">Kart</h1></span>"
+          }
+        }
+      ],
       "console": []
     }
   ]
