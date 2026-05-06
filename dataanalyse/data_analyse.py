@@ -20,7 +20,9 @@ def _():
 @app.cell
 def _(valgt_fil):
     file_info = valgt_fil.value[0]
+
     arter_df = pl.read_parquet(file_info.path)
+
     artsdata_df = mo.ui.table(arter_df, page_size=20)
     return arter_df, artsdata_df
 
@@ -49,17 +51,79 @@ def _():
 
 
 @app.cell
-def plotlymap(arter_df):
+def _():
+    farge_kart_arter = mo.ui.dropdown(
+        options=["Navn", "Verdi M1941", "Atferd"], value="Verdi M1941", label="Farge på punkter"
+    )
+    return (farge_kart_arter,)
+
+
+@app.cell
+def _(farge_kart_arter):
+    farge_kart_arter
+    return
+
+
+@app.cell(hide_code=True)
+def plotlymap(arter_df, farge_kart_arter):
+    verdi_m1941_color_map = {
+        "Svært stor verdi": "#AF0F0F",
+        "Stor verdi": "#FD7032",
+        "Middels verdi": "#FEC02D",
+        "Noe verdi": "#FFFF00",
+        "Uten betydning for KU": "#D9D9D9",
+        "Ikke definert": "#000000",
+    }
+
+    verdi_m1941_draw_order = [
+        "Uten betydning for KU",
+        "Ikke definert",
+        "Noe verdi",
+        "Middels verdi",
+        "Stor verdi",
+        "Svært stor verdi",
+    ]
+
+    atferd_priority_order = [
+        "reproductive",
+        "possiblereproductive",
+        "feeding",
+        "stationary",
+        "moving",
+        "dead",
+    ]
+    atferd_draw_order = list(reversed(atferd_priority_order))
+
+    plotly_color_kwargs = {}
+    if farge_kart_arter.value == "Verdi M1941":
+        plotly_color_kwargs = {
+            "color_discrete_map": verdi_m1941_color_map,
+            "category_orders": {"Verdi M1941": verdi_m1941_draw_order},
+        }
+    elif farge_kart_arter.value == "Atferd":
+        plotly_color_kwargs = {
+            "category_orders": {"Atferd": atferd_draw_order},
+        }
+
     plotly_map_fig = px.scatter_map(
         arter_df,
         lat="latitude",
         lon="longitude",
         hover_name="Navn",
-        hover_data=["Art", "Antall", "Observert dato", "Kommune", "Fylke"],
+        hover_data=[
+            "Antall",
+            "Kategori",
+            "Art av nasjonal forvaltningsinteresse",
+            "Atferd",
+            "Observert dato",
+            "Verdi M1941",
+        ],
         custom_data=["Artens ID", "Navn"],
         zoom=8,
         height=650,
         map_style="open-street-map",
+        color=farge_kart_arter.value,
+        **plotly_color_kwargs,
     )
     plotly_map_fig.update_traces(
         marker={"size": 8, "opacity": 0.75},
@@ -91,16 +155,6 @@ def _(arter_df, plotly_map):
             mo.ui.table(selected_arter_df, page_size=10),
         ]
     )
-    return
-
-
-@app.cell(column=2)
-def _():
-    return
-
-
-@app.cell(column=3)
-def _():
     return
 
 
