@@ -50,6 +50,22 @@ def _():
     return
 
 
+@app.cell(hide_code=True)
+def _():
+    mo.md(r"""
+    Heatmap
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _():
+    mo.md(r"""
+    Selekteringskart
+    """)
+    return
+
+
 @app.cell
 def _():
     farge_kart_arter = mo.ui.dropdown(
