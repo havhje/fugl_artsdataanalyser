@@ -13,11 +13,9 @@ with app.setup:
     import requests
     import duckdb
     import pytest
-    from unittest.mock import MagicMock, patch
+    from unittest.mock import patch
     from datetime import datetime, date as dt_date
     import typer
-    from pathlib import Path
-    import rich
     from rich.console import Console
     from rich.table import Table
     from rich.prompt import Prompt
@@ -53,6 +51,73 @@ def _():
     ## Utility functions
     """)
     return
+
+
+@app.function
+def get_required_artskart_columns() -> set[str]:
+    """Return the Artskart columns required by the processing pipeline."""
+    return {
+        "category",
+        "validScientificNameId",
+        "validScientificName",
+        "preferredPopularName",
+        "taxonGroupName",
+        "collector",
+        "dateTimeCollected",
+        "locality",
+        "coordinateUncertaintyInMeters",
+        "municipality",
+        "county",
+        "individualCount",
+        "latitude",
+        "longitude",
+        "geometry",
+        "scientificNameRank",
+        "behavior",
+    }
+
+
+@app.function
+def get_allowed_categories() -> set[str]:
+    """Return accepted red-list and alien-species category codes."""
+    return {
+        "RE",
+        "CR",
+        "EN",
+        "VU",
+        "NT",
+        "LC",
+        "DD",
+        "SE",
+        "HI",
+        "PH",
+        "LO",
+        "NK",
+        "NA",
+        "NE",
+        "Unknown",
+    }
+
+
+@app.function
+def validate_artskart_input_contract(df: pl.DataFrame) -> None:
+    """Validate the Artskart input schema and category domain values."""
+    required_columns = get_required_artskart_columns()
+    missing_columns = sorted(required_columns - set(df.columns))
+    if missing_columns:
+        raise ValueError(f"Mangler obligatoriske Artskart-kolonner: {', '.join(missing_columns)}")
+
+    allowed_categories = get_allowed_categories()
+    unknown_categories = (
+        df.select(pl.col("category").cast(pl.Utf8).alias("category"))
+        .filter(pl.col("category").is_null() | ~pl.col("category").is_in(allowed_categories))
+        .get_column("category")
+        .unique()
+        .to_list()
+    )
+    if unknown_categories:
+        formatted_unknown_categories = sorted("<null>" if value is None else str(value) for value in unknown_categories)
+        raise ValueError(f"Ukjente category-verdier i Artskart-data: {', '.join(formatted_unknown_categories)}")
 
 
 @app.cell(hide_code=True)
@@ -482,7 +547,7 @@ def _(
     fetch_taxon_data,
     get_norwegian_name,
 ):
-    def process_and_enrich_data(source_df: pl.DataFrame) -> pl.DataFrame | None:
+    def process_and_enrich_data(source_df: pl.DataFrame) -> pl.DataFrame:
         """Process the dataframe and enrich with taxonomy data.
 
         Fetches taxonomic hierarchy and Norwegian vernacular names from the
@@ -493,28 +558,33 @@ def _(
             source_df: Input dataframe containing a ``validScientificNameId`` column.
 
         Returns:
-            Enriched dataframe with taxonomy columns, or None on error.
+            Enriched dataframe with taxonomy columns.
+
+        Raises:
+            ValueError: If the required ID column is missing or no valid IDs exist.
+            RuntimeError: If NorTaxa API calls for valid IDs fail or return empty data.
         """
-        # Convert to Polars for better performance
+        # Konverterer til Polars for bedre ytelse
         if isinstance(source_df, pl.DataFrame):
             df_work = source_df.clone()
         else:
             df_work = pl.from_pandas(source_df)
 
-        # Check if required column exists
         if "validScientificNameId" not in df_work.columns:
-            console.print("[bold red]Feil:[/bold red] 'validScientificNameId'-kolonnen finnes ikke i datasettet.")
-            return None
+            message = "'validScientificNameId'-kolonnen finnes ikke i datasettet."
+            console.print(f"[bold red]Feil:[/bold red] {message}")
+            raise ValueError(message)
 
-        # Get unique IDs
         unique_ids = df_work.select("validScientificNameId").unique().to_series().to_list()
         total_ids = len(unique_ids)
+        lookup_id_dtype = df_work["validScientificNameId"].dtype
 
-        # Storage for results
-        taxonomy_data = {}
-        family_names = {}
-        order_names = {}
-        feilet_ids = []
+        taxonomy_data: dict[int, dict[str, str | None]] = {}
+        family_names: dict[int, str | None] = {}
+        order_names: dict[int, str | None] = {}
+        valid_species_ids: list[int] = []
+        invalid_ids: list[Any] = []
+        failed_api_ids: list[str] = []
 
         # Hent taksonomidata med Rich-fremdriftsindikator
         with Progress(
@@ -528,9 +598,9 @@ def _(
         ) as progress:
             task = progress.add_task("Henter taksonomidata fra NorTaxa API...", total=total_ids)
 
-            for i, species_id in enumerate(unique_ids):
-                # Validate ID before processing — avoids exception-driven control flow
-                if species_id is None or species_id != species_id:  # catches None and NaN
+            for i, raw_species_id in enumerate(unique_ids):
+                if raw_species_id is None or raw_species_id != raw_species_id:  # fanger None og NaN
+                    invalid_ids.append(raw_species_id)
                     progress.update(
                         task,
                         advance=1,
@@ -539,8 +609,9 @@ def _(
                     continue
 
                 try:
-                    species_id = int(species_id)
-                except ValueError, TypeError:
+                    species_id = int(raw_species_id)
+                except (ValueError, TypeError):
+                    invalid_ids.append(raw_species_id)
                     progress.update(
                         task,
                         advance=1,
@@ -548,27 +619,31 @@ def _(
                     )
                     continue
 
-                # Fetch species data
+                valid_species_ids.append(species_id)
+
                 species_data = fetch_taxon_data(species_id)
-                if species_data:
+                if not species_data:
+                    failed_api_ids.append(str(species_id))
+                else:
                     hierarchy, family_id, order_id = extract_hierarchy_and_ids(species_data)
                     taxonomy_data[species_id] = hierarchy
 
-                    # Fetch family name if available
+                    # Hent norsk familienavn hvis API-et oppgir familie-ID
                     if family_id:
                         family_data = fetch_taxon_data(family_id)
                         if family_data:
                             family_names[species_id] = get_norwegian_name(family_data)
+                        else:
+                            failed_api_ids.append(f"{species_id} (Family {family_id})")
 
-                    # Fetch order name if available
+                    # Hent norsk ordennavn hvis API-et oppgir orden-ID
                     if order_id:
                         order_data = fetch_taxon_data(order_id)
                         if order_data:
                             order_names[species_id] = get_norwegian_name(order_data)
-                else:
-                    feilet_ids.append(species_id)
+                        else:
+                            failed_api_ids.append(f"{species_id} (Order {order_id})")
 
-                # Rate limiting
                 if RATE_LIMIT_DELAY > 0:
                     time.sleep(RATE_LIMIT_DELAY)
 
@@ -578,17 +653,32 @@ def _(
                     description=f"Henter ID {species_id} ({i + 1}/{total_ids})",
                 )
 
-        # Vis advarsler for mislykkede API-kall
-        if feilet_ids:
+        if invalid_ids:
+            formatted_invalid_ids = ["<null>" if value is None else str(value) for value in invalid_ids[:10]]
             console.print(
-                f"[yellow]Advarsel:[/yellow] Kunne ikke hente data for {len(feilet_ids)} art-IDer: {feilet_ids[:10]}{'...' if len(feilet_ids) > 10 else ''}"
+                f"[yellow]Advarsel:[/yellow] Hopper over {len(invalid_ids)} ugyldige art-IDer: "
+                f"{formatted_invalid_ids}{'...' if len(invalid_ids) > 10 else ''}"
+            )
+
+        if not valid_species_ids:
+            raise ValueError("Ingen gyldige validScientificNameId-verdier å hente fra NorTaxa API.")
+
+        if failed_api_ids:
+            examples = ", ".join(failed_api_ids[:10])
+            raise RuntimeError(
+                "NorTaxa API-kall feilet eller ga tomt resultat for "
+                f"{len(failed_api_ids)} ID-er. Eksempel-IDer: {examples}"
             )
 
         taxonomy_rows = [
-            {"validScientificNameId": sid, **{r: h.get(r) for r in DESIRED_RANKS}} for sid, h in taxonomy_data.items()
+            {"validScientificNameId": sid, **{rank: hierarchy.get(rank) for rank in DESIRED_RANKS}}
+            for sid, hierarchy in taxonomy_data.items()
         ]
-        taxonomy_lookup = pl.DataFrame(taxonomy_rows).with_columns(
-            pl.col("validScientificNameId").cast(df_work["validScientificNameId"].dtype)
+        taxonomy_schema = {"validScientificNameId": lookup_id_dtype, **{rank: pl.Utf8 for rank in DESIRED_RANKS}}
+        taxonomy_lookup = pl.DataFrame(taxonomy_rows) if taxonomy_rows else pl.DataFrame(schema=taxonomy_schema)
+        taxonomy_lookup = taxonomy_lookup.with_columns(
+            pl.col("validScientificNameId").cast(lookup_id_dtype),
+            *[pl.col(rank).cast(pl.Utf8) for rank in DESIRED_RANKS],
         )
 
         name_rows = [
@@ -597,10 +687,14 @@ def _(
                 "FamilieNavn": family_names.get(sid),
                 "OrdenNavn": order_names.get(sid),
             }
-            for sid in set(list(family_names.keys()) + list(order_names.keys()))
+            for sid in sorted(set(family_names) | set(order_names))
         ]
-        name_lookup = pl.DataFrame(name_rows).with_columns(
-            pl.col("validScientificNameId").cast(df_work["validScientificNameId"].dtype)
+        name_schema = {"validScientificNameId": lookup_id_dtype, "FamilieNavn": pl.Utf8, "OrdenNavn": pl.Utf8}
+        name_lookup = pl.DataFrame(name_rows) if name_rows else pl.DataFrame(schema=name_schema)
+        name_lookup = name_lookup.with_columns(
+            pl.col("validScientificNameId").cast(lookup_id_dtype),
+            pl.col("FamilieNavn").cast(pl.Utf8),
+            pl.col("OrdenNavn").cast(pl.Utf8),
         )
 
         df_work = df_work.join(taxonomy_lookup, on="validScientificNameId", how="left").join(
@@ -947,6 +1041,8 @@ def legg_til_kolonne_arteravnasjonal(input_df: pl.DataFrame) -> pl.DataFrame:
         "Fremmede arter",
     ]
 
+    missing_lookup_marker = "Treff ikke funnet"
+
     category_list = (
         pl.concat_list(  # slår sammen alle anf til en kolonne, men merk List Concatenation  = packing items into a list within a single row ( noe annet enn a stacke tabbeller)
             *[
@@ -955,12 +1051,15 @@ def legg_til_kolonne_arteravnasjonal(input_df: pl.DataFrame) -> pl.DataFrame:
             ]
         ).list.drop_nulls()  # fjerner null verdier slik at du ikke får NT, null, null, Fremmed art
     )
+    has_missing_lookup = pl.any_horizontal(*[pl.col(col) == missing_lookup_marker for col in category_columns])
 
     output_df = input_df.with_columns(
         pl.when(category_list.list.len() > 0)
         .then(
             category_list.list.join(", ")
         )  # You need .list.join(", ") because pl.concat_list() gives you the computer-code format (a list object), and you want the human-readable format (a single text string). Hvor du da joiner tingene i listen med ,
+        .when(has_missing_lookup)
+        .then(pl.lit(missing_lookup_marker))
         .otherwise(pl.lit("Nei"))
         .alias("Art av nasjonal forvaltningsinteresse")
     )
@@ -1447,6 +1546,7 @@ def _(add_national_interest_criteria, console, process_and_enrich_data):
         # Bruker DuckDB direkte for å lese CSV — unngår polars sin ragged-lines feil
         with console.status("[bold blue]Leser CSV-fil med DuckDB..."):
             input_df = duckdb.sql(f"SELECT * FROM read_csv('{input_fil_sti}')").pl()
+        validate_artskart_input_contract(input_df)
 
         with console.status("[bold blue]Filtrerer observasjoner på år..."):
             # OBS: Observasjoner uten dato (null) filtreres også bort her.

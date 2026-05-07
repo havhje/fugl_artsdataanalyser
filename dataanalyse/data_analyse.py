@@ -57,7 +57,24 @@ def _(artsdata_df):
     return
 
 
-@app.cell(column=1, hide_code=True)
+@app.cell(column=1)
+def _():
+    mo.md(r"""
+    ### TO do>
+
+    1. Forstå all kodem
+    2. Optimalisere layout når du ikke er app view
+
+    3. NB!!! Kan du endre geodatahåndteringen til den nye geoAI pakken eller noe lignende?
+
+    4. NBBB! Heatmap = bare obs, også regne ut antall/obs, gjære enm funkskjon og leggge til funksjonsdataanalyse
+
+    SUppe AI har lagd egen mappe med tester. Fiks.
+    """)
+    return
+
+
+@app.cell(hide_code=True)
 def _():
     mo.md(r"""
     #Kart

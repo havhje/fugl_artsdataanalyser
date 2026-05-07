@@ -1,0 +1,36 @@
+from __future__ import annotations
+
+import polars as pl
+
+from databehandling.databehandling import legg_til_kolonne_arteravnasjonal
+
+CATEGORY_COLUMNS = [
+    "Ansvarsarter",
+    "Trua arter",
+    "Andre spesielt hensynskrevende arter",
+    "Spesielle okologiske former",
+    "Prioriterte arter",
+    "Fredete arter",
+    "NT",
+    "Fremmede arter",
+]
+
+
+def test_national_interest_summary_preserves_missing_lookup_marker() -> None:
+    source_df = pl.DataFrame(
+        {
+            "species": ["ingen treff", "ingen kriterier", "positive kriterier"],
+            **{column: ["Treff ikke funnet", "No", "No"] for column in CATEGORY_COLUMNS},
+        }
+    ).with_columns(
+        pl.Series("Ansvarsarter", ["Treff ikke funnet", "No", "Yes"]),
+        pl.Series("Fremmede arter", ["Treff ikke funnet", "No", "Yes"]),
+    )
+
+    result = legg_til_kolonne_arteravnasjonal(source_df)
+
+    assert result.get_column("Art av nasjonal forvaltningsinteresse").to_list() == [
+        "Treff ikke funnet",
+        "Nei",
+        "Ansvarsarter, Fremmede arter",
+    ]
