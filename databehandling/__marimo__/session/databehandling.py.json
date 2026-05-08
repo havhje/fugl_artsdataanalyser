@@ -7,28 +7,14 @@
   "cells": [
     {
       "id": "setup",
-      "code_hash": "74aeb1d18306fdb71e93eb52eed87d87",
-      "outputs": [
-        {
-          "type": "data",
-          "data": {
-            "text/plain": ""
-          }
-        }
-      ],
+      "code_hash": "59315e4441c8d9b4718b38071df8afe2",
+      "outputs": [],
       "console": []
     },
     {
       "id": "Hbol",
       "code_hash": "e6c08ff892612d1f23236283efd8bbee",
-      "outputs": [
-        {
-          "type": "data",
-          "data": {
-            "text/plain": ""
-          }
-        }
-      ],
+      "outputs": [],
       "console": []
     },
     {
@@ -52,6 +38,24 @@
     },
     {
       "id": "bkHC",
+      "code_hash": "1ae282e6b82ddd406cff7ee201ec30e3",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "lEQa",
+      "code_hash": "4f057aa5e4893377a7051eba7104bf7d",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "PKri",
+      "code_hash": "3f84699f51bb42ca0484540340b185c6",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "Xref",
       "code_hash": "aae9b7496d94e1388a1a7e9745859762",
       "outputs": [
         {
@@ -64,40 +68,19 @@
       "console": []
     },
     {
-      "id": "lEQa",
-      "code_hash": "0ef846908cffcf7667729185ea7dff00",
-      "outputs": [
-        {
-          "type": "data",
-          "data": {
-            "text/plain": ""
-          }
-        }
-      ],
+      "id": "SFPL",
+      "code_hash": "ea6a4a4eacd3d84f83696d872bf503ab",
+      "outputs": [],
       "console": []
     },
     {
-      "id": "PKri",
-      "code_hash": "266dc042331703554c87e4112601e1d7",
-      "outputs": [
-        {
-          "type": "data",
-          "data": {
-            "text/plain": ""
-          }
-        }
-      ],
-      "console": [
-        {
-          "type": "stream",
-          "name": "stdout",
-          "text": "\u001b[31mF\u001b[0m\u001b[31m                                                                        [100%]\u001b[0m\n=================================== FAILURES ===================================\n\u001b[31m\u001b[1m______ .fugl_artsdataanalyser.databehandling.test_rydd_navn_og_datatyper _______\u001b[0m\n\n    def test_rydd_navn_og_datatyper():\n    \n        # \u2500\u2500 Build test input with all required columns \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n        test_df = pl.DataFrame(\n            {\n                \"category\": [\"LC\", \"NT\", \"EN\"],\n                \"Art av nasjonal forvaltningsinteresse\": [\"Yes\", \"No\", \"Yes\"],\n                \"Verdi M1941\": [\"C\", \"D\", \"B\"],\n                \"preferredPopularName\": [\"dompap\", \"kr\u00e5ke\", \"tjeld\"],\n                \"validScientificName\": [\n                    \"Pyrrhula pyrrhula\",\n                    \"Corvus cornix\",\n                    \"Haematopus ostralegus\",\n                ],\n                \"individualCount\": [\"6\", None, \"3/1\"],\n                \"behavior\": [\"singing\", None, \"flying\"],\n                \"dateTimeCollected\": [\n                    datetime(2022, 5, 15, 10, 30, 0),\n                    datetime(2023, 7, 4, 14, 0, 0),\n                    datetime(2019, 6, 1, 7, 4, 19),\n                ],\n                \"coordinateUncertaintyInMeters\": [300, None, 9],\n                \"FamilieNavn\": [\"Fringillidae\", \"Corvidae\", \"Haematopodidae\"],\n                \"OrdenNavn\": [\"Passeriformes\", \"Passeriformes\", \"Charadriiformes\"],\n                \"taxonGroupName\": [\"Fugler\", \"Fugler\", \"Fugler\"],\n                \"collector\": [\"Ola Nordmann\", \"Kari Nordmann\", None],\n                \"locality\": [\"Sommar\u00f8yveien 21\", \"Strengelv\u00e5gfjorden\", None],\n                \"municipality\": [\"\u00d8ksnes\", \"\u00d8ksnes\", \"\u00d8ksnes\"],\n                \"county\": [\"Nordland\", \"Nordland\", \"Nordland\"],\n                \"scientificNameRank\": [\"species\", \"species\", \"species\"],\n                \"Ansvarsarter\": [\"No\", \"No\", \"Yes\"],\n                \"Andre spesielt hensynskrevende arter\": [\"No\", \"Yes\", \"No\"],\n                \"Spesielle okologiske former\": [\"No\", \"No\", \"Yes\"],\n                \"Prioriterte arter\": [\"No\", \"No\", \"Yes\"],\n                \"Fredete arter\": [\"No\", \"No\", \"No\"],\n                \"Fremmede arter\": [\"No\", \"No\", \"No\"],\n                \"latitude\": [\"68,904168\", \"68,962388\", \"68.974144\"],\n                \"longitude\": [\"15,066918\", \"15,148183\", \"14.947151\"],\n                \"geometry\": [\n                    \"POINT (502688 7643678)\",\n                    \"POINT (505937 7650175)\",\n                    \"POINT (497884 7651480)\",\n                ],\n                \"validScientificNameId\": [4263, 4164, 3664],\n            }\n        )\n    \n        test_result = rydd_navn_og_datatyper(test_df)\n    \n        # \u2500\u2500 Antall rader skal v\u00e6re uendret \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n        assert test_result.height == 3, f\"Forventet 3 rader, fikk {test_result.height}\"\n    \n        # \u2500\u2500 Alle forventede kolonner skal finnes\n        expected_cols = [\n            \"Kategori\",\n            \"Art av nasjonal forvaltningsinteresse\",\n            \"Verdi M1941\",\n            \"Navn\",\n            \"Art\",\n            \"Antall\",\n            \"Atferd\",\n            \"Observert dato\",\n            \"Usikkerhet meter\",\n            \"Familie\",\n            \"Orden\",\n            \"Artsgruppe\",\n            \"Observat\u00f8r\",\n            \"Lokalitet\",\n            \"Kommune\",\n            \"Fylke\",\n            \"Taksonomisk niv\u00e5\",\n            \"Ansvarsarter\",\n            \"Andre spesielt hensynskrevende arter\",\n            \"Spesielle \u00f8kologiske former\",\n            \"Prioriterte arter\",\n            \"Fredete arter\",\n            \"Fremmede arter\",\n            \"latitude\",\n            \"longitude\",\n            \"geometry\",\n            \"Artens ID\",\n        ]\n    \n        for col in expected_cols:\n            assert col in test_result.columns, f\"Kolonne '{col}' mangler i resultatet\"\n    \n        assert len(test_result.columns) == len(expected_cols), (\n            f\"Forventet {len(expected_cols)} kolonner, fikk {len(test_result.columns)}: {test_result.columns}\"\n        )\n    \n        # \u2500\u2500 Test kolonneomnavning (renaming) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n        # category \u2192 Kategori\n>       assert test_result.get_column(\"Kategori\").to_list() == [\"LC\", \"NT\", \"EN\"], (\n            \"category skal omd\u00f8pes til Kategori med riktige verdier\"\n        )\n\u001b[1m\u001b[31mE       AssertionError: category skal omd\u00f8pes til Kategori med riktige verdier\u001b[0m\n\u001b[1m\u001b[31mE       assert ['EN', 'NT', 'LC'] == ['LC', 'NT', 'EN']\u001b[0m\n\u001b[1m\u001b[31mE         \u001b[0m\n\u001b[1m\u001b[31mE         At index 0 diff: 'EN' != 'LC'\u001b[0m\n\u001b[1m\u001b[31mE         Use -v to get more diff\u001b[0m\n\n\u001b[1m\u001b[31mmarimo://databehandling.py#cell_id=PKri\u001b[0m:93: AssertionError\n=================================== Overview ===================================\n\nSummary:\nTotal: 1, Passed: 0, Failed: 1, Errors: 0, Skipped: 0\n\u001b[36m\u001b[1m=========================== short test summary info ============================\u001b[0m\n\u001b[31mFAILED\u001b[0m databehandling::\u001b[1mtest_rydd_navn_og_datatyper\u001b[0m - AssertionError: category skal omd\u00f8pes til Kategori med riktige verdier\n",
-          "mimetype": "text/plain"
-        }
-      ]
+      "id": "BYtC",
+      "code_hash": "dcea5ade2f6ad2a851da64dd16357bc3",
+      "outputs": [],
+      "console": []
     },
     {
-      "id": "Xref",
+      "id": "RGSE",
       "code_hash": "8a2aaea25d28ed7cc1132dab98577296",
       "outputs": [
         {
@@ -110,31 +93,31 @@
       "console": []
     },
     {
-      "id": "SFPL",
+      "id": "Kclp",
       "code_hash": "03c76cc8fe9ae19397186f52469073fd",
       "outputs": [],
       "console": []
     },
     {
-      "id": "BYtC",
+      "id": "emfo",
       "code_hash": "b7aadb84063e274e9be28ae527a3039c",
       "outputs": [],
       "console": []
     },
     {
-      "id": "RGSE",
-      "code_hash": "f35a64005889806f38fcfad1bc5cf7cc",
+      "id": "Hstk",
+      "code_hash": "4e9ae643d275cab1a5b5e7eb8c1f946b",
       "outputs": [],
       "console": []
     },
     {
-      "id": "Kclp",
+      "id": "nWHF",
       "code_hash": "d0ff6ae8b594813a1a8013a0cde82161",
       "outputs": [],
       "console": []
     },
     {
-      "id": "emfo",
+      "id": "iLit",
       "code_hash": "d92f9ed2b36c80ef8728273902ce3f15",
       "outputs": [
         {
@@ -147,19 +130,19 @@
       "console": []
     },
     {
-      "id": "Hstk",
+      "id": "ZHCJ",
       "code_hash": "56c957a471dc21e12668fb3524776020",
       "outputs": [],
       "console": []
     },
     {
-      "id": "nWHF",
+      "id": "ROlb",
       "code_hash": "03b7d6809ca724a53df5110fc99e1344",
       "outputs": [],
       "console": []
     },
     {
-      "id": "iLit",
+      "id": "qnkX",
       "code_hash": "dda1e72ac50c6417612a74b4eff27eba",
       "outputs": [
         {
@@ -172,19 +155,19 @@
       "console": []
     },
     {
-      "id": "ZHCJ",
-      "code_hash": "dc98c1bcb2242ec3594484d8b31b9b99",
+      "id": "TqIu",
+      "code_hash": "a037fd5b69096c4ab2c441c380570baf",
       "outputs": [],
       "console": []
     },
     {
-      "id": "ROlb",
+      "id": "Vxnm",
       "code_hash": "b5009442b1b32a0c44e20f8722e83789",
       "outputs": [],
       "console": []
     },
     {
-      "id": "qnkX",
+      "id": "DnEU",
       "code_hash": "014174002aa4cf3b1bda533c973342b4",
       "outputs": [
         {
@@ -197,19 +180,19 @@
       "console": []
     },
     {
-      "id": "TqIu",
+      "id": "ulZA",
       "code_hash": "cf623a2c4dca80680fa2f1f407f1a05d",
       "outputs": [],
       "console": []
     },
     {
-      "id": "Vxnm",
+      "id": "ecfG",
       "code_hash": "710e6bdbf171f57aff48ec7049f84c37",
       "outputs": [],
       "console": []
     },
     {
-      "id": "DnEU",
+      "id": "Pvdt",
       "code_hash": "b83d98e9c7a5910b657eeafb190dc38a",
       "outputs": [
         {
@@ -222,43 +205,43 @@
       "console": []
     },
     {
-      "id": "ulZA",
+      "id": "ZBYS",
       "code_hash": "1081708cf24d7038e9573fd49f35b0f9",
       "outputs": [],
       "console": []
     },
     {
-      "id": "ecfG",
+      "id": "aLJB",
       "code_hash": "80d3a806469d99158bff33c36c662676",
       "outputs": [],
       "console": []
     },
     {
-      "id": "Pvdt",
+      "id": "nHfw",
       "code_hash": "38f01bb5678cdfdff0f5eeb9e0ac80b6",
       "outputs": [],
       "console": []
     },
     {
-      "id": "ZBYS",
+      "id": "xXTn",
       "code_hash": "b1a77a4cceee2fe674466ac858423a12",
       "outputs": [],
       "console": []
     },
     {
-      "id": "aLJB",
+      "id": "AjVT",
       "code_hash": "61bae9686644176c99b96d9c7257ef2a",
       "outputs": [],
       "console": []
     },
     {
-      "id": "nHfw",
+      "id": "pHFh",
       "code_hash": "df23b74179e2f7a917f0872e99d55061",
       "outputs": [],
       "console": []
     },
     {
-      "id": "xXTn",
+      "id": "NCOB",
       "code_hash": "10eab9fe24a69fc2527626f0dac574ac",
       "outputs": [
         {
@@ -271,14 +254,14 @@
       "console": []
     },
     {
-      "id": "AjVT",
+      "id": "aqbW",
       "code_hash": "8e6ef924fcfd59a6331194ad9892531f",
       "outputs": [],
       "console": []
     },
     {
-      "id": "pHFh",
-      "code_hash": "14739e71298bf1ee8fde45d0443defa8",
+      "id": "TRpd",
+      "code_hash": "6d9267adfb5f84c2e3d8dcb17328eefa",
       "outputs": [],
       "console": []
     }

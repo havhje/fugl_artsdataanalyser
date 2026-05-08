@@ -3,7 +3,7 @@ from __future__ import annotations
 import polars as pl
 import pytest
 
-from tests.helpers import FAKE_DESIRED_RANKS, FakeNorTaxa, run_databehandling_app
+from tests_KI.helpers import FAKE_DESIRED_RANKS, FakeNorTaxa, run_databehandling_app
 
 
 def test_one_api_call_failure_raises_runtime_error_with_id() -> None:

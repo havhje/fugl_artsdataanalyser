@@ -6,7 +6,7 @@ from pathlib import Path
 import duckdb
 import polars as pl
 
-from tests.helpers import FakeNorTaxa, run_databehandling_app
+from tests_KI.helpers import FakeNorTaxa, run_databehandling_app
 
 ROOT = Path(__file__).resolve().parents[1]
 FIXTURE_CSV = ROOT / "data_csv_gammel" / "test_fugledata.csv"

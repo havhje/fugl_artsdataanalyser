@@ -1,9 +1,9 @@
 import marimo
 
-__generated_with = "0.23.2"
+__generated_with = "0.23.5"
 app = marimo.App(width="columns", layout_file="layouts/data_analyse.grid.json")
 
-with app.setup:
+with app.setup(hide_code=True):
     import marimo as mo
     import polars as pl
     import plotly.express as px
@@ -26,7 +26,7 @@ def _():
     return (valgt_fil,)
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(valgt_fil):
     file_info = valgt_fil.value[0]
 
@@ -36,7 +36,7 @@ def _(valgt_fil):
     return (artsdata_df,)
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(artsdata_df):
     arter_df = artsdata_df.value
     return (arter_df,)
@@ -53,28 +53,11 @@ def _():
 
 @app.cell
 def _(artsdata_df):
-    artsdata_df
+    artsdata_df 
     return
 
 
-@app.cell(column=1)
-def _():
-    mo.md(r"""
-    ### TO do>
-
-    1. Forstå all kodem
-    2. Optimalisere layout når du ikke er app view
-
-    3. NB!!! Kan du endre geodatahåndteringen til den nye geoAI pakken eller noe lignende?
-
-    4. NBBB! Heatmap = bare obs, også regne ut antall/obs, gjære enm funkskjon og leggge til funksjonsdataanalyse
-
-    SUppe AI har lagd egen mappe med tester. Fiks.
-    """)
-    return
-
-
-@app.cell(hide_code=True)
+@app.cell(column=1, hide_code=True)
 def _():
     mo.md(r"""
     #Kart
@@ -82,7 +65,7 @@ def _():
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _():
     mo.md(r"""
     ### Selekteringskart
@@ -104,7 +87,7 @@ def _(farge_kart_arter):
     return
 
 
-@app.cell(hide_code=True)
+@app.cell
 def plotlymap(arter_df, farge_kart_arter):
     verdi_m1941_color_map = {
         "Svært stor verdi": "#AF0F0F",
@@ -186,43 +169,6 @@ def plotlymap(arter_df, farge_kart_arter):
     return plotly_map, plotly_map_fig
 
 
-@app.cell(hide_code=True)
-def _(arter_df, plotly_map, plotly_map_fig):
-    def get_selected_row_nrs(points, figure):
-        selected_row_nrs = []
-        for point in points:
-            curve_number = point.get("curveNumber")
-            point_index = point.get("pointIndex")
-            if point_index is None:
-                point_index = point.get("pointNumber")
-
-            if curve_number is None or point_index is None:
-                continue
-
-            trace_customdata = figure.data[int(curve_number)].customdata
-            if trace_customdata is None:
-                continue
-
-            selected_row_nrs.append(int(trace_customdata[int(point_index)][0]))
-
-        return selected_row_nrs
-
-
-    selected_row_nrs = get_selected_row_nrs(plotly_map.points, plotly_map_fig)
-
-    selected_arter_df = (
-        arter_df.with_row_index("__row_nr").filter(pl.col("__row_nr").is_in(selected_row_nrs)).drop("__row_nr")
-    )
-
-    mo.vstack(
-        [
-            mo.md(f"**Valgte observasjoner:** {selected_arter_df.height}"),
-            mo.ui.table(selected_arter_df, page_size=10),
-        ]
-    )
-    return (selected_arter_df,)
-
-
 @app.cell
 def _():
     mo.md(r"""
@@ -270,6 +216,43 @@ def heatmap(arter_map_df):
 
     EsriImagery().opts(alpha=0.75) * species_density
     return
+
+
+@app.cell(hide_code=True)
+def _(arter_df, plotly_map, plotly_map_fig):
+    def get_selected_row_nrs(points, figure):
+        selected_row_nrs = []
+        for point in points:
+            curve_number = point.get("curveNumber")
+            point_index = point.get("pointIndex")
+            if point_index is None:
+                point_index = point.get("pointNumber")
+
+            if curve_number is None or point_index is None:
+                continue
+
+            trace_customdata = figure.data[int(curve_number)].customdata
+            if trace_customdata is None:
+                continue
+
+            selected_row_nrs.append(int(trace_customdata[int(point_index)][0]))
+
+        return selected_row_nrs
+
+
+    selected_row_nrs = get_selected_row_nrs(plotly_map.points, plotly_map_fig)
+
+    selected_arter_df = (
+        arter_df.with_row_index("__row_nr").filter(pl.col("__row_nr").is_in(selected_row_nrs)).drop("__row_nr")
+    )
+
+    mo.vstack(
+        [
+            mo.md(f"**Valgte observasjoner:** {selected_arter_df.height}"),
+            mo.ui.table(selected_arter_df, page_size=10),
+        ]
+    )
+    return (selected_arter_df,)
 
 
 if __name__ == "__main__":
