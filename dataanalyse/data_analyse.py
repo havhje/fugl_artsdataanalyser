@@ -14,8 +14,6 @@ with app.setup(hide_code=True):
     import holoviews as hv
     import datashader as ds
     import geopandas as gpd
-
-
     from holoviews.element.tiles import EsriImagery
 
 
@@ -53,7 +51,7 @@ def _():
 
 @app.cell
 def _(artsdata_df):
-    artsdata_df 
+    artsdata_df
     return
 
 
@@ -87,7 +85,7 @@ def _(farge_kart_arter):
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def plotlymap(arter_df, farge_kart_arter):
     verdi_m1941_color_map = {
         "Svært stor verdi": "#AF0F0F",
@@ -177,9 +175,9 @@ def _():
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def test(selected_arter_df):
-    arter_pdf = selected_arter_df.filter(pl.col("latitude").is_not_null() & pl.col("longitude").is_not_null()).to_pandas()
+    arter_pdf = selected_arter_df.to_pandas()
 
     arter_gdf = gpd.GeoDataFrame(
         arter_pdf,
@@ -197,20 +195,36 @@ def test(selected_arter_df):
 
 
 @app.cell
-def heatmap(arter_map_df):
+def _():
+    max_px_value = mo.ui.slider(  start=1, stop=10, step=2, value=10, show_value=True, label="Maks spredning" )
+    threshold_value= mo.ui.slider(start=0.1, stop=1, value=0.95, show_value=True,label="Terskel")
+    return max_px_value, threshold_value
+
+
+@app.cell
+def _(max_px_value, threshold_value):
+    max_px_value 
+    threshold_value
+
+    stack = mo.vstack([max_px_value, threshold_value])
+
+    stack
+    return
+
+
+@app.cell
+def heatmap(arter_map_df, max_px_value, threshold_value):
     species_density = arter_map_df.hvplot.points(
         x="x_webmercator",
         y="y_webmercator",
         rasterize=True,
         dynspread=True,
-        max_px=10,
-        threshold=0.95,
+        max_px=max_px_value.value,
+        threshold=threshold_value.value,
         aggregator=ds.count(),
         cnorm="eq_hist",
         cmap=cc.fire[100:],
-        width=900,
-        height=700,
-        xaxis=None,
+        width=900, height=700, xaxis=None,
         yaxis=None,
     )
 
@@ -218,26 +232,11 @@ def heatmap(arter_map_df):
     return
 
 
-@app.cell(hide_code=True)
+@app.cell
 def _(arter_df, plotly_map, plotly_map_fig):
     def get_selected_row_nrs(points, figure):
-        selected_row_nrs = []
-        for point in points:
-            curve_number = point.get("curveNumber")
-            point_index = point.get("pointIndex")
-            if point_index is None:
-                point_index = point.get("pointNumber")
-
-            if curve_number is None or point_index is None:
-                continue
-
-            trace_customdata = figure.data[int(curve_number)].customdata
-            if trace_customdata is None:
-                continue
-
-            selected_row_nrs.append(int(trace_customdata[int(point_index)][0]))
-
-        return selected_row_nrs
+        """For every selected map point, use its curveNumber to find the right Plotly trace, use its pointIndex to find the right point inside that trace, look in that point’s hidden customdata, take the first value, convert it to an integer, and return all those integers as a list."""
+        return [int(figure.data[point["curveNumber"]].customdata[point["pointIndex"]][0]) for point in points]
 
 
     selected_row_nrs = get_selected_row_nrs(plotly_map.points, plotly_map_fig)
@@ -253,6 +252,11 @@ def _(arter_df, plotly_map, plotly_map_fig):
         ]
     )
     return (selected_arter_df,)
+
+
+@app.cell(column=2)
+def _():
+    return
 
 
 if __name__ == "__main__":

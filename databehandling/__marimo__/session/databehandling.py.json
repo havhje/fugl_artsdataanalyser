@@ -1,26 +1,47 @@
 {
   "version": "1",
   "metadata": {
-    "marimo_version": "0.23.2",
+    "marimo_version": "0.23.5",
     "script_metadata_hash": null
   },
   "cells": [
     {
       "id": "setup",
       "code_hash": "59315e4441c8d9b4718b38071df8afe2",
-      "outputs": [],
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
       "console": []
     },
     {
       "id": "Hbol",
       "code_hash": "e6c08ff892612d1f23236283efd8bbee",
-      "outputs": [],
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
       "console": []
     },
     {
       "id": "MJUe",
       "code_hash": "3bc9d46fd8b2baa2e56803e32e3f98fe",
-      "outputs": [],
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
       "console": []
     },
     {
@@ -39,19 +60,40 @@
     {
       "id": "bkHC",
       "code_hash": "1ae282e6b82ddd406cff7ee201ec30e3",
-      "outputs": [],
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
       "console": []
     },
     {
       "id": "lEQa",
       "code_hash": "4f057aa5e4893377a7051eba7104bf7d",
-      "outputs": [],
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
       "console": []
     },
     {
       "id": "PKri",
       "code_hash": "3f84699f51bb42ca0484540340b185c6",
-      "outputs": [],
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
       "console": []
     },
     {
@@ -70,14 +112,35 @@
     {
       "id": "SFPL",
       "code_hash": "ea6a4a4eacd3d84f83696d872bf503ab",
-      "outputs": [],
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
       "console": []
     },
     {
       "id": "BYtC",
       "code_hash": "dcea5ade2f6ad2a851da64dd16357bc3",
-      "outputs": [],
-      "console": []
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stdout",
+          "text": "\u001b[32m.\u001b[0m\u001b[33m                                                                        [100%]\u001b[0m\n=================================== Overview ===================================\nPassed Tests:\n\u001b[1m\u001b[32m\u001b[22m\u2713\u001b[0m\u001b[0m databehandling::test_rydd_navn_og_datatyper\n\nSummary:\nTotal: 1, Passed: 1, Failed: 0, Errors: 0, Skipped: 0\n",
+          "mimetype": "text/plain"
+        }
+      ]
     },
     {
       "id": "RGSE",
@@ -95,26 +158,61 @@
     {
       "id": "Kclp",
       "code_hash": "03c76cc8fe9ae19397186f52469073fd",
-      "outputs": [],
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
       "console": []
     },
     {
       "id": "emfo",
       "code_hash": "b7aadb84063e274e9be28ae527a3039c",
-      "outputs": [],
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
       "console": []
     },
     {
       "id": "Hstk",
       "code_hash": "4e9ae643d275cab1a5b5e7eb8c1f946b",
-      "outputs": [],
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
       "console": []
     },
     {
       "id": "nWHF",
       "code_hash": "d0ff6ae8b594813a1a8013a0cde82161",
-      "outputs": [],
-      "console": []
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stdout",
+          "text": "\u001b[32m.\u001b[0m\u001b[33m                                                                        [100%]\u001b[0m\n=================================== Overview ===================================\nPassed Tests:\n\u001b[1m\u001b[32m\u001b[22m\u2713\u001b[0m\u001b[0m databehandling/databehandling.py::test_process_and_enrich_data\n\nSummary:\nTotal: 1, Passed: 1, Failed: 0, Errors: 0, Skipped: 0\n",
+          "mimetype": "text/plain"
+        }
+      ]
     },
     {
       "id": "iLit",
@@ -132,14 +230,35 @@
     {
       "id": "ZHCJ",
       "code_hash": "56c957a471dc21e12668fb3524776020",
-      "outputs": [],
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
       "console": []
     },
     {
       "id": "ROlb",
       "code_hash": "03b7d6809ca724a53df5110fc99e1344",
-      "outputs": [],
-      "console": []
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stdout",
+          "text": "\u001b[32m.\u001b[0m\u001b[33m                                                                        [100%]\u001b[0m\n=================================== Overview ===================================\nPassed Tests:\n\u001b[1m\u001b[32m\u001b[22m\u2713\u001b[0m\u001b[0m databehandling/databehandling.py::test_add_national_interest_criteria\n\nSummary:\nTotal: 1, Passed: 1, Failed: 0, Errors: 0, Skipped: 0\n",
+          "mimetype": "text/plain"
+        }
+      ]
     },
     {
       "id": "qnkX",
@@ -157,14 +276,35 @@
     {
       "id": "TqIu",
       "code_hash": "a037fd5b69096c4ab2c441c380570baf",
-      "outputs": [],
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
       "console": []
     },
     {
       "id": "Vxnm",
       "code_hash": "b5009442b1b32a0c44e20f8722e83789",
-      "outputs": [],
-      "console": []
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stdout",
+          "text": "\u001b[32m.\u001b[0m\u001b[33m                                                                        [100%]\u001b[0m\n=================================== Overview ===================================\nPassed Tests:\n\u001b[1m\u001b[32m\u001b[22m\u2713\u001b[0m\u001b[0m databehandling::test_legg_til_kolonne_arteravnasjonal\n\nSummary:\nTotal: 1, Passed: 1, Failed: 0, Errors: 0, Skipped: 0\n",
+          "mimetype": "text/plain"
+        }
+      ]
     },
     {
       "id": "DnEU",
@@ -182,14 +322,35 @@
     {
       "id": "ulZA",
       "code_hash": "cf623a2c4dca80680fa2f1f407f1a05d",
-      "outputs": [],
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
       "console": []
     },
     {
       "id": "ecfG",
       "code_hash": "710e6bdbf171f57aff48ec7049f84c37",
-      "outputs": [],
-      "console": []
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stdout",
+          "text": "\u001b[32m.\u001b[0m\u001b[33m                                                                        [100%]\u001b[0m\n=================================== Overview ===================================\nPassed Tests:\n\u001b[1m\u001b[32m\u001b[22m\u2713\u001b[0m\u001b[0m databehandling::test_legg_til_verdi_m1941\n\nSummary:\nTotal: 1, Passed: 1, Failed: 0, Errors: 0, Skipped: 0\n",
+          "mimetype": "text/plain"
+        }
+      ]
     },
     {
       "id": "Pvdt",
@@ -207,13 +368,27 @@
     {
       "id": "ZBYS",
       "code_hash": "1081708cf24d7038e9573fd49f35b0f9",
-      "outputs": [],
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
       "console": []
     },
     {
       "id": "aLJB",
       "code_hash": "80d3a806469d99158bff33c36c662676",
-      "outputs": [],
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
       "console": []
     },
     {

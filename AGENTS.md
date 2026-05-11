@@ -1,7 +1,9 @@
-Norwegian species data analysis tool built as interactive marimo notebooks, using polars and DuckDB for spatial/taxonomic data from Artsdatabanken.
+Fugl Artsdataanalyser: Norwegian Artsdatabanken species-data project using marimo.
 
-**Language:** Inline comments and UI text in Norwegian. Code identifiers, docstrings, and function names in English.
+Main files: `databehandling/databehandling.py` (ingest/validate/enrich/export), `dataanalyse/data_analyse.py` (analysis/presentation), tests in `tests_KI/`.
 
-This project uses `uv` as the package manager and uses marimo check as a notebook linter. Run this after every edit.
+Use `uv`; after changes prefer `uv run marimo check` and `uv run pytest tests_KI`.
 
-Always default to polars for dataframes and datamanipulation. Default to best practice polars code that is as readable as possible. 
+Rules: Norwegian UI/markdown/CLI/comments; English docstrings OK. Follow `databehandling.py`: explicit typed pipeline functions; Polars expressions over pandas; DuckDB when useful; early validation/helpful errors; nearby domain constants; Parquet outputs.
+
+Tests: add pytest files in `tests_KI/`; no notebook test cells unless requested.
