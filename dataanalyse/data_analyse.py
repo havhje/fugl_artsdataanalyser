@@ -74,7 +74,18 @@ def _():
 @app.cell
 def _():
     farge_kart_arter = mo.ui.dropdown(
-        options=["Navn", "Verdi M1941", "Atferd"], value="Verdi M1941", label="Farge på punkter"
+        options=["Navn", "Verdi M1941", "Atferd"],
+        value="Verdi M1941",
+        label="Farge på punkter (punkter hvor atferd ikke er registrert vises ikke i kartet)",
+    )
+
+    mo.vstack(
+        [
+            farge_kart_arter,
+            mo.md(
+                "*Merk: Punkter uten registrert atferd vises ikke når kartet fargelegges etter atferd (eller punkter med null values)*"
+            ),
+        ]
     )
     return (farge_kart_arter,)
 
@@ -85,7 +96,7 @@ def _(farge_kart_arter):
     return
 
 
-@app.cell(hide_code=True)
+@app.cell
 def plotlymap(arter_df, farge_kart_arter):
     verdi_m1941_color_map = {
         "Svært stor verdi": "#AF0F0F",
@@ -127,6 +138,14 @@ def plotlymap(arter_df, farge_kart_arter):
         }
 
     plotly_arter_df = arter_df.with_row_index("__row_nr")
+    plotly_kartflis_lag = [
+        {
+            "below": "traces",
+            "source": ["https://basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png"],
+            "sourceattribution": "© OpenStreetMap-bidragsytere © CARTO",
+            "sourcetype": "raster",
+        }
+    ]
 
     plotly_map_fig = px.scatter_map(
         plotly_arter_df,
@@ -145,7 +164,7 @@ def plotlymap(arter_df, farge_kart_arter):
         custom_data=["__row_nr", "Artens ID", "Navn"],
         zoom=8,
         height=650,
-        map_style="open-street-map",
+        map_style="white-bg",
         color=farge_kart_arter.value,
         **plotly_color_kwargs,
     )
@@ -157,6 +176,7 @@ def plotlymap(arter_df, farge_kart_arter):
     plotly_map_fig.update_layout(
         dragmode="lasso",
         clickmode="event+select",
+        map_layers=plotly_kartflis_lag,
         margin={"r": 0, "t": 0, "l": 0, "b": 0},
     )
     plotly_map = mo.ui.plotly(
@@ -196,14 +216,14 @@ def test(selected_arter_df):
 
 @app.cell
 def _():
-    max_px_value = mo.ui.slider(  start=1, stop=10, step=2, value=10, show_value=True, label="Maks spredning" )
-    threshold_value= mo.ui.slider(start=0.1, stop=1, value=0.95, show_value=True,label="Terskel")
+    max_px_value = mo.ui.slider(start=1, stop=10, step=2, value=10, show_value=True, label="Maks spredning")
+    threshold_value = mo.ui.slider(start=0.1, stop=1, value=0.95, show_value=True, label="Terskel")
     return max_px_value, threshold_value
 
 
 @app.cell
 def _(max_px_value, threshold_value):
-    max_px_value 
+    max_px_value
     threshold_value
 
     stack = mo.vstack([max_px_value, threshold_value])
@@ -224,7 +244,9 @@ def heatmap(arter_map_df, max_px_value, threshold_value):
         aggregator=ds.count(),
         cnorm="eq_hist",
         cmap=cc.fire[100:],
-        width=900, height=700, xaxis=None,
+        width=900,
+        height=700,
+        xaxis=None,
         yaxis=None,
     )
 
