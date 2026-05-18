@@ -45,15 +45,7 @@ def _():
     return (console,)
 
 
-@app.cell(hide_code=True)
-def _():
-    mo.md(r"""
-    ## Utility functions
-    """)
-    return
-
-
-@app.function
+@app.function(hide_code=True)
 def get_required_artskart_columns() -> set[str]:
     """Return the Artskart columns required by the processing pipeline."""
     return {
@@ -77,7 +69,7 @@ def get_required_artskart_columns() -> set[str]:
     }
 
 
-@app.function
+@app.function(hide_code=True)
 def get_allowed_categories() -> set[str]:
     """Return accepted red-list and alien-species category codes."""
     return {
@@ -99,7 +91,7 @@ def get_allowed_categories() -> set[str]:
     }
 
 
-@app.function
+@app.function(hide_code=True)
 def validate_artskart_input_contract(df: pl.DataFrame) -> None:
     """Validate the Artskart input schema and category domain values."""
     required_columns = get_required_artskart_columns()
@@ -128,7 +120,7 @@ def _():
     return
 
 
-@app.function
+@app.function(hide_code=True)
 def rydd_navn_og_datatyper(df_input: pl.DataFrame) -> pl.DataFrame:
 
     VERDI_M1941_ORDER = {
@@ -217,7 +209,7 @@ def rydd_navn_og_datatyper(df_input: pl.DataFrame) -> pl.DataFrame:
     return df_alle_funksjoner_ferdig_kjørt
 
 
-@app.function
+@app.function(hide_code=True)
 def test_rydd_navn_og_datatyper():
 
     # ── Build test input with all required columns ──────────────────
@@ -451,7 +443,7 @@ def _():
     return DESIRED_RANKS, NORTAXA_API_BASE_URL, RATE_LIMIT_DELAY
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(DESIRED_RANKS, NORTAXA_API_BASE_URL):
     @lru_cache(maxsize=10000)
     def fetch_taxon_data(scientific_name_id: int) -> dict[str, Any] | None:
@@ -610,7 +602,7 @@ def _(
 
                 try:
                     species_id = int(raw_species_id)
-                except (ValueError, TypeError):
+                except ValueError, TypeError:
                     invalid_ids.append(raw_species_id)
                     progress.update(
                         task,
@@ -666,8 +658,7 @@ def _(
         if failed_api_ids:
             examples = ", ".join(failed_api_ids[:10])
             raise RuntimeError(
-                "NorTaxa API-kall feilet eller ga tomt resultat for "
-                f"{len(failed_api_ids)} ID-er. Eksempel-IDer: {examples}"
+                f"NorTaxa API-kall feilet eller ga tomt resultat for {len(failed_api_ids)} ID-er. Eksempel-IDer: {examples}"
             )
 
         taxonomy_rows = [
@@ -773,25 +764,66 @@ def _():
     return
 
 
+@app.cell(hide_code=True)
+def _(bird_data):
+    df_test = bird_data.execute("SELECT * FROM arter_av_nasjonal_forvaltningsinteresse").pl()
+    df_test
+    return
+
+
+@app.cell
+def _(bird_data):
+    df_arter_nf = bird_data.execute("SELECT * FROM arter_av_nasjonal_forvaltningsinteresse").pl()
+
+    df_arter_nf_ryddet = df_arter_nf.select(
+        [
+            pl.col("vitenskapelig_navn_id").alias("arts_id"),
+            pl.col("vitenskapelig_navn"),
+            pl.col("forvaltningsverdi").alias("Verdi M1941"),
+            pl.col("kriterium_prioriterte_arter").alias("Prioriterte arter"),
+            pl.col("kriterium_fredete_arter").alias("Fredete arter"),
+            pl.col("kriterium_andre_spesielt_hensynskrevende_arter").alias("Andre spesielt hensynskrevende arter"),
+            pl.col("kriterium_spesielle_okologiske_former").alias("Spesielle ølologiske former"),
+            pl.col("kriterium_dd").alias("Datamangel"),
+            pl.col("kriterium_hensynskrevende_arter").alias("Hensynskrevende arter"),
+            pl.col("kriterium_ansvarsart").alias("Ansvarsarter"),
+            pl.col("kriterium_fremmede_arter").alias("Fremmede arter"),
+        ]
+    )
+
+    df_arter_nf_filtrert = df_arter_nf_ryddet.filter(
+        pl.any_horizontal(pl.all() == 1)
+    )  # dette blir feil du må ta og gjøre om 1 og 0 til yes og no og deretter joine, se videre pipeline på hva som blir riktig.
+
+    df_arter_nf_filtrert
+    return
+
+
 @app.cell
 def _add_national_interest_criteria(bird_data):
     def add_national_interest_criteria(df_enriched: pl.DataFrame) -> pl.DataFrame:
-        """Add national interest criteria from Excel file to enriched dataframe.
-
-        Reads criteria columns from the national-interest Excel sheet, converts
-        X-marks to Yes/No, and left-joins the result onto the enriched dataframe.
-
-        Args:
-            df_enriched: The enriched dataframe with species data.
-            excel_path: Path to the Excel file with criteria. If None, uses
-                the default path.
-
-        Returns:
-            DataFrame with added criteria columns.
-        """
+        """Add national interest criteria from Excel file to enriched dataframe."""
 
         # Load Excel with criteria
         df_arter_nf = bird_data.execute("SELECT * FROM arter_av_nasjonal_forvaltningsinteresse").pl()
+
+        df_arter_nf_ryddet = df_arter_nf.select(
+            [
+                pl.col("vitenslapelig_navn_id").alias("arts_id"),
+                pl.col("vitenskapelig_navn"),
+                pl.col("forvaltningsverdi").alias("Verdi M1941"),
+                pl.col("kriterium_prioriterte_arter").alias("Prioriterte arter"),
+                pl.col("kriterium_fredete_arter").alias("Fredete arter"),
+                pl.col("kriterium_andre_spesielt_hensynskrevende_arter").alias("Andre spesielt hensynskrevende arter"),
+                pl.col("kriterium_spesielle_okologiske_former").alias("Spesielle ølologiske former"),
+                pl.col("kriterium_dd").alias("Datamangel"),
+                pl.col("kriterium_hensynskrevende_arter").alias("Hensynskrevende arter"),
+                pl.col("kriterium_ansvarsart").alias("Ansvarsarter"),
+                pl.col("kriterium_fremmede_arter").alias("Fremmede arter"),
+            ]
+        )
+
+        df_arter_nf_filtrert = df_arter_nf_ryddet.filter(pl.any_horizontal(pl.all() == 1))
 
         # Get criteria columns
         criteria_cols = [

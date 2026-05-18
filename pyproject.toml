@@ -30,6 +30,10 @@ dependencies = [
     "vl-convert-python>=1.8.0",
 ]
 
+[tool.marimo.keymap]
+preset = "vim"
+vimrc = ".vimrc"
+
 [dependency-groups]
 dev = [
     "mcp>=1",

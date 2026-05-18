@@ -45,19 +45,6 @@
       "console": []
     },
     {
-      "id": "vblA",
-      "code_hash": "ae65b27ccd3060a1cdee7080008f8e01",
-      "outputs": [
-        {
-          "type": "data",
-          "data": {
-            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"utility-functions\">Utility functions</h2></span>"
-          }
-        }
-      ],
-      "console": []
-    },
-    {
       "id": "bkHC",
       "code_hash": "1ae282e6b82ddd406cff7ee201ec30e3",
       "outputs": [
@@ -183,7 +170,7 @@
     },
     {
       "id": "Hstk",
-      "code_hash": "4e9ae643d275cab1a5b5e7eb8c1f946b",
+      "code_hash": "8a24591ccb8d7a3eefbb4c56bfc5d550",
       "outputs": [
         {
           "type": "data",
@@ -229,19 +216,52 @@
     },
     {
       "id": "ZHCJ",
-      "code_hash": "56c957a471dc21e12668fb3524776020",
+      "code_hash": "e05cba5df2b18e10f64bfc7b0529e129",
       "outputs": [
         {
           "type": "data",
           "data": {
-            "text/plain": ""
+            "text/html": "<marimo-ui-element object-id='ZHCJ-0' random-id='a30e6c08-0e30-f0a0-49b2-dd0e67afebe8'><marimo-table data-initial-value='[]' data-label='null' data-data='&quot;[{&#92;&quot;vitenskapelig_navn_id&#92;&quot;:1577,&#92;&quot;artsgruppe&#92;&quot;:&#92;&quot;Amfibier og reptiler&#92;&quot;,&#92;&quot;vitenskapelig_navn&#92;&quot;:&#92;&quot;Rana (Rana) arvalis&#92;&quot;,&#92;&quot;populaernavn&#92;&quot;:&#92;&quot;Spissnutefrosk&#92;&quot;,&#92;&quot;roedlistestatus&#92;&quot;:&#92;&quot;VU&#92;&quot;,&#92;&quot;forvaltningsverdi&#92;&quot;:&#92;&quot;Stor verdi&#92;&quot;,&#92;&quot;kriterium_prioriterte_arter&#92;&quot;:null,&#92;&quot;kriterium_fredete_arter&#92;&quot;:null,&#92;&quot;kriterium_kritisk_trua_art&#92;&quot;:null,&#92;&quot;kriterium_sterkt_trua_art&#92;&quot;:null,&#92;&quot;kriterium_saarbar_art&#92;&quot;:1,&#92;&quot;kriterium_andre_spesielt_hensynskrevende_arter&#92;&quot;:1,&#92;&quot;kriterium_spesielle_okologiske_former&#92;&quot;:null,&#92;&quot;kriterium_nt&#92;&quot;:null,&#92;&quot;kriterium_dd&#92;&quot;:null,&#92;&quot;kriterium_hensynskrevende_arter&#92;&quot;:null,&#92;&quot;kriterium_ansvarsart&#92;&quot;:null,&#92;&quot;kriterium_fremmede_arter&#92;&quot;:null},{&#92;&quot;vitenskapelig_navn_id&#92;&quot;:1586,&#92;&quot;artsgruppe&#92;&quot;:&#92;&quot;Amfibier og reptiler&#92;&quot;,&#92;&quot;vitenskapelig_navn&#92;&quot;:&#92;&quot;Triturus (Triturus) cristatus&#92;&quot;,&#92;&quot;populaernavn&#92;&quot;:&#92;&quot;Storsalamander&#92;&quot;,&#92;&quot;roedlistestatus&#92;&quot;:&#92;&quot;NT&#92;&quot;,&#92;&quot;forvaltningsverdi&#92;&quot;:&#92;&quot;Stor verdi&#92;&quot;,&#92;&quot;kriterium_prioriterte_arter&#92;&quot;:null,&#92;&quot;kriterium_fredete_arter&#92;&quot;:null,&#92;&quot;kriterium_kritisk_trua_art&#92;&quot;:null,&#92;&quot;kriterium_sterkt_trua_art&#92;&quot;:null,&#92;&quot;kriterium_saarbar_art&#92;&quot;:null,&#92;&quot;kriterium_andre_spesielt_hensynskrevende_arter&#92;&quot;:1,&#92;&quot;kriterium_spesielle_okologiske_former&#92;&quot;:null,&#92;&quot;kriterium_nt&#92;&quot;:1,&#92;&quot;kriterium_dd&#92;&quot;:null,&#92;&quot;kriterium_hensynskrevende_arter&#92;&quot;:null,&#92;&quot;kriterium_ansvarsart&#92;&quot;:null,&#92;&quot;kriterium_fremmede_arter&#92;&quot;:null},{&#92;&quot;vitenskapelig_navn_id&#92;&quot;:1602,&#92;&quot;artsgruppe&#92;&quot;:&#92;&quot;Amfibier og reptiler&#92;&quot;,&#92;&quot;vitenskapelig_navn&#92;&quot;:&#92;&quot;Coronella austriaca&#92;&quot;,&#92;&quot;populaernavn&#92;&quot;:&#92;&quot;Slettsnok&#92;&quot;,&#92;&quot;roedlistestatus&#92;&quot;:&#92;&quot;NT&#92;&quot;,&#92;&quot;forvaltningsverdi&#92;&quot;:&#92;&quot;Stor verdi&#92;&quot;,&#92;&quot;kriterium_prioriterte_arter&#92;&quot;:null,&#92;&quot;kriterium_fredete_arter&#92;&quot;:null,&#92;&quot;kriterium_kritisk_trua_art&#92;&quot;:null,&#92;&quot;kriterium_sterkt_trua_art&#92;&quot;:null,&#92;&quot;kriterium_saarbar_art&#92;&quot;:null,&#92;&quot;kriterium_andre_spesielt_hensynskrevende_arter&#92;&quot;:1,&#92;&quot;kriterium_spesielle_okologiske_former&#92;&quot;:null,&#92;&quot;kriterium_nt&#92;&quot;:1,&#92;&quot;kriterium_dd&#92;&quot;:null,&#92;&quot;kriterium_hensynskrevende_arter&#92;&quot;:null,&#92;&quot;kriterium_ansvarsart&#92;&quot;:null,&#92;&quot;kriterium_fremmede_arter&#92;&quot;:null},{&#92;&quot;vitenskapelig_navn_id&#92;&quot;:1671,&#92;&quot;artsgruppe&#92;&quot;:&#92;&quot;Krepsdyr&#92;&quot;,&#92;&quot;vitenskapelig_navn&#92;&quot;:&#92;&quot;Apolochus borealis&#92;&quot;,&#92;&quot;populaernavn&#92;&quot;:null,&#92;&quot;roedlistestatus&#92;&quot;:&#92;&quot;DD&#92;&quot;,&#92;&quot;forvaltningsverdi&#92;&quot;:&#92;&quot;Middels verdi&#92;&quot;,&#92;&quot;kriterium_prioriterte_arter&#92;&quot;:null,&#92;&quot;kriterium_fredete_arter&#92;&quot;:null,&#92;&quot;kriterium_kritisk_trua_art&#92;&quot;:null,&#92;&quot;kriterium_sterkt_trua_art&#92;&quot;:null,&#92;&quot;kriterium_saarbar_art&#92;&quot;:null,&#92;&quot;kriterium_andre_spesielt_hensynskrevende_arter&#92;&quot;:null,&#92;&quot;kriterium_spesielle_okologiske_former&#92;&quot;:null,&#92;&quot;kriterium_nt&#92;&quot;:null,&#92;&quot;kriterium_dd&#92;&quot;:1,&#92;&quot;kriterium_hensynskrevende_arter&#92;&quot;:null,&#92;&quot;kriterium_ansvarsart&#92;&quot;:null,&#92;&quot;kriterium_fremmede_arter&#92;&quot;:null},{&#92;&quot;vitenskapelig_navn_id&#92;&quot;:1734,&#92;&quot;artsgruppe&#92;&quot;:&#92;&quot;Krepsdyr&#92;&quot;,&#92;&quot;vitenskapelig_navn&#92;&quot;:&#92;&quot;Bathyporeia pilosa&#92;&quot;,&#92;&quot;populaernavn&#92;&quot;:null,&#92;&quot;roedlistestatus&#92;&quot;:&#92;&quot;NT&#92;&quot;,&#92;&quot;forvaltningsverdi&#92;&quot;:&#92;&quot;Middels verdi&#92;&quot;,&#92;&quot;kriterium_prioriterte_arter&#92;&quot;:null,&#92;&quot;kriterium_fredete_arter&#92;&quot;:null,&#92;&quot;kriterium_kritisk_trua_art&#92;&quot;:null,&#92;&quot;kriterium_sterkt_trua_art&#92;&quot;:null,&#92;&quot;kriterium_saarbar_art&#92;&quot;:null,&#92;&quot;kriterium_andre_spesielt_hensynskrevende_arter&#92;&quot;:null,&#92;&quot;kriterium_spesielle_okologiske_former&#92;&quot;:null,&#92;&quot;kriterium_nt&#92;&quot;:1,&#92;&quot;kriterium_dd&#92;&quot;:null,&#92;&quot;kriterium_hensynskrevende_arter&#92;&quot;:null,&#92;&quot;kriterium_ansvarsart&#92;&quot;:null,&#92;&quot;kriterium_fremmede_arter&#92;&quot;:null},{&#92;&quot;vitenskapelig_navn_id&#92;&quot;:1744,&#92;&quot;artsgruppe&#92;&quot;:&#92;&quot;Krepsdyr&#92;&quot;,&#92;&quot;vitenskapelig_navn&#92;&quot;:&#92;&quot;Apherusa glacialis&#92;&quot;,&#92;&quot;populaernavn&#92;&quot;:null,&#92;&quot;roedlistestatus&#92;&quot;:&#92;&quot;NT&#92;&quot;,&#92;&quot;forvaltningsverdi&#92;&quot;:&#92;&quot;Middels verdi&#92;&quot;,&#92;&quot;kriterium_prioriterte_arter&#92;&quot;:null,&#92;&quot;kriterium_fredete_arter&#92;&quot;:null,&#92;&quot;kriterium_kritisk_trua_art&#92;&quot;:null,&#92;&quot;kriterium_sterkt_trua_art&#92;&quot;:null,&#92;&quot;kriterium_saarbar_art&#92;&quot;:null,&#92;&quot;kriterium_andre_spesielt_hensynskrevende_arter&#92;&quot;:null,&#92;&quot;kriterium_spesielle_okologiske_former&#92;&quot;:null,&#92;&quot;kriterium_nt&#92;&quot;:1,&#92;&quot;kriterium_dd&#92;&quot;:null,&#92;&quot;kriterium_hensynskrevende_arter&#92;&quot;:null,&#92;&quot;kriterium_ansvarsart&#92;&quot;:null,&#92;&quot;kriterium_fremmede_arter&#92;&quot;:null},{&#92;&quot;vitenskapelig_navn_id&#92;&quot;:1761,&#92;&quot;artsgruppe&#92;&quot;:&#92;&quot;Krepsdyr&#92;&quot;,&#92;&quot;vitenskapelig_navn&#92;&quot;:&#92;&quot;Haliragoides niflheimri&#92;&quot;,&#92;&quot;populaernavn&#92;&quot;:null,&#92;&quot;roedlistestatus&#92;&quot;:&#92;&quot;DD&#92;&quot;,&#92;&quot;forvaltningsverdi&#92;&quot;:&#92;&quot;Middels verdi&#92;&quot;,&#92;&quot;kriterium_prioriterte_arter&#92;&quot;:null,&#92;&quot;kriterium_fredete_arter&#92;&quot;:null,&#92;&quot;kriterium_kritisk_trua_art&#92;&quot;:null,&#92;&quot;kriterium_sterkt_trua_art&#92;&quot;:null,&#92;&quot;kriterium_saarbar_art&#92;&quot;:null,&#92;&quot;kriterium_andre_spesielt_hensynskrevende_arter&#92;&quot;:null,&#92;&quot;kriterium_spesielle_okologiske_former&#92;&quot;:null,&#92;&quot;kriterium_nt&#92;&quot;:null,&#92;&quot;kriterium_dd&#92;&quot;:1,&#92;&quot;kriterium_hensynskrevende_arter&#92;&quot;:null,&#92;&quot;kriterium_ansvarsart&#92;&quot;:null,&#92;&quot;kriterium_fremmede_arter&#92;&quot;:null},{&#92;&quot;vitenskapelig_navn_id&#92;&quot;:1785,&#92;&quot;artsgruppe&#92;&quot;:&#92;&quot;Krepsdyr&#92;&quot;,&#92;&quot;vitenskapelig_navn&#92;&quot;:&#92;&quot;Caprella mutica&#92;&quot;,&#92;&quot;populaernavn&#92;&quot;:null,&#92;&quot;roedlistestatus&#92;&quot;:null,&#92;&quot;forvaltningsverdi&#92;&quot;:&#92;&quot;-&#92;&quot;,&#92;&quot;kriterium_prioriterte_arter&#92;&quot;:null,&#92;&quot;kriterium_fredete_arter&#92;&quot;:null,&#92;&quot;kriterium_kritisk_trua_art&#92;&quot;:null,&#92;&quot;kriterium_sterkt_trua_art&#92;&quot;:null,&#92;&quot;kriterium_saarbar_art&#92;&quot;:null,&#92;&quot;kriterium_andre_spesielt_hensynskrevende_arter&#92;&quot;:null,&#92;&quot;kriterium_spesielle_okologiske_former&#92;&quot;:null,&#92;&quot;kriterium_nt&#92;&quot;:null,&#92;&quot;kriterium_dd&#92;&quot;:null,&#92;&quot;kriterium_hensynskrevende_arter&#92;&quot;:null,&#92;&quot;kriterium_ansvarsart&#92;&quot;:null,&#92;&quot;kriterium_fremmede_arter&#92;&quot;:1},{&#92;&quot;vitenskapelig_navn_id&#92;&quot;:1793,&#92;&quot;artsgruppe&#92;&quot;:&#92;&quot;Krepsdyr&#92;&quot;,&#92;&quot;vitenskapelig_navn&#92;&quot;:&#92;&quot;Proaeginina norvegica&#92;&quot;,&#92;&quot;populaernavn&#92;&quot;:null,&#92;&quot;roedlistestatus&#92;&quot;:&#92;&quot;DD&#92;&quot;,&#92;&quot;forvaltningsverdi&#92;&quot;:&#92;&quot;Middels verdi&#92;&quot;,&#92;&quot;kriterium_prioriterte_arter&#92;&quot;:null,&#92;&quot;kriterium_fredete_arter&#92;&quot;:null,&#92;&quot;kriterium_kritisk_trua_art&#92;&quot;:null,&#92;&quot;kriterium_sterkt_trua_art&#92;&quot;:null,&#92;&quot;kriterium_saarbar_art&#92;&quot;:null,&#92;&quot;kriterium_andre_spesielt_hensynskrevende_arter&#92;&quot;:null,&#92;&quot;kriterium_spesielle_okologiske_former&#92;&quot;:null,&#92;&quot;kriterium_nt&#92;&quot;:null,&#92;&quot;kriterium_dd&#92;&quot;:1,&#92;&quot;kriterium_hensynskrevende_arter&#92;&quot;:null,&#92;&quot;kriterium_ansvarsart&#92;&quot;:null,&#92;&quot;kriterium_fremmede_arter&#92;&quot;:null},{&#92;&quot;vitenskapelig_navn_id&#92;&quot;:1807,&#92;&quot;artsgruppe&#92;&quot;:&#92;&quot;Krepsdyr&#92;&quot;,&#92;&quot;vitenskapelig_navn&#92;&quot;:&#92;&quot;Chelura terebrans&#92;&quot;,&#92;&quot;populaernavn&#92;&quot;:&#92;&quot;Pelekreps&#92;&quot;,&#92;&quot;roedlistestatus&#92;&quot;:&#92;&quot;DD&#92;&quot;,&#92;&quot;forvaltningsverdi&#92;&quot;:&#92;&quot;Middels verdi&#92;&quot;,&#92;&quot;kriterium_prioriterte_arter&#92;&quot;:null,&#92;&quot;kriterium_fredete_arter&#92;&quot;:null,&#92;&quot;kriterium_kritisk_trua_art&#92;&quot;:null,&#92;&quot;kriterium_sterkt_trua_art&#92;&quot;:null,&#92;&quot;kriterium_saarbar_art&#92;&quot;:null,&#92;&quot;kriterium_andre_spesielt_hensynskrevende_arter&#92;&quot;:null,&#92;&quot;kriterium_spesielle_okologiske_former&#92;&quot;:null,&#92;&quot;kriterium_nt&#92;&quot;:null,&#92;&quot;kriterium_dd&#92;&quot;:1,&#92;&quot;kriterium_hensynskrevende_arter&#92;&quot;:null,&#92;&quot;kriterium_ansvarsart&#92;&quot;:null,&#92;&quot;kriterium_fremmede_arter&#92;&quot;:null},{&#92;&quot;vitenskapelig_navn_id&#92;&quot;:1828,&#92;&quot;artsgruppe&#92;&quot;:&#92;&quot;Krepsdyr&#92;&quot;,&#92;&quot;vitenskapelig_navn&#92;&quot;:&#92;&quot;Leptocheirus pilosus&#92;&quot;,&#92;&quot;populaernavn&#92;&quot;:null,&#92;&quot;roedlistestatus&#92;&quot;:&#92;&quot;DD&#92;&quot;,&#92;&quot;forvaltningsverdi&#92;&quot;:&#92;&quot;Middels verdi&#92;&quot;,&#92;&quot;kriterium_prioriterte_arter&#92;&quot;:null,&#92;&quot;kriterium_fredete_arter&#92;&quot;:null,&#92;&quot;kriterium_kritisk_trua_art&#92;&quot;:null,&#92;&quot;kriterium_sterkt_trua_art&#92;&quot;:null,&#92;&quot;kriterium_saarbar_art&#92;&quot;:null,&#92;&quot;kriterium_andre_spesielt_hensynskrevende_arter&#92;&quot;:null,&#92;&quot;kriterium_spesielle_okologiske_former&#92;&quot;:null,&#92;&quot;kriterium_nt&#92;&quot;:null,&#92;&quot;kriterium_dd&#92;&quot;:1,&#92;&quot;kriterium_hensynskrevende_arter&#92;&quot;:null,&#92;&quot;kriterium_ansvarsart&#92;&quot;:null,&#92;&quot;kriterium_fremmede_arter&#92;&quot;:null},{&#92;&quot;vitenskapelig_navn_id&#92;&quot;:1871,&#92;&quot;artsgruppe&#92;&quot;:&#92;&quot;Krepsdyr&#92;&quot;,&#92;&quot;vitenskapelig_navn&#92;&quot;:&#92;&quot;Dyopedos normani&#92;&quot;,&#92;&quot;populaernavn&#92;&quot;:null,&#92;&quot;roedlistestatus&#92;&quot;:&#92;&quot;DD&#92;&quot;,&#92;&quot;forvaltningsverdi&#92;&quot;:&#92;&quot;Middels verdi&#92;&quot;,&#92;&quot;kriterium_prioriterte_arter&#92;&quot;:null,&#92;&quot;kriterium_fredete_arter&#92;&quot;:null,&#92;&quot;kriterium_kritisk_trua_art&#92;&quot;:null,&#92;&quot;kriterium_sterkt_trua_art&#92;&quot;:null,&#92;&quot;kriterium_saarbar_art&#92;&quot;:null,&#92;&quot;kriterium_andre_spesielt_hensynskrevende_arter&#92;&quot;:null,&#92;&quot;kriterium_spesielle_okologiske_former&#92;&quot;:null,&#92;&quot;kriterium_nt&#92;&quot;:null,&#92;&quot;kriterium_dd&#92;&quot;:1,&#92;&quot;kriterium_hensynskrevende_arter&#92;&quot;:null,&#92;&quot;kriterium_ansvarsart&#92;&quot;:null,&#92;&quot;kriterium_fremmede_arter&#92;&quot;:null},{&#92;&quot;vitenskapelig_navn_id&#92;&quot;:1918,&#92;&quot;artsgruppe&#92;&quot;:&#92;&quot;Krepsdyr&#92;&quot;,&#92;&quot;vitenskapelig_navn&#92;&quot;:&#92;&quot;Gammarus inaequicauda&#92;&quot;,&#92;&quot;populaernavn&#92;&quot;:null,&#92;&quot;roedlistestatus&#92;&quot;:&#92;&quot;VU&#92;&quot;,&#92;&quot;forvaltningsverdi&#92;&quot;:&#92;&quot;Stor verdi&#92;&quot;,&#92;&quot;kriterium_prioriterte_arter&#92;&quot;:null,&#92;&quot;kriterium_fredete_arter&#92;&quot;:null,&#92;&quot;kriterium_kritisk_trua_art&#92;&quot;:null,&#92;&quot;kriterium_sterkt_trua_art&#92;&quot;:null,&#92;&quot;kriterium_saarbar_art&#92;&quot;:1,&#92;&quot;kriterium_andre_spesielt_hensynskrevende_arter&#92;&quot;:null,&#92;&quot;kriterium_spesielle_okologiske_former&#92;&quot;:null,&#92;&quot;kriterium_nt&#92;&quot;:null,&#92;&quot;kriterium_dd&#92;&quot;:null,&#92;&quot;kriterium_hensynskrevende_arter&#92;&quot;:null,&#92;&quot;kriterium_ansvarsart&#92;&quot;:null,&#92;&quot;kriterium_fremmede_arter&#92;&quot;:null},{&#92;&quot;vitenskapelig_navn_id&#92;&quot;:1928,&#92;&quot;artsgruppe&#92;&quot;:&#92;&quot;Krepsdyr&#92;&quot;,&#92;&quot;vitenskapelig_navn&#92;&quot;:&#92;&quot;Gammarus wilkitzkii&#92;&quot;,&#92;&quot;populaernavn&#92;&quot;:null,&#92;&quot;roedlistestatus&#92;&quot;:&#92;&quot;NT&#92;&quot;,&#92;&quot;forvaltningsverdi&#92;&quot;:&#92;&quot;Middels verdi&#92;&quot;,&#92;&quot;kriterium_prioriterte_arter&#92;&quot;:null,&#92;&quot;kriterium_fredete_arter&#92;&quot;:null,&#92;&quot;kriterium_kritisk_trua_art&#92;&quot;:null,&#92;&quot;kriterium_sterkt_trua_art&#92;&quot;:null,&#92;&quot;kriterium_saarbar_art&#92;&quot;:null,&#92;&quot;kriterium_andre_spesielt_hensynskrevende_arter&#92;&quot;:null,&#92;&quot;kriterium_spesielle_okologiske_former&#92;&quot;:null,&#92;&quot;kriterium_nt&#92;&quot;:1,&#92;&quot;kriterium_dd&#92;&quot;:null,&#92;&quot;kriterium_hensynskrevende_arter&#92;&quot;:null,&#92;&quot;kriterium_ansvarsart&#92;&quot;:null,&#92;&quot;kriterium_fremmede_arter&#92;&quot;:null},{&#92;&quot;vitenskapelig_navn_id&#92;&quot;:1971,&#92;&quot;artsgruppe&#92;&quot;:&#92;&quot;Krepsdyr&#92;&quot;,&#92;&quot;vitenskapelig_navn&#92;&quot;:&#92;&quot;Ischyrocerus commensalis&#92;&quot;,&#92;&quot;populaernavn&#92;&quot;:null,&#92;&quot;roedlistestatus&#92;&quot;:null,&#92;&quot;forvaltningsverdi&#92;&quot;:&#92;&quot;-&#92;&quot;,&#92;&quot;kriterium_prioriterte_arter&#92;&quot;:null,&#92;&quot;kriterium_fredete_arter&#92;&quot;:null,&#92;&quot;kriterium_kritisk_trua_art&#92;&quot;:null,&#92;&quot;kriterium_sterkt_trua_art&#92;&quot;:null,&#92;&quot;kriterium_saarbar_art&#92;&quot;:null,&#92;&quot;kriterium_andre_spesielt_hensynskrevende_arter&#92;&quot;:null,&#92;&quot;kriterium_spesielle_okologiske_former&#92;&quot;:null,&#92;&quot;kriterium_nt&#92;&quot;:null,&#92;&quot;kriterium_dd&#92;&quot;:null,&#92;&quot;kriterium_hensynskrevende_arter&#92;&quot;:null,&#92;&quot;kriterium_ansvarsart&#92;&quot;:null,&#92;&quot;kriterium_fremmede_arter&#92;&quot;:1},{&#92;&quot;vitenskapelig_navn_id&#92;&quot;:1982,&#92;&quot;artsgruppe&#92;&quot;:&#92;&quot;Krepsdyr&#92;&quot;,&#92;&quot;vitenskapelig_navn&#92;&quot;:&#92;&quot;Jassa herdmani&#92;&quot;,&#92;&quot;populaernavn&#92;&quot;:null,&#92;&quot;roedlistestatus&#92;&quot;:&#92;&quot;DD&#92;&quot;,&#92;&quot;forvaltningsverdi&#92;&quot;:&#92;&quot;Middels verdi&#92;&quot;,&#92;&quot;kriterium_prioriterte_arter&#92;&quot;:null,&#92;&quot;kriterium_fredete_arter&#92;&quot;:null,&#92;&quot;kriterium_kritisk_trua_art&#92;&quot;:null,&#92;&quot;kriterium_sterkt_trua_art&#92;&quot;:null,&#92;&quot;kriterium_saarbar_art&#92;&quot;:null,&#92;&quot;kriterium_andre_spesielt_hensynskrevende_arter&#92;&quot;:null,&#92;&quot;kriterium_spesielle_okologiske_former&#92;&quot;:null,&#92;&quot;kriterium_nt&#92;&quot;:null,&#92;&quot;kriterium_dd&#92;&quot;:1,&#92;&quot;kriterium_hensynskrevende_arter&#92;&quot;:null,&#92;&quot;kriterium_ansvarsart&#92;&quot;:null,&#92;&quot;kriterium_fremmede_arter&#92;&quot;:null},{&#92;&quot;vitenskapelig_navn_id&#92;&quot;:2021,&#92;&quot;artsgruppe&#92;&quot;:&#92;&quot;Krepsdyr&#92;&quot;,&#92;&quot;vitenskapelig_navn&#92;&quot;:&#92;&quot;Nannonyx goesii&#92;&quot;,&#92;&quot;populaernavn&#92;&quot;:null,&#92;&quot;roedlistestatus&#92;&quot;:&#92;&quot;DD&#92;&quot;,&#92;&quot;forvaltningsverdi&#92;&quot;:&#92;&quot;Middels verdi&#92;&quot;,&#92;&quot;kriterium_prioriterte_arter&#92;&quot;:null,&#92;&quot;kriterium_fredete_arter&#92;&quot;:null,&#92;&quot;kriterium_kritisk_trua_art&#92;&quot;:null,&#92;&quot;kriterium_sterkt_trua_art&#92;&quot;:null,&#92;&quot;kriterium_saarbar_art&#92;&quot;:null,&#92;&quot;kriterium_andre_spesielt_hensynskrevende_arter&#92;&quot;:null,&#92;&quot;kriterium_spesielle_okologiske_former&#92;&quot;:null,&#92;&quot;kriterium_nt&#92;&quot;:null,&#92;&quot;kriterium_dd&#92;&quot;:1,&#92;&quot;kriterium_hensynskrevende_arter&#92;&quot;:null,&#92;&quot;kriterium_ansvarsart&#92;&quot;:null,&#92;&quot;kriterium_fremmede_arter&#92;&quot;:null},{&#92;&quot;vitenskapelig_navn_id&#92;&quot;:2071,&#92;&quot;artsgruppe&#92;&quot;:&#92;&quot;Krepsdyr&#92;&quot;,&#92;&quot;vitenskapelig_navn&#92;&quot;:&#92;&quot;Tmetonyx rotundatus&#92;&quot;,&#92;&quot;populaernavn&#92;&quot;:null,&#92;&quot;roedlistestatus&#92;&quot;:&#92;&quot;DD&#92;&quot;,&#92;&quot;forvaltningsverdi&#92;&quot;:&#92;&quot;Middels verdi&#92;&quot;,&#92;&quot;kriterium_prioriterte_arter&#92;&quot;:null,&#92;&quot;kriterium_fredete_arter&#92;&quot;:null,&#92;&quot;kriterium_kritisk_trua_art&#92;&quot;:null,&#92;&quot;kriterium_sterkt_trua_art&#92;&quot;:null,&#92;&quot;kriterium_saarbar_art&#92;&quot;:null,&#92;&quot;kriterium_andre_spesielt_hensynskrevende_arter&#92;&quot;:null,&#92;&quot;kriterium_spesielle_okologiske_former&#92;&quot;:null,&#92;&quot;kriterium_nt&#92;&quot;:null,&#92;&quot;kriterium_dd&#92;&quot;:1,&#92;&quot;kriterium_hensynskrevende_arter&#92;&quot;:null,&#92;&quot;kriterium_ansvarsart&#92;&quot;:null,&#92;&quot;kriterium_fremmede_arter&#92;&quot;:null},{&#92;&quot;vitenskapelig_navn_id&#92;&quot;:2100,&#92;&quot;artsgruppe&#92;&quot;:&#92;&quot;Krepsdyr&#92;&quot;,&#92;&quot;vitenskapelig_navn&#92;&quot;:&#92;&quot;Elasmopus rapax&#92;&quot;,&#92;&quot;populaernavn&#92;&quot;:null,&#92;&quot;roedlistestatus&#92;&quot;:&#92;&quot;DD&#92;&quot;,&#92;&quot;forvaltningsverdi&#92;&quot;:&#92;&quot;Middels verdi&#92;&quot;,&#92;&quot;kriterium_prioriterte_arter&#92;&quot;:null,&#92;&quot;kriterium_fredete_arter&#92;&quot;:null,&#92;&quot;kriterium_kritisk_trua_art&#92;&quot;:null,&#92;&quot;kriterium_sterkt_trua_art&#92;&quot;:null,&#92;&quot;kriterium_saarbar_art&#92;&quot;:null,&#92;&quot;kriterium_andre_spesielt_hensynskrevende_arter&#92;&quot;:null,&#92;&quot;kriterium_spesielle_okologiske_former&#92;&quot;:null,&#92;&quot;kriterium_nt&#92;&quot;:null,&#92;&quot;kriterium_dd&#92;&quot;:1,&#92;&quot;kriterium_hensynskrevende_arter&#92;&quot;:null,&#92;&quot;kriterium_ansvarsart&#92;&quot;:null,&#92;&quot;kriterium_fremmede_arter&#92;&quot;:null},{&#92;&quot;vitenskapelig_navn_id&#92;&quot;:2104,&#92;&quot;artsgruppe&#92;&quot;:&#92;&quot;Krepsdyr&#92;&quot;,&#92;&quot;vitenskapelig_navn&#92;&quot;:&#92;&quot;Maera tenera&#92;&quot;,&#92;&quot;populaernavn&#92;&quot;:null,&#92;&quot;roedlistestatus&#92;&quot;:&#92;&quot;DD&#92;&quot;,&#92;&quot;forvaltningsverdi&#92;&quot;:&#92;&quot;Middels verdi&#92;&quot;,&#92;&quot;kriterium_prioriterte_arter&#92;&quot;:null,&#92;&quot;kriterium_fredete_arter&#92;&quot;:null,&#92;&quot;kriterium_kritisk_trua_art&#92;&quot;:null,&#92;&quot;kriterium_sterkt_trua_art&#92;&quot;:null,&#92;&quot;kriterium_saarbar_art&#92;&quot;:null,&#92;&quot;kriterium_andre_spesielt_hensynskrevende_arter&#92;&quot;:null,&#92;&quot;kriterium_spesielle_okologiske_former&#92;&quot;:null,&#92;&quot;kriterium_nt&#92;&quot;:null,&#92;&quot;kriterium_dd&#92;&quot;:1,&#92;&quot;kriterium_hensynskrevende_arter&#92;&quot;:null,&#92;&quot;kriterium_ansvarsart&#92;&quot;:null,&#92;&quot;kriterium_fremmede_arter&#92;&quot;:null},{&#92;&quot;vitenskapelig_navn_id&#92;&quot;:2118,&#92;&quot;artsgruppe&#92;&quot;:&#92;&quot;Krepsdyr&#92;&quot;,&#92;&quot;vitenskapelig_navn&#92;&quot;:&#92;&quot;Allomelita pellucida&#92;&quot;,&#92;&quot;populaernavn&#92;&quot;:null,&#92;&quot;roedlistestatus&#92;&quot;:&#92;&quot;NT&#92;&quot;,&#92;&quot;forvaltningsverdi&#92;&quot;:&#92;&quot;Middels verdi&#92;&quot;,&#92;&quot;kriterium_prioriterte_arter&#92;&quot;:null,&#92;&quot;kriterium_fredete_arter&#92;&quot;:null,&#92;&quot;kriterium_kritisk_trua_art&#92;&quot;:null,&#92;&quot;kriterium_sterkt_trua_art&#92;&quot;:null,&#92;&quot;kriterium_saarbar_art&#92;&quot;:null,&#92;&quot;kriterium_andre_spesielt_hensynskrevende_arter&#92;&quot;:null,&#92;&quot;kriterium_spesielle_okologiske_former&#92;&quot;:null,&#92;&quot;kriterium_nt&#92;&quot;:1,&#92;&quot;kriterium_dd&#92;&quot;:null,&#92;&quot;kriterium_hensynskrevende_arter&#92;&quot;:null,&#92;&quot;kriterium_ansvarsart&#92;&quot;:null,&#92;&quot;kriterium_fremmede_arter&#92;&quot;:null},{&#92;&quot;vitenskapelig_navn_id&#92;&quot;:2216,&#92;&quot;artsgruppe&#92;&quot;:&#92;&quot;Krepsdyr&#92;&quot;,&#92;&quot;vitenskapelig_navn&#92;&quot;:&#92;&quot;Podoprionella norvegica&#92;&quot;,&#92;&quot;populaernavn&#92;&quot;:null,&#92;&quot;roedlistestatus&#92;&quot;:&#92;&quot;DD&#92;&quot;,&#92;&quot;forvaltningsverdi&#92;&quot;:&#92;&quot;Middels verdi&#92;&quot;,&#92;&quot;kriterium_prioriterte_arter&#92;&quot;:null,&#92;&quot;kriterium_fredete_arter&#92;&quot;:null,&#92;&quot;kriterium_kritisk_trua_art&#92;&quot;:null,&#92;&quot;kriterium_sterkt_trua_art&#92;&quot;:null,&#92;&quot;kriterium_saarbar_art&#92;&quot;:null,&#92;&quot;kriterium_andre_spesielt_hensynskrevende_arter&#92;&quot;:null,&#92;&quot;kriterium_spesielle_okologiske_former&#92;&quot;:null,&#92;&quot;kriterium_nt&#92;&quot;:null,&#92;&quot;kriterium_dd&#92;&quot;:1,&#92;&quot;kriterium_hensynskrevende_arter&#92;&quot;:null,&#92;&quot;kriterium_ansvarsart&#92;&quot;:null,&#92;&quot;kriterium_fremmede_arter&#92;&quot;:null},{&#92;&quot;vitenskapelig_navn_id&#92;&quot;:2291,&#92;&quot;artsgruppe&#92;&quot;:&#92;&quot;Krepsdyr&#92;&quot;,&#92;&quot;vitenskapelig_navn&#92;&quot;:&#92;&quot;Pleusymtes karstensi&#92;&quot;,&#92;&quot;populaernavn&#92;&quot;:null,&#92;&quot;roedlistestatus&#92;&quot;:&#92;&quot;NT&#92;&quot;,&#92;&quot;forvaltningsverdi&#92;&quot;:&#92;&quot;Middels verdi&#92;&quot;,&#92;&quot;kriterium_prioriterte_arter&#92;&quot;:null,&#92;&quot;kriterium_fredete_arter&#92;&quot;:null,&#92;&quot;kriterium_kritisk_trua_art&#92;&quot;:null,&#92;&quot;kriterium_sterkt_trua_art&#92;&quot;:null,&#92;&quot;kriterium_saarbar_art&#92;&quot;:null,&#92;&quot;kriterium_andre_spesielt_hensynskrevende_arter&#92;&quot;:null,&#92;&quot;kriterium_spesielle_okologiske_former&#92;&quot;:null,&#92;&quot;kriterium_nt&#92;&quot;:1,&#92;&quot;kriterium_dd&#92;&quot;:null,&#92;&quot;kriterium_hensynskrevende_arter&#92;&quot;:null,&#92;&quot;kriterium_ansvarsart&#92;&quot;:null,&#92;&quot;kriterium_fremmede_arter&#92;&quot;:null},{&#92;&quot;vitenskapelig_navn_id&#92;&quot;:2306,&#92;&quot;artsgruppe&#92;&quot;:&#92;&quot;Krepsdyr&#92;&quot;,&#92;&quot;vitenskapelig_navn&#92;&quot;:&#92;&quot;Monoporeia affinis&#92;&quot;,&#92;&quot;populaernavn&#92;&quot;:&#92;&quot;Flatbent istidskreps&#92;&quot;,&#92;&quot;roedlistestatus&#92;&quot;:&#92;&quot;NT&#92;&quot;,&#92;&quot;forvaltningsverdi&#92;&quot;:&#92;&quot;Middels verdi&#92;&quot;,&#92;&quot;kriterium_prioriterte_arter&#92;&quot;:null,&#92;&quot;kriterium_fredete_arter&#92;&quot;:null,&#92;&quot;kriterium_kritisk_trua_art&#92;&quot;:null,&#92;&quot;kriterium_sterkt_trua_art&#92;&quot;:null,&#92;&quot;kriterium_saarbar_art&#92;&quot;:null,&#92;&quot;kriterium_andre_spesielt_hensynskrevende_arter&#92;&quot;:null,&#92;&quot;kriterium_spesielle_okologiske_former&#92;&quot;:null,&#92;&quot;kriterium_nt&#92;&quot;:1,&#92;&quot;kriterium_dd&#92;&quot;:null,&#92;&quot;kriterium_hensynskrevende_arter&#92;&quot;:null,&#92;&quot;kriterium_ansvarsart&#92;&quot;:null,&#92;&quot;kriterium_fremmede_arter&#92;&quot;:null},{&#92;&quot;vitenskapelig_navn_id&#92;&quot;:2352,&#92;&quot;artsgruppe&#92;&quot;:&#92;&quot;Krepsdyr&#92;&quot;,&#92;&quot;vitenskapelig_navn&#92;&quot;:&#92;&quot;Metopa affinis&#92;&quot;,&#92;&quot;populaernavn&#92;&quot;:null,&#92;&quot;roedlistestatus&#92;&quot;:&#92;&quot;DD&#92;&quot;,&#92;&quot;forvaltningsverdi&#92;&quot;:&#92;&quot;Middels verdi&#92;&quot;,&#92;&quot;kriterium_prioriterte_arter&#92;&quot;:null,&#92;&quot;kriterium_fredete_arter&#92;&quot;:null,&#92;&quot;kriterium_kritisk_trua_art&#92;&quot;:null,&#92;&quot;kriterium_sterkt_trua_art&#92;&quot;:null,&#92;&quot;kriterium_saarbar_art&#92;&quot;:null,&#92;&quot;kriterium_andre_spesielt_hensynskrevende_arter&#92;&quot;:null,&#92;&quot;kriterium_spesielle_okologiske_former&#92;&quot;:null,&#92;&quot;kriterium_nt&#92;&quot;:null,&#92;&quot;kriterium_dd&#92;&quot;:1,&#92;&quot;kriterium_hensynskrevende_arter&#92;&quot;:null,&#92;&quot;kriterium_ansvarsart&#92;&quot;:null,&#92;&quot;kriterium_fremmede_arter&#92;&quot;:null},{&#92;&quot;vitenskapelig_navn_id&#92;&quot;:2359,&#92;&quot;artsgruppe&#92;&quot;:&#92;&quot;Krepsdyr&#92;&quot;,&#92;&quot;vitenskapelig_navn&#92;&quot;:&#92;&quot;Metopa leptocarpa&#92;&quot;,&#92;&quot;populaernavn&#92;&quot;:null,&#92;&quot;roedlistestatus&#92;&quot;:&#92;&quot;DD&#92;&quot;,&#92;&quot;forvaltningsverdi&#92;&quot;:&#92;&quot;Middels verdi&#92;&quot;,&#92;&quot;kriterium_prioriterte_arter&#92;&quot;:null,&#92;&quot;kriterium_fredete_arter&#92;&quot;:null,&#92;&quot;kriterium_kritisk_trua_art&#92;&quot;:null,&#92;&quot;kriterium_sterkt_trua_art&#92;&quot;:null,&#92;&quot;kriterium_saarbar_art&#92;&quot;:null,&#92;&quot;kriterium_andre_spesielt_hensynskrevende_arter&#92;&quot;:null,&#92;&quot;kriterium_spesielle_okologiske_former&#92;&quot;:null,&#92;&quot;kriterium_nt&#92;&quot;:null,&#92;&quot;kriterium_dd&#92;&quot;:1,&#92;&quot;kriterium_hensynskrevende_arter&#92;&quot;:null,&#92;&quot;kriterium_ansvarsart&#92;&quot;:null,&#92;&quot;kriterium_fremmede_arter&#92;&quot;:null},{&#92;&quot;vitenskapelig_navn_id&#92;&quot;:2362,&#92;&quot;artsgruppe&#92;&quot;:&#92;&quot;Krepsdyr&#92;&quot;,&#92;&quot;vitenskapelig_navn&#92;&quot;:&#92;&quot;Metopa palmata&#92;&quot;,&#92;&quot;populaernavn&#92;&quot;:null,&#92;&quot;roedlistestatus&#92;&quot;:&#92;&quot;DD&#92;&quot;,&#92;&quot;forvaltningsverdi&#92;&quot;:&#92;&quot;Middels verdi&#92;&quot;,&#92;&quot;kriterium_prioriterte_arter&#92;&quot;:null,&#92;&quot;kriterium_fredete_arter&#92;&quot;:null,&#92;&quot;kriterium_kritisk_trua_art&#92;&quot;:null,&#92;&quot;kriterium_sterkt_trua_art&#92;&quot;:null,&#92;&quot;kriterium_saarbar_art&#92;&quot;:null,&#92;&quot;kriterium_andre_spesielt_hensynskrevende_arter&#92;&quot;:null,&#92;&quot;kriterium_spesielle_okologiske_former&#92;&quot;:null,&#92;&quot;kriterium_nt&#92;&quot;:null,&#92;&quot;kriterium_dd&#92;&quot;:1,&#92;&quot;kriterium_hensynskrevende_arter&#92;&quot;:null,&#92;&quot;kriterium_ansvarsart&#92;&quot;:null,&#92;&quot;kriterium_fremmede_arter&#92;&quot;:null},{&#92;&quot;vitenskapelig_navn_id&#92;&quot;:2368,&#92;&quot;artsgruppe&#92;&quot;:&#92;&quot;Krepsdyr&#92;&quot;,&#92;&quot;vitenskapelig_navn&#92;&quot;:&#92;&quot;Metopa spitzbergensis&#92;&quot;,&#92;&quot;populaernavn&#92;&quot;:null,&#92;&quot;roedlistestatus&#92;&quot;:&#92;&quot;DD&#92;&quot;,&#92;&quot;forvaltningsverdi&#92;&quot;:&#92;&quot;Middels verdi&#92;&quot;,&#92;&quot;kriterium_prioriterte_arter&#92;&quot;:null,&#92;&quot;kriterium_fredete_arter&#92;&quot;:null,&#92;&quot;kriterium_kritisk_trua_art&#92;&quot;:null,&#92;&quot;kriterium_sterkt_trua_art&#92;&quot;:null,&#92;&quot;kriterium_saarbar_art&#92;&quot;:null,&#92;&quot;kriterium_andre_spesielt_hensynskrevende_arter&#92;&quot;:null,&#92;&quot;kriterium_spesielle_okologiske_former&#92;&quot;:null,&#92;&quot;kriterium_nt&#92;&quot;:null,&#92;&quot;kriterium_dd&#92;&quot;:1,&#92;&quot;kriterium_hensynskrevende_arter&#92;&quot;:null,&#92;&quot;kriterium_ansvarsart&#92;&quot;:null,&#92;&quot;kriterium_fremmede_arter&#92;&quot;:null},{&#92;&quot;vitenskapelig_navn_id&#92;&quot;:2371,&#92;&quot;artsgruppe&#92;&quot;:&#92;&quot;Krepsdyr&#92;&quot;,&#92;&quot;vitenskapelig_navn&#92;&quot;:&#92;&quot;Metopella longimana&#92;&quot;,&#92;&quot;populaernavn&#92;&quot;:null,&#92;&quot;roedlistestatus&#92;&quot;:&#92;&quot;DD&#92;&quot;,&#92;&quot;forvaltningsverdi&#92;&quot;:&#92;&quot;Middels verdi&#92;&quot;,&#92;&quot;kriterium_prioriterte_arter&#92;&quot;:null,&#92;&quot;kriterium_fredete_arter&#92;&quot;:null,&#92;&quot;kriterium_kritisk_trua_art&#92;&quot;:null,&#92;&quot;kriterium_sterkt_trua_art&#92;&quot;:null,&#92;&quot;kriterium_saarbar_art&#92;&quot;:null,&#92;&quot;kriterium_andre_spesielt_hensynskrevende_arter&#92;&quot;:null,&#92;&quot;kriterium_spesielle_okologiske_former&#92;&quot;:null,&#92;&quot;kriterium_nt&#92;&quot;:null,&#92;&quot;kriterium_dd&#92;&quot;:1,&#92;&quot;kriterium_hensynskrevende_arter&#92;&quot;:null,&#92;&quot;kriterium_ansvarsart&#92;&quot;:null,&#92;&quot;kriterium_fremmede_arter&#92;&quot;:null},{&#92;&quot;vitenskapelig_navn_id&#92;&quot;:2378,&#92;&quot;artsgruppe&#92;&quot;:&#92;&quot;Krepsdyr&#92;&quot;,&#92;&quot;vitenskapelig_navn&#92;&quot;:&#92;&quot;Stenothoe microps&#92;&quot;,&#92;&quot;populaernavn&#92;&quot;:null,&#92;&quot;roedlistestatus&#92;&quot;:&#92;&quot;DD&#92;&quot;,&#92;&quot;forvaltningsverdi&#92;&quot;:&#92;&quot;Middels verdi&#92;&quot;,&#92;&quot;kriterium_prioriterte_arter&#92;&quot;:null,&#92;&quot;kriterium_fredete_arter&#92;&quot;:null,&#92;&quot;kriterium_kritisk_trua_art&#92;&quot;:null,&#92;&quot;kriterium_sterkt_trua_art&#92;&quot;:null,&#92;&quot;kriterium_saarbar_art&#92;&quot;:null,&#92;&quot;kriterium_andre_spesielt_hensynskrevende_arter&#92;&quot;:null,&#92;&quot;kriterium_spesielle_okologiske_former&#92;&quot;:null,&#92;&quot;kriterium_nt&#92;&quot;:null,&#92;&quot;kriterium_dd&#92;&quot;:1,&#92;&quot;kriterium_hensynskrevende_arter&#92;&quot;:null,&#92;&quot;kriterium_ansvarsart&#92;&quot;:null,&#92;&quot;kriterium_fremmede_arter&#92;&quot;:null}]&quot;' data-total-rows='5538' data-total-columns='18' data-max-columns='50' data-banner-text='&quot;&quot;' data-pagination='true' data-page-size='30' data-field-types='[[&quot;vitenskapelig_navn_id&quot;,[&quot;integer&quot;,&quot;i64&quot;]],[&quot;artsgruppe&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;vitenskapelig_navn&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;populaernavn&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;roedlistestatus&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;forvaltningsverdi&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;kriterium_prioriterte_arter&quot;,[&quot;integer&quot;,&quot;i64&quot;]],[&quot;kriterium_fredete_arter&quot;,[&quot;integer&quot;,&quot;i64&quot;]],[&quot;kriterium_kritisk_trua_art&quot;,[&quot;integer&quot;,&quot;i64&quot;]],[&quot;kriterium_sterkt_trua_art&quot;,[&quot;integer&quot;,&quot;i64&quot;]],[&quot;kriterium_saarbar_art&quot;,[&quot;integer&quot;,&quot;i64&quot;]],[&quot;kriterium_andre_spesielt_hensynskrevende_arter&quot;,[&quot;integer&quot;,&quot;i64&quot;]],[&quot;kriterium_spesielle_okologiske_former&quot;,[&quot;integer&quot;,&quot;i64&quot;]],[&quot;kriterium_nt&quot;,[&quot;integer&quot;,&quot;i64&quot;]],[&quot;kriterium_dd&quot;,[&quot;integer&quot;,&quot;i64&quot;]],[&quot;kriterium_hensynskrevende_arter&quot;,[&quot;integer&quot;,&quot;i64&quot;]],[&quot;kriterium_ansvarsart&quot;,[&quot;integer&quot;,&quot;i64&quot;]],[&quot;kriterium_fremmede_arter&quot;,[&quot;integer&quot;,&quot;i64&quot;]]]' data-show-filters='true' data-show-download='true' data-show-column-summaries='true' data-show-data-types='true' data-show-page-size-selector='true' data-show-column-explorer='true' data-show-chart-builder='true' data-row-headers='[]' data-has-stable-row-id='false' data-lazy='false' data-preload='false'></marimo-table></marimo-ui-element>"
           }
         }
       ],
       "console": []
     },
     {
+      "id": "ItKS",
+      "code_hash": "5702b6895119c47b57f5c1c8e7a78e17",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "exception",
+          "evalue": "cannot compare string with numeric type (i32)\n\nThis error occurred in the following expression:\n\t[(col(\"vitenskapelig_navn\")) == (dyn int: 1)]\nwhile evaluating this larger expression:\n\t[([([([([([([([([([([(col(\"arts_id\")) == (1)]) | ([(col(\"vitenskapelig_navn\")) == (dyn int: 1)])]) | ([(col(\"Verdi M1941\")) == (dyn int: 1)])]) | ([(col(\"Prioriterte arter\")) == (1)])]) | ([(col(\"Fredete arter\")) == (1)])]) | ([(col(\"Andre spesielt hensynskrevende arter\")) == (1)])]) | ([(col(\"Spesielle \u00f8lologiske former\")) == (1)])]) | ([(col(\"Datamangel\")) == (1)])]) | ([(col(\"Hensynskrevende arter\")) == (1)])]) | ([(col(\"Ansvarsarter\")) == (1)])]) | ([(col(\"Fremmede arter\")) == (1)])]\n",
+          "traceback": null
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stderr",
+          "text": "<span class=\"codehilite\"><div class=\"highlight\"><pre><span></span><span class=\"gt\">Traceback (most recent call last):</span>\n  File <span class=\"nb\">&quot;/tmp/marimo_3812/__marimo__cell_ItKS_.py&quot;</span>, line <span class=\"m\">19</span>, in <span class=\"n\">&lt;module&gt;</span>\n<span class=\"w\">    </span><span class=\"n\">df_arter_nf_filtrert</span> <span class=\"o\">=</span> <span class=\"n\">df_arter_nf_ryddet</span><span class=\"o\">.</span><span class=\"n\">filter</span><span class=\"p\">(</span><span class=\"n\">pl</span><span class=\"o\">.</span><span class=\"n\">any_horizontal</span><span class=\"p\">(</span><span class=\"n\">pl</span><span class=\"o\">.</span><span class=\"n\">all</span><span class=\"p\">()</span> <span class=\"o\">==</span> <span class=\"mi\">1</span><span class=\"p\">))</span>\n  File <span class=\"nb\">&quot;/home/havhje/koding/fugl_artsdataanalyser/.venv/lib/python3.14/site-packages/polars/dataframe/frame.py&quot;</span>, line <span class=\"m\">5509</span>, in <span class=\"n\">filter</span>\n<span class=\"w\">    </span><span class=\"o\">.</span><span class=\"n\">collect</span><span class=\"p\">(</span><span class=\"n\">optimizations</span><span class=\"o\">=</span><span class=\"n\">QueryOptFlags</span><span class=\"o\">.</span><span class=\"n\">_eager</span><span class=\"p\">())</span>\n<span class=\"w\">     </span><span class=\"pm\">~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^</span>\n  File <span class=\"nb\">&quot;/home/havhje/koding/fugl_artsdataanalyser/.venv/lib/python3.14/site-packages/polars/_utils/deprecation.py&quot;</span>, line <span class=\"m\">97</span>, in <span class=\"n\">wrapper</span>\n<span class=\"w\">    </span><span class=\"k\">return</span> <span class=\"n\">function</span><span class=\"p\">(</span><span class=\"o\">*</span><span class=\"n\">args</span><span class=\"p\">,</span> <span class=\"o\">**</span><span class=\"n\">kwargs</span><span class=\"p\">)</span>\n  File <span class=\"nb\">&quot;/home/havhje/koding/fugl_artsdataanalyser/.venv/lib/python3.14/site-packages/polars/lazyframe/opt_flags.py&quot;</span>, line <span class=\"m\">343</span>, in <span class=\"n\">wrapper</span>\n<span class=\"w\">    </span><span class=\"k\">return</span> <span class=\"n\">function</span><span class=\"p\">(</span><span class=\"o\">*</span><span class=\"n\">args</span><span class=\"p\">,</span> <span class=\"o\">**</span><span class=\"n\">kwargs</span><span class=\"p\">)</span>\n  File <span class=\"nb\">&quot;/home/havhje/koding/fugl_artsdataanalyser/.venv/lib/python3.14/site-packages/polars/lazyframe/frame.py&quot;</span>, line <span class=\"m\">2510</span>, in <span class=\"n\">collect</span>\n<span class=\"w\">    </span><span class=\"k\">return</span> <span class=\"n\">wrap_df</span><span class=\"p\">(</span><span class=\"n\">ldf</span><span class=\"o\">.</span><span class=\"n\">collect</span><span class=\"p\">(</span><span class=\"n\">engine</span><span class=\"p\">,</span> <span class=\"n\">callback</span><span class=\"p\">))</span>\n<span class=\"w\">                   </span><span class=\"pm\">~~~~~~~~~~~^^^^^^^^^^^^^^^^^^</span>\n<span class=\"gr\">polars.exceptions.ComputeError</span>: <span class=\"n\">cannot compare string with numeric type (i32)</span>\n\n<span class=\"x\">This error occurred in the following expression:</span>\n<span class=\"x\">\t[(col(&quot;vitenskapelig_navn&quot;)) == (dyn int: 1)]</span>\n<span class=\"x\">while evaluating this larger expression:</span>\n<span class=\"x\">\t[([([([([([([([([([([(col(&quot;arts_id&quot;)) == (1)]) | ([(col(&quot;vitenskapelig_navn&quot;)) == (dyn int: 1)])]) | ([(col(&quot;Verdi M1941&quot;)) == (dyn int: 1)])]) | ([(col(&quot;Prioriterte arter&quot;)) == (1)])]) | ([(col(&quot;Fredete arter&quot;)) == (1)])]) | ([(col(&quot;Andre spesielt hensynskrevende arter&quot;)) == (1)])]) | ([(col(&quot;Spesielle \u00f8lologiske former&quot;)) == (1)])]) | ([(col(&quot;Datamangel&quot;)) == (1)])]) | ([(col(&quot;Hensynskrevende arter&quot;)) == (1)])]) | ([(col(&quot;Ansvarsarter&quot;)) == (1)])]) | ([(col(&quot;Fremmede arter&quot;)) == (1)])]</span>\n</pre></div>\n</span>",
+          "mimetype": "application/vnd.marimo+traceback"
+        }
+      ]
+    },
+    {
       "id": "ROlb",
+      "code_hash": "2249c35c630e10483a65dc6674cb66d7",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "syntax",
+          "evalue": "line 19\n    pl.col(\"kriterium_ansvarsart\").alias(\"Ansvarsarter\")\n    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nSyntaxError: invalid syntax. Perhaps you forgot a comma?\n",
+          "traceback": []
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "qnkX",
       "code_hash": "03b7d6809ca724a53df5110fc99e1344",
       "outputs": [
         {
@@ -255,13 +275,13 @@
         {
           "type": "stream",
           "name": "stdout",
-          "text": "\u001b[32m.\u001b[0m\u001b[33m                                                                        [100%]\u001b[0m\n=================================== Overview ===================================\nPassed Tests:\n\u001b[1m\u001b[32m\u001b[22m\u2713\u001b[0m\u001b[0m databehandling/databehandling.py::test_add_national_interest_criteria\n\nSummary:\nTotal: 1, Passed: 1, Failed: 0, Errors: 0, Skipped: 0\n",
+          "text": "\u001b[31mF\u001b[0m\u001b[31m                                                                        [100%]\u001b[0m\n=================================== FAILURES ===================================\n\u001b[31m\u001b[1m_____________________ test_add_national_interest_criteria ______________________\u001b[0m\n\n    def test_add_national_interest_criteria():\n    \n        test_df_anf = pl.DataFrame(\n            {\n                \"validScientificNameId\": [\n                    3506,  # havelle\n                    3768,  # svarthalespove (iclandica)\n                    295741,  # h\u00f8nsehauk\n                    3478,  # dvergg\u00e5s\n                    3495,  # kanadag\u00e5s\n                    999999,  # finnes ikke i kriterietabellen\n                ],\n                \"validScientificName\": [\n                    \"Clangula hyemalis\",  # havelle\n                    \"Limosa limosa islandica\",  # svarthalespove\n                    \"Accipiter gentilis\",  # h\u00f8nsehauk\n                    \"Anser erythropus\",  # dvergg\u00e5s\n                    \"Branta canadensis\",  # kanadag\u00e5s\n                    \"Nonexistent species\",  # finnes ikke\n                ],\n            }\n        )\n    \n>       test_result = add_national_interest_criteria(test_df_anf)\n                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n\u001b[1m\u001b[31mE       NameError: name 'add_national_interest_criteria' is not defined\u001b[0m\n\n\u001b[1m\u001b[31mmarimo://databehandling.py#cell_id=qnkX\u001b[0m:24: NameError\n=================================== Overview ===================================\n\nSummary:\nTotal: 1, Passed: 0, Failed: 1, Errors: 0, Skipped: 0\n\u001b[36m\u001b[1m=========================== short test summary info ============================\u001b[0m\n\u001b[31mFAILED\u001b[0m databehandling/databehandling.py::\u001b[1mtest_add_national_interest_criteria\u001b[0m - NameError: name 'add_national_interest_criteria' is not defined\n",
           "mimetype": "text/plain"
         }
       ]
     },
     {
-      "id": "qnkX",
+      "id": "TqIu",
       "code_hash": "dda1e72ac50c6417612a74b4eff27eba",
       "outputs": [
         {
@@ -274,7 +294,7 @@
       "console": []
     },
     {
-      "id": "TqIu",
+      "id": "Vxnm",
       "code_hash": "a037fd5b69096c4ab2c441c380570baf",
       "outputs": [
         {
@@ -287,7 +307,7 @@
       "console": []
     },
     {
-      "id": "Vxnm",
+      "id": "DnEU",
       "code_hash": "b5009442b1b32a0c44e20f8722e83789",
       "outputs": [
         {
@@ -307,7 +327,7 @@
       ]
     },
     {
-      "id": "DnEU",
+      "id": "ulZA",
       "code_hash": "014174002aa4cf3b1bda533c973342b4",
       "outputs": [
         {
@@ -320,7 +340,7 @@
       "console": []
     },
     {
-      "id": "ulZA",
+      "id": "ecfG",
       "code_hash": "cf623a2c4dca80680fa2f1f407f1a05d",
       "outputs": [
         {
@@ -333,7 +353,7 @@
       "console": []
     },
     {
-      "id": "ecfG",
+      "id": "Pvdt",
       "code_hash": "710e6bdbf171f57aff48ec7049f84c37",
       "outputs": [
         {
@@ -353,7 +373,7 @@
       ]
     },
     {
-      "id": "Pvdt",
+      "id": "ZBYS",
       "code_hash": "b83d98e9c7a5910b657eeafb190dc38a",
       "outputs": [
         {
@@ -366,7 +386,7 @@
       "console": []
     },
     {
-      "id": "ZBYS",
+      "id": "aLJB",
       "code_hash": "1081708cf24d7038e9573fd49f35b0f9",
       "outputs": [
         {
@@ -379,8 +399,28 @@
       "console": []
     },
     {
-      "id": "aLJB",
+      "id": "nHfw",
       "code_hash": "80d3a806469d99158bff33c36c662676",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stdout",
+          "text": "\u001b[32m.\u001b[0m\u001b[33m                                                                        [100%]\u001b[0m\n=================================== Overview ===================================\nPassed Tests:\n\u001b[1m\u001b[32m\u001b[22m\u2713\u001b[0m\u001b[0m databehandling::test_finn_mangler_navn\n\nSummary:\nTotal: 1, Passed: 1, Failed: 0, Errors: 0, Skipped: 0\n",
+          "mimetype": "text/plain"
+        }
+      ]
+    },
+    {
+      "id": "xXTn",
+      "code_hash": "38f01bb5678cdfdff0f5eeb9e0ac80b6",
       "outputs": [
         {
           "type": "data",
@@ -392,31 +432,60 @@
       "console": []
     },
     {
-      "id": "nHfw",
-      "code_hash": "38f01bb5678cdfdff0f5eeb9e0ac80b6",
-      "outputs": [],
-      "console": []
-    },
-    {
-      "id": "xXTn",
-      "code_hash": "b1a77a4cceee2fe674466ac858423a12",
-      "outputs": [],
-      "console": []
-    },
-    {
       "id": "AjVT",
-      "code_hash": "61bae9686644176c99b96d9c7257ef2a",
-      "outputs": [],
-      "console": []
+      "code_hash": "b1a77a4cceee2fe674466ac858423a12",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stdout",
+          "text": "\u001b[32m.\u001b[0m\u001b[33m                                                                        [100%]\u001b[0m\n=================================== Overview ===================================\nPassed Tests:\n\u001b[1m\u001b[32m\u001b[22m\u2713\u001b[0m\u001b[0m databehandling/databehandling.py::test_prompt_mangler_navn\n\nSummary:\nTotal: 1, Passed: 1, Failed: 0, Errors: 0, Skipped: 0\n",
+          "mimetype": "text/plain"
+        }
+      ]
     },
     {
       "id": "pHFh",
-      "code_hash": "df23b74179e2f7a917f0872e99d55061",
-      "outputs": [],
+      "code_hash": "61bae9686644176c99b96d9c7257ef2a",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
       "console": []
     },
     {
       "id": "NCOB",
+      "code_hash": "df23b74179e2f7a917f0872e99d55061",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stdout",
+          "text": "\u001b[32m.\u001b[0m\u001b[33m                                                                        [100%]\u001b[0m\n=================================== Overview ===================================\nPassed Tests:\n\u001b[1m\u001b[32m\u001b[22m\u2713\u001b[0m\u001b[0m databehandling::test_join_navn_til_orginal_df\n\nSummary:\nTotal: 1, Passed: 1, Failed: 0, Errors: 0, Skipped: 0\n",
+          "mimetype": "text/plain"
+        }
+      ]
+    },
+    {
+      "id": "aqbW",
       "code_hash": "10eab9fe24a69fc2527626f0dac574ac",
       "outputs": [
         {
@@ -429,15 +498,29 @@
       "console": []
     },
     {
-      "id": "aqbW",
+      "id": "TRpd",
       "code_hash": "8e6ef924fcfd59a6331194ad9892531f",
-      "outputs": [],
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
       "console": []
     },
     {
-      "id": "TRpd",
+      "id": "TXez",
       "code_hash": "6d9267adfb5f84c2e3d8dcb17328eefa",
-      "outputs": [],
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
       "console": []
     }
   ]
