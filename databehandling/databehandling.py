@@ -852,14 +852,7 @@ def _add_national_interest_criteria(bird_data):
     return (add_national_interest_criteria,)
 
 
-@app.cell
-def _(bird_data):
-    t = bird_data.execute("SELECT * FROM arter_av_nasjonal_forvaltningsinteresse").pl()
-    t
-    return
-
-
-@app.cell
+@app.cell(hide_code=True)
 def _(add_national_interest_criteria):
     def test_add_national_interest_criteria():
 
@@ -1095,7 +1088,7 @@ def legg_til_kolonne_arteravnasjonal(input_df: pl.DataFrame) -> pl.DataFrame:
     Adds a new column 'Art av nasjonal forvaltningsinteresse' to the DataFrame.
 
     The new column is populated based on the values in a predefined list of
-    category columns. If any of these columns have the value "Yes", the new
+    category columns. If any of these columns have the value "Ja", the new
     column will contain a comma-separated list of the category names.
     Otherwise, it will contain the value "Nei".
 
@@ -1107,12 +1100,12 @@ def legg_til_kolonne_arteravnasjonal(input_df: pl.DataFrame) -> pl.DataFrame:
     """
     category_columns = [
         "Ansvarsarter",
-        "Trua arter",
         "Andre spesielt hensynskrevende arter",
+        "Hensynskrevende arter",
         "Spesielle økologiske former",
+        "Datamangel",
         "Prioriterte arter",
         "Fredete arter",
-        "NT",
         "Fremmede arter",
     ]
 
@@ -1121,7 +1114,7 @@ def legg_til_kolonne_arteravnasjonal(input_df: pl.DataFrame) -> pl.DataFrame:
     category_list = (
         pl.concat_list(  # slår sammen alle anf til en kolonne, men merk List Concatenation  = packing items into a list within a single row ( noe annet enn a stacke tabbeller)
             *[
-                pl.when(pl.col(col) == "Yes").then(pl.lit(col))  # erstatter YES/NO med kolonne navnet
+                pl.when(pl.col(col) == "Ja").then(pl.lit(col))  # erstatter Ja/Nei med kolonne navnet
                 for col in category_columns
             ]
         ).list.drop_nulls()  # fjerner null verdier slik at du ikke får NT, null, null, Fremmed art
@@ -1146,15 +1139,24 @@ def legg_til_kolonne_arteravnasjonal(input_df: pl.DataFrame) -> pl.DataFrame:
 def test_legg_til_kolonne_arteravnasjonal():
     sample_df = pl.DataFrame(
         {
-            "species": ["Hubro", "Gråspurv", "Fjellrev", "Villmink", "Dverggås"],
-            "Ansvarsarter": ["Yes", "No", "No", "No", "Yes"],
-            "Trua arter": ["No", "No", "No", "No", "No"],
-            "Andre spesielt hensynskrevende arter": ["No", "No", "Yes", "No", "No"],
-            "Spesielle okologiske former": ["No", "No", "No", "No", "Yes"],
-            "Prioriterte arter": ["Yes", "No", "No", "No", "No"],
-            "Fredete arter": ["Yes", "No", "No", "No", "No"],
-            "NT": ["No", "No", "No", "No", "No"],
-            "Fremmede arter": ["No", "No", "No", "Yes", "No"],
+            "species": ["Hubro", "Gråspurv", "Fjellrev", "Villmink", "Dverggås", "Pelekreps", "Krikkand", "Ukjent art"],
+            "Ansvarsarter": ["Ja", "Nei", "Nei", "Nei", "Ja", "Nei", "Nei", "Treff ikke funnet"],
+            "Andre spesielt hensynskrevende arter": [
+                "Nei",
+                "Nei",
+                "Ja",
+                "Nei",
+                "Nei",
+                "Nei",
+                "Nei",
+                "Treff ikke funnet",
+            ],
+            "Hensynskrevende arter": ["Nei", "Nei", "Nei", "Nei", "Nei", "Nei", "Ja", "Treff ikke funnet"],
+            "Spesielle økologiske former": ["Nei", "Nei", "Nei", "Nei", "Ja", "Nei", "Nei", "Treff ikke funnet"],
+            "Datamangel": ["Nei", "Nei", "Nei", "Nei", "Nei", "Ja", "Nei", "Treff ikke funnet"],
+            "Prioriterte arter": ["Ja", "Nei", "Nei", "Nei", "Nei", "Nei", "Nei", "Treff ikke funnet"],
+            "Fredete arter": ["Ja", "Nei", "Nei", "Nei", "Nei", "Nei", "Nei", "Treff ikke funnet"],
+            "Fremmede arter": ["Nei", "Nei", "Nei", "Ja", "Nei", "Nei", "Nei", "Treff ikke funnet"],
         }
     )
 
@@ -1167,7 +1169,7 @@ def test_legg_til_kolonne_arteravnasjonal():
     values = result.get_column("Art av nasjonal forvaltningsinteresse").to_list()
 
     # Unpacker (en egen python greie (må ha samme "lengde") lista inn i artene (som er de fra df), slik at disse får sine korrensponderende verdier fra ANF kolonnen i orginal df
-    hubro, graspurv, fjellrev, villmink, dverggas = values
+    hubro, graspurv, fjellrev, villmink, dverggas, pelekreps, krikkand, ukjent_art = values
 
     # Kan da skrive de riktige "assertene" i testen
     # Hubro: Ansvarsarter, Prioriterte arter, Fredete arter
@@ -1184,10 +1186,19 @@ def test_legg_til_kolonne_arteravnasjonal():
     # Villmink: Fremmede arter
     assert villmink == "Fremmede arter"
 
-    # Dverggås: Ansvarsarter + Spesielle okologiske former
+    # Dverggås: Ansvarsarter + Spesielle økologiske former
     assert "Ansvarsarter" in dverggas
-    assert "Spesielle okologiske former" in dverggas
+    assert "Spesielle økologiske former" in dverggas
     assert dverggas.count(",") == 1
+
+    # Pelekreps: Datamangel
+    assert pelekreps == "Datamangel"
+
+    # Krikkand: Hensynskrevende arter
+    assert krikkand == "Hensynskrevende arter"
+
+    # Ukjent art: Treff ikke funnet
+    assert ukjent_art == "Treff ikke funnet"
 
 
 @app.cell(hide_code=True)
