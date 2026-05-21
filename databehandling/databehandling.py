@@ -1,6 +1,6 @@
 import marimo
 
-__generated_with = "0.23.5"
+__generated_with = "0.23.6"
 app = marimo.App(width="columns")
 
 with app.setup:
@@ -32,6 +32,26 @@ with app.setup:
     from rich.rule import Rule
 
 
+@app.cell(hide_code=True)
+def todo():
+    todo_liste = mo.callout(
+        mo.md(
+            r"""
+    ### Todo
+
+    - [ ] Add logging to the national criteria function.
+    - [ ] Clean up all tests.
+    - [ ] Fix all dependencies.
+    - [ ] Update both the M1941 function and the national criteria function to one-column output.
+    """
+        ),
+        kind="info",
+    )
+
+    todo_liste
+    return
+
+
 @app.cell
 def _():
     DATABASE_URL = "databehandling/fugl_atributt_data"
@@ -43,6 +63,14 @@ def _():
 def _():
     console = Console()
     return (console,)
+
+
+@app.cell(hide_code=True)
+def _():
+    mo.md(r"""
+    ### Henter tillatte kolonner fra artskart
+    """)
+    return
 
 
 @app.function(hide_code=True)
@@ -843,6 +871,10 @@ def _(add_national_interest_criteria):
                     295741,  # hønsehauk
                     3478,  # dverggås
                     3495,  # kanadagås
+                    4910,  # blodigle
+                    3685,  # nordlig sildemåke
+                    1807,  # pelekreps
+                    3454,  # krikkand
                     999999,  # finnes ikke i kriterietabellen
                 ],
                 "validScientificName": [
@@ -851,6 +883,10 @@ def _(add_national_interest_criteria):
                     "Accipiter gentilis",  # hønsehauk
                     "Anser erythropus",  # dverggås
                     "Branta canadensis",  # kanadagås
+                    "Hirudo medicinalis",  # blodigle
+                    "Larus fuscus fuscus",  # nordlig sildemåke
+                    "Chelura terebrans",  # pelekreps
+                    "Anas crecca",  # krikkand
                     "Nonexistent species",  # finnes ikke
                 ],
             }
@@ -863,6 +899,7 @@ def _(add_national_interest_criteria):
             "Andre spesielt hensynskrevende arter",
             "Hensynskrevende arter",
             "Spesielle økologiske former",
+            "Datamangel",
             "Prioriterte arter",
             "Fredete arter",
             "Fremmede arter",
@@ -873,7 +910,7 @@ def _(add_national_interest_criteria):
             assert col in test_result.columns, f"Kolonne '{col}' mangler i resultatet"
 
         # Antall rader skal være uendret
-        assert test_result.height == 6, f"Forventet 6 rader, fikk {test_result.height}"
+        assert test_result.height == 10, f"Forventet 10 rader, fikk {test_result.height}"
 
         # Test havelle (3506) – nært trua art og andre spesielt hensynskrevende
         havelle = test_result.filter(pl.col("validScientificNameId") == 3506)
@@ -882,37 +919,45 @@ def _(add_national_interest_criteria):
         assert havelle.get_column("Andre spesielt hensynskrevende arter").eq("Ja").all(), (
             "Havelle er en andre spesielt hensynskrevende art"
         )
+        assert havelle.get_column("Hensynskrevende arter").eq("Nei").all(), "Havelle er ikke en hensynskrevende art"
         assert havelle.get_column("Spesielle økologiske former").eq("Nei").all(), (
             "Havelle er ikke en spesiell økologisk form"
         )
+        assert havelle.get_column("Datamangel").eq("Nei").all(), "Havelle har ikke datamangel"
         assert havelle.get_column("Prioriterte arter").eq("Nei").all(), "Havelle er ikke en prioritert art"
         assert havelle.get_column("Fredete arter").eq("Nei").all(), "Havelle er ikke en fredet art"
         assert havelle.get_column("Fremmede arter").eq("Nei").all(), "Havelle er ikke en fremmed art"
 
-        # Test svarthalespove (3768) – trua art og prioritert art
+        # Test svarthalespove (3768) – prioritert underart
         svarthalespove = test_result.filter(pl.col("validScientificNameId") == 3768)
         assert svarthalespove.height > 0, "Svarthalespove ikke funnet i resultatet"
         assert svarthalespove.get_column("Ansvarsarter").eq("Nei").all(), "Svarthalespove er ikke en ansvarsart"
         assert svarthalespove.get_column("Andre spesielt hensynskrevende arter").eq("Nei").all(), (
             "Svarthalespove er ikke en andre spesielt hensynskrevende art"
         )
+        assert svarthalespove.get_column("Hensynskrevende arter").eq("Nei").all(), (
+            "Svarthalespove er ikke en hensynskrevende art"
+        )
         assert svarthalespove.get_column("Spesielle økologiske former").eq("Nei").all(), (
             "Svarthalespove er ikke en spesiell økologisk form"
         )
+        assert svarthalespove.get_column("Datamangel").eq("Nei").all(), "Svarthalespove har ikke datamangel"
         assert svarthalespove.get_column("Prioriterte arter").eq("Ja").all(), "Svarthalespove er en prioritert art"
         assert svarthalespove.get_column("Fredete arter").eq("Nei").all(), "Svarthalespove er ikke en fredet art"
         assert svarthalespove.get_column("Fremmede arter").eq("Nei").all(), "Svarthalespove er ikke en fremmed art"
 
-        # Test hønsehauk (295741) – trua art (matchet via vitenskapelig navn-fallback)
+        # Test hønsehauk (295741) – sårbar art (matchet via vitenskapelig navn-fallback)
         hønsehauk = test_result.filter(pl.col("validScientificNameId") == 295741)
         assert hønsehauk.height > 0, "Hønsehauk ikke funnet i resultatet"
         assert hønsehauk.get_column("Ansvarsarter").eq("Nei").all(), "Hønsehauk er ikke en ansvarsart"
         assert hønsehauk.get_column("Andre spesielt hensynskrevende arter").eq("Ja").all(), (
             "Hønsehauk er ikke en andre spesielt hensynskrevende art"
         )
+        assert hønsehauk.get_column("Hensynskrevende arter").eq("Nei").all(), "Hønsehauk er ikke en hensynskrevende art"
         assert hønsehauk.get_column("Spesielle økologiske former").eq("Nei").all(), (
             "Hønsehauk er ikke en spesiell økologisk form"
         )
+        assert hønsehauk.get_column("Datamangel").eq("Nei").all(), "Hønsehauk har ikke datamangel"
         assert hønsehauk.get_column("Prioriterte arter").eq("Nei").all(), "Hønsehauk er ikke en prioritert art"
         assert hønsehauk.get_column("Fredete arter").eq("Nei").all(), "Hønsehauk er ikke en fredet art"
         assert hønsehauk.get_column("Fremmede arter").eq("Nei").all(), "Hønsehauk er ikke en fremmed art"
@@ -924,9 +969,11 @@ def _(add_national_interest_criteria):
         assert dverggås.get_column("Andre spesielt hensynskrevende arter").eq("Ja").all(), (
             "Dverggås er ikke en andre spesielt hensynskrevende art"
         )
+        assert dverggås.get_column("Hensynskrevende arter").eq("Nei").all(), "Dverggås er ikke en hensynskrevende art"
         assert dverggås.get_column("Spesielle økologiske former").eq("Nei").all(), (
             "Dverggås er ikke en spesiell økologisk form"
         )
+        assert dverggås.get_column("Datamangel").eq("Nei").all(), "Dverggås har ikke datamangel"
         assert dverggås.get_column("Prioriterte arter").eq("Ja").all(), "Dverggås er en prioritert art"
         assert dverggås.get_column("Fredete arter").eq("Nei").all(), "Dverggås er ikke en fredet art"
         assert dverggås.get_column("Fremmede arter").eq("Nei").all(), "Dverggås er ikke en fremmed art"
@@ -938,12 +985,82 @@ def _(add_national_interest_criteria):
         assert kanadagås.get_column("Andre spesielt hensynskrevende arter").eq("Nei").all(), (
             "Kanadagås er ikke en andre spesielt hensynskrevende art"
         )
+        assert kanadagås.get_column("Hensynskrevende arter").eq("Nei").all(), "Kanadagås er ikke en hensynskrevende art"
         assert kanadagås.get_column("Spesielle økologiske former").eq("Nei").all(), (
             "Kanadagås er ikke en spesiell økologisk form"
         )
+        assert kanadagås.get_column("Datamangel").eq("Nei").all(), "Kanadagås har ikke datamangel"
         assert kanadagås.get_column("Prioriterte arter").eq("Nei").all(), "Kanadagås er ikke en prioritert art"
         assert kanadagås.get_column("Fredete arter").eq("Nei").all(), "Kanadagås er ikke en fredet art"
         assert kanadagås.get_column("Fremmede arter").eq("Ja").all(), "Kanadagås er en fremmed art"
+
+        # Test blodigle (4910) – fredet art
+        blodigle = test_result.filter(pl.col("validScientificNameId") == 4910)
+        assert blodigle.height > 0, "Blodigle ikke funnet i resultatet"
+        assert blodigle.get_column("Ansvarsarter").eq("Nei").all(), "Blodigle er ikke en ansvarsart"
+        assert blodigle.get_column("Andre spesielt hensynskrevende arter").eq("Nei").all(), (
+            "Blodigle er ikke en andre spesielt hensynskrevende art"
+        )
+        assert blodigle.get_column("Hensynskrevende arter").eq("Nei").all(), "Blodigle er ikke en hensynskrevende art"
+        assert blodigle.get_column("Spesielle økologiske former").eq("Nei").all(), (
+            "Blodigle er ikke en spesiell økologisk form"
+        )
+        assert blodigle.get_column("Datamangel").eq("Nei").all(), "Blodigle har ikke datamangel"
+        assert blodigle.get_column("Prioriterte arter").eq("Nei").all(), "Blodigle er ikke en prioritert art"
+        assert blodigle.get_column("Fredete arter").eq("Ja").all(), "Blodigle er en fredet art"
+        assert blodigle.get_column("Fremmede arter").eq("Nei").all(), "Blodigle er ikke en fremmed art"
+
+        # Test nordlig sildemåke (3685) – spesiell økologisk form
+        nordlig_sildemåke = test_result.filter(pl.col("validScientificNameId") == 3685)
+        assert nordlig_sildemåke.height > 0, "Nordlig sildemåke ikke funnet i resultatet"
+        assert nordlig_sildemåke.get_column("Ansvarsarter").eq("Nei").all(), "Nordlig sildemåke er ikke en ansvarsart"
+        assert nordlig_sildemåke.get_column("Andre spesielt hensynskrevende arter").eq("Nei").all(), (
+            "Nordlig sildemåke er ikke en andre spesielt hensynskrevende art"
+        )
+        assert nordlig_sildemåke.get_column("Hensynskrevende arter").eq("Nei").all(), (
+            "Nordlig sildemåke er ikke en hensynskrevende art"
+        )
+        assert nordlig_sildemåke.get_column("Spesielle økologiske former").eq("Ja").all(), (
+            "Nordlig sildemåke er en spesiell økologisk form"
+        )
+        assert nordlig_sildemåke.get_column("Datamangel").eq("Nei").all(), "Nordlig sildemåke har ikke datamangel"
+        assert nordlig_sildemåke.get_column("Prioriterte arter").eq("Nei").all(), (
+            "Nordlig sildemåke er ikke en prioritert art"
+        )
+        assert nordlig_sildemåke.get_column("Fredete arter").eq("Nei").all(), "Nordlig sildemåke er ikke en fredet art"
+        assert nordlig_sildemåke.get_column("Fremmede arter").eq("Nei").all(), "Nordlig sildemåke er ikke en fremmed art"
+
+        # Test pelekreps (1807) – datamangel
+        pelekreps = test_result.filter(pl.col("validScientificNameId") == 1807)
+        assert pelekreps.height > 0, "Pelekreps ikke funnet i resultatet"
+        assert pelekreps.get_column("Ansvarsarter").eq("Nei").all(), "Pelekreps er ikke en ansvarsart"
+        assert pelekreps.get_column("Andre spesielt hensynskrevende arter").eq("Nei").all(), (
+            "Pelekreps er ikke en andre spesielt hensynskrevende art"
+        )
+        assert pelekreps.get_column("Hensynskrevende arter").eq("Nei").all(), "Pelekreps er ikke en hensynskrevende art"
+        assert pelekreps.get_column("Spesielle økologiske former").eq("Nei").all(), (
+            "Pelekreps er ikke en spesiell økologisk form"
+        )
+        assert pelekreps.get_column("Datamangel").eq("Ja").all(), "Pelekreps har datamangel"
+        assert pelekreps.get_column("Prioriterte arter").eq("Nei").all(), "Pelekreps er ikke en prioritert art"
+        assert pelekreps.get_column("Fredete arter").eq("Nei").all(), "Pelekreps er ikke en fredet art"
+        assert pelekreps.get_column("Fremmede arter").eq("Nei").all(), "Pelekreps er ikke en fremmed art"
+
+        # Test krikkand (3454) – hensynskrevende art
+        krikkand = test_result.filter(pl.col("validScientificNameId") == 3454)
+        assert krikkand.height > 0, "Krikkand ikke funnet i resultatet"
+        assert krikkand.get_column("Ansvarsarter").eq("Nei").all(), "Krikkand er ikke en ansvarsart"
+        assert krikkand.get_column("Andre spesielt hensynskrevende arter").eq("Nei").all(), (
+            "Krikkand er ikke en andre spesielt hensynskrevende art"
+        )
+        assert krikkand.get_column("Hensynskrevende arter").eq("Ja").all(), "Krikkand er en hensynskrevende art"
+        assert krikkand.get_column("Spesielle økologiske former").eq("Nei").all(), (
+            "Krikkand er ikke en spesiell økologisk form"
+        )
+        assert krikkand.get_column("Datamangel").eq("Nei").all(), "Krikkand har ikke datamangel"
+        assert krikkand.get_column("Prioriterte arter").eq("Nei").all(), "Krikkand er ikke en prioritert art"
+        assert krikkand.get_column("Fredete arter").eq("Nei").all(), "Krikkand er ikke en fredet art"
+        assert krikkand.get_column("Fremmede arter").eq("Nei").all(), "Krikkand er ikke en fremmed art"
 
         # Test ID som ikke finnes (999999) -> "Treff ikke funnet"
         missing = test_result.filter(pl.col("validScientificNameId") == 999999)

@@ -10,3 +10,5 @@ test_data/
 .venv
 data_csv_gammel/
 .opencode/
+__marimo__/__marimo__/session/ git rm -r --cached __marimo__/session git status
+**/__marimo__/session/
