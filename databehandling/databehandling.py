@@ -32,15 +32,21 @@ with app.setup:
     from rich.rule import Rule
 
 
-@app.cell(hide_code=True)
+@app.cell
 def todo():
     todo_liste = mo.callout(
         mo.md(
             r"""
     ### Todo
 
-    - [ ] Add logging to the national criteria function.
-    - [ ] Clean up all tests.
+    - [ ] Avklar ANF-join for underarter der eksakt underart ikke finnes i Mdir-tabellen, men parent-arten finnes.
+        - Eksempel: `Larus argentatus subsp. argentatus` får i dag `Treff ikke funnet`, fordi hverken `validScientificNameId` eller eksakt `validScientificName` matcher ANF-tabellen.
+        - Parent-arten `Larus argentatus` finnes derimot i Mdir-tabellen med `Verdi M1941 = Stor verdi`.
+        - Dette kan gi falske negative «Ikke treff» dersom Mdir-verdi/kriterier på artsnivå skal arves av underarter når eksakt underart mangler.
+        - Mulig løsning: legg til en eksplisitt tredje fallback som prøver parent-art for underarter, og merk resultatet med matchnivå, f.eks. `id`, `navn`, `parent_art` eller `ikke_treff`.
+
+    - [ ] Fiks slik at loggingen viser faktisk falske negative, og ikke slik som nå hvor den viser alle arter som ikke matcher mdir tabellen (både riktige og gale)
+
     """
         ),
         kind="info",
@@ -131,7 +137,7 @@ def rydd_navn_og_datatyper(df_input: pl.DataFrame) -> pl.DataFrame:
                 pl.col("scientificNameRank").alias("Taksonomisk nivå"),
                 pl.col("Ansvarsarter"),
                 pl.col("Andre spesielt hensynskrevende arter"),
-                pl.col("Spesielle okologiske former").alias("Spesielle økologiske former"),
+                pl.col("Spesielle økologiske former"),
                 pl.col("Prioriterte arter"),
                 pl.col("Fredete arter"),
                 pl.col("Fremmede arter"),
@@ -628,7 +634,15 @@ def _(
 
                 try:
                     species_id = int(raw_species_id)
-                except ValueError, TypeError:
+                except ValueError:
+                    invalid_ids.append(raw_species_id)
+                    progress.update(
+                        task,
+                        advance=1,
+                        description=f"Hopper over ugyldig ID ({i + 1}/{total_ids})",
+                    )
+                    continue
+                except TypeError:
                     invalid_ids.append(raw_species_id)
                     progress.update(
                         task,
@@ -1518,12 +1532,18 @@ def _(console, les_data_og_kjør_alle_funksjoner, prompt_mangler_navn):
 
         # Oppsummering
         unike_arter = df.select("Art").n_unique() if "Art" in df.columns else "—"
+        antall_ikke_treff_anf = (
+            df.filter(pl.col("Art av nasjonal forvaltningsinteresse") == "Treff ikke funnet").height
+            if "Art av nasjonal forvaltningsinteresse" in df.columns
+            else "—"
+        )
         summary = (
             f"[bold green]Ferdig![/bold green]\n\n"
-            f"  Rader:          [cyan]{df.height}[/cyan]\n"
-            f"  Kolonner:       [cyan]{df.width}[/cyan]\n"
-            f"  Unike arter:    [cyan]{unike_arter}[/cyan]\n"
-            f"  Skrevet til:    [cyan]{output}[/cyan]"
+            f"  Rader:                                      [cyan]{df.height}[/cyan]\n"
+            f"  Kolonner:                                   [cyan]{df.width}[/cyan]\n"
+            f"  Unike arter:                                [cyan]{unike_arter}[/cyan]\n"
+            f'  Antall "Ikke treff" på ANF-tabbell fra Mdir: [cyan]{antall_ikke_treff_anf}[/cyan]\n'
+            f"  Skrevet til:                                [cyan]{output}[/cyan]"
         )
         console.print(Panel(summary, title="Oppsummering", border_style="green"))
 
@@ -1535,12 +1555,7 @@ def _(console, les_data_og_kjør_alle_funksjoner, prompt_mangler_navn):
 
 
 @app.cell
-def _(
-    add_national_interest_criteria,
-    console,
-    legg_til_verdi_m1941,
-    process_and_enrich_data,
-):
+def _(add_national_interest_criteria, console, process_and_enrich_data):
     def les_data_og_kjør_alle_funksjoner(input_fil_sti: str, filter_year: int = 1990) -> pl.DataFrame:
         """Les CSV med DuckDB, filtrer på år, og kjør alle berikingsfunksjoner."""
 
@@ -1571,12 +1586,8 @@ def _(
             df_steg2 = df_steg1.pipe(legg_til_kolonne_arteravnasjonal)
         console.print("  [green]✓[/green] Arter av nasjonal forvaltningsinteresse summert til en kolonne")
 
-        with console.status("[bold blue]Legger til M1941-verdier..."):
-            df_steg3 = df_steg2.pipe(legg_til_verdi_m1941)
-        console.print("  [green]✓[/green] Lagt til M1941-verdier")
-
         with console.status("[bold blue]Rydder opp i navn og datatyper..."):
-            df_alle_funksjoner = df_steg3.pipe(rydd_navn_og_datatyper)
+            df_alle_funksjoner = df_steg2.pipe(rydd_navn_og_datatyper)
         console.print("  [green]✓[/green] Ryddet navn, kolonner og datatyper")
 
         return df_alle_funksjoner
