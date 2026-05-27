@@ -6,12 +6,12 @@ from databehandling.databehandling import legg_til_kolonne_arteravnasjonal
 
 CATEGORY_COLUMNS = [
     "Ansvarsarter",
-    "Trua arter",
     "Andre spesielt hensynskrevende arter",
-    "Spesielle okologiske former",
+    "Hensynskrevende arter",
+    "Spesielle økologiske former",
+    "Datamangel",
     "Prioriterte arter",
     "Fredete arter",
-    "NT",
     "Fremmede arter",
 ]
 
@@ -20,11 +20,11 @@ def test_national_interest_summary_preserves_missing_lookup_marker() -> None:
     source_df = pl.DataFrame(
         {
             "species": ["ingen treff", "ingen kriterier", "positive kriterier"],
-            **{column: ["Treff ikke funnet", "No", "No"] for column in CATEGORY_COLUMNS},
+            **{column: ["Treff ikke funnet", "Nei", "Nei"] for column in CATEGORY_COLUMNS},
         }
     ).with_columns(
-        pl.Series("Ansvarsarter", ["Treff ikke funnet", "No", "Yes"]),
-        pl.Series("Fremmede arter", ["Treff ikke funnet", "No", "Yes"]),
+        pl.Series("Ansvarsarter", ["Treff ikke funnet", "Nei", "Ja"]),
+        pl.Series("Fremmede arter", ["Treff ikke funnet", "Nei", "Ja"]),
     )
 
     result = legg_til_kolonne_arteravnasjonal(source_df)
