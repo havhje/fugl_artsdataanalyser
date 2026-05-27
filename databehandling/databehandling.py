@@ -41,8 +41,6 @@ def todo():
 
     - [ ] Add logging to the national criteria function.
     - [ ] Clean up all tests.
-    - [ ] Fix all dependencies.
-    - [ ] Update both the M1941 function and the national criteria function to one-column output.
     """
         ),
         kind="info",
@@ -63,81 +61,6 @@ def _():
 def _():
     console = Console()
     return (console,)
-
-
-@app.cell(hide_code=True)
-def _():
-    mo.md(r"""
-    ### Henter tillatte kolonner fra artskart
-    """)
-    return
-
-
-@app.function(hide_code=True)
-def get_required_artskart_columns() -> set[str]:
-    """Return the Artskart columns required by the processing pipeline."""
-    return {
-        "category",
-        "validScientificNameId",
-        "validScientificName",
-        "preferredPopularName",
-        "taxonGroupName",
-        "collector",
-        "dateTimeCollected",
-        "locality",
-        "coordinateUncertaintyInMeters",
-        "municipality",
-        "county",
-        "individualCount",
-        "latitude",
-        "longitude",
-        "geometry",
-        "scientificNameRank",
-        "behavior",
-    }
-
-
-@app.function(hide_code=True)
-def get_allowed_categories() -> set[str]:
-    """Return accepted red-list and alien-species category codes."""
-    return {
-        "RE",
-        "CR",
-        "EN",
-        "VU",
-        "NT",
-        "LC",
-        "DD",
-        "SE",
-        "HI",
-        "PH",
-        "LO",
-        "NK",
-        "NA",
-        "NE",
-        "Unknown",
-    }
-
-
-@app.function(hide_code=True)
-def validate_artskart_input_contract(df: pl.DataFrame) -> None:
-    """Validate the Artskart input schema and category domain values."""
-    required_columns = get_required_artskart_columns()
-    missing_columns = sorted(required_columns - set(df.columns))
-    if missing_columns:
-        raise ValueError(f"Mangler obligatoriske Artskart-kolonner: {', '.join(missing_columns)}")
-
-    allowed_categories = get_allowed_categories()
-    unknown_categories = (
-        df.select(pl.col("category").cast(pl.Utf8).alias("category"))
-        .filter(pl.col("category").is_null() | ~pl.col("category").is_in(allowed_categories))
-        .get_column("category")
-        .unique()
-        .to_list()
-    )
-    if unknown_categories:
-        formatted_unknown_categories = sorted("<null>" if value is None else str(value) for value in unknown_categories)
-        raise ValueError(f"Ukjente category-verdier i Artskart-data: {', '.join(formatted_unknown_categories)}")
 
 
 @app.cell(hide_code=True)
@@ -168,7 +91,7 @@ def rydd_navn_og_datatyper(df_input: pl.DataFrame) -> pl.DataFrame:
         "NT": 4,  # Nær truet
         "LC": 5,  # Livskraftig
         "DD": 6,  # Datamangel
-        # Fremmedartslista, høyest økologisk risiko først
+        # Fremmedartslista, høJat økologisk risiko først
         "SE": 7,  # Svært høy risiko
         "HI": 8,  # Høy risiko
         "PH": 9,  # Potensielt høy risiko
@@ -183,6 +106,7 @@ def rydd_navn_og_datatyper(df_input: pl.DataFrame) -> pl.DataFrame:
     df_alle_funksjoner_ferdig_kjørt = (
         df_input.select(
             [
+                pl.col("Verdi M1941"),
                 pl.col("category").alias("Kategori"),
                 pl.col("Art av nasjonal forvaltningsinteresse"),
                 pl.col("preferredPopularName").alias("Navn"),
@@ -205,6 +129,12 @@ def rydd_navn_og_datatyper(df_input: pl.DataFrame) -> pl.DataFrame:
                 pl.col("municipality").alias("Kommune"),
                 pl.col("county").alias("Fylke"),
                 pl.col("scientificNameRank").alias("Taksonomisk nivå"),
+                pl.col("Ansvarsarter"),
+                pl.col("Andre spesielt hensynskrevende arter"),
+                pl.col("Spesielle okologiske former").alias("Spesielle økologiske former"),
+                pl.col("Prioriterte arter"),
+                pl.col("Fredete arter"),
+                pl.col("Fremmede arter"),
                 pl.col("latitude").str.replace_all(",", ".").cast(pl.Float64),
                 pl.col("longitude").str.replace_all(",", ".").cast(pl.Float64),
                 pl.col("geometry"),
@@ -237,7 +167,7 @@ def test_rydd_navn_og_datatyper():
     test_df = pl.DataFrame(
         {
             "category": ["LC", "NT", "EN"],
-            "Art av nasjonal forvaltningsinteresse": ["Yes", "No", "Yes"],
+            "Art av nasjonal forvaltningsinteresse": ["Ja", "Nei", "Ja"],
             "Verdi M1941": ["C", "D", "B"],
             "preferredPopularName": ["dompap", "kråke", "tjeld"],
             "validScientificName": [
@@ -261,12 +191,12 @@ def test_rydd_navn_og_datatyper():
             "municipality": ["Øksnes", "Øksnes", "Øksnes"],
             "county": ["Nordland", "Nordland", "Nordland"],
             "scientificNameRank": ["species", "species", "species"],
-            "Ansvarsarter": ["No", "No", "Yes"],
-            "Andre spesielt hensynskrevende arter": ["No", "Yes", "No"],
-            "Spesielle okologiske former": ["No", "No", "Yes"],
-            "Prioriterte arter": ["No", "No", "Yes"],
-            "Fredete arter": ["No", "No", "No"],
-            "Fremmede arter": ["No", "No", "No"],
+            "Ansvarsarter": ["Nei", "Nei", "Ja"],
+            "Andre spesielt hensynskrevende arter": ["Nei", "Ja", "Nei"],
+            "Spesielle okologiske former": ["Nei", "Nei", "Ja"],
+            "Prioriterte arter": ["Nei", "Nei", "Ja"],
+            "Fredete arter": ["Nei", "Nei", "Nei"],
+            "Fremmede arter": ["Nei", "Nei", "Nei"],
             "latitude": ["68,904168", "68,962388", "68.974144"],
             "longitude": ["15,066918", "15,148183", "14.947151"],
             "geometry": [
@@ -437,14 +367,89 @@ def test_rydd_navn_og_datatyper():
     ], "geometry skal beholde sine verdier i sortert radrekkefølge"
 
     assert test_result.get_column("Art av nasjonal forvaltningsinteresse").to_list() == [
-        "Yes",
-        "No",
-        "Yes",
+        "Ja",
+        "Nei",
+        "Ja",
     ], "Art av nasjonal forvaltningsinteresse skal beholde sine verdier"
 
     assert test_result.get_column("Verdi M1941").to_list() == ["B", "D", "C"], (
         "Verdi M1941 skal beholde sine verdier i sortert radrekkefølge"
     )
+
+
+@app.cell(hide_code=True)
+def _():
+    mo.md(r"""
+    ### Henter tillatte kolonner fra artskart
+    """)
+    return
+
+
+@app.function(hide_code=True)
+def get_required_artskart_columns() -> set[str]:
+    """Return the Artskart columns required by the processing pipeline."""
+    return {
+        "category",
+        "validScientificNameId",
+        "validScientificName",
+        "preferredPopularName",
+        "taxonGroupName",
+        "collector",
+        "dateTimeCollected",
+        "locality",
+        "coordinateUncertaintyInMeters",
+        "municipality",
+        "county",
+        "individualCount",
+        "latitude",
+        "longitude",
+        "geometry",
+        "scientificNameRank",
+        "behavior",
+    }
+
+
+@app.function(hide_code=True)
+def get_allowed_categories() -> set[str]:
+    """Return accepted red-list and alien-species category codes."""
+    return {
+        "RE",
+        "CR",
+        "EN",
+        "VU",
+        "NT",
+        "LC",
+        "DD",
+        "SE",
+        "HI",
+        "PH",
+        "LO",
+        "NK",
+        "NA",
+        "NE",
+        "Unknown",
+    }
+
+
+@app.function(hide_code=True)
+def validate_artskart_input_contract(df: pl.DataFrame) -> None:
+    """Validate the Artskart input schema and category domain values."""
+    required_columns = get_required_artskart_columns()
+    missing_columns = sorted(required_columns - set(df.columns))
+    if missing_columns:
+        raise ValueError(f"Mangler obligatoriske Artskart-kolonner: {', '.join(missing_columns)}")
+
+    allowed_categories = get_allowed_categories()
+    unknown_categories = (
+        df.select(pl.col("category").cast(pl.Utf8).alias("category"))
+        .filter(pl.col("category").is_null() | ~pl.col("category").is_in(allowed_categories))
+        .get_column("category")
+        .unique()
+        .to_list()
+    )
+    if unknown_categories:
+        formatted_unknown_categories = sorted("<null>" if value is None else str(value) for value in unknown_categories)
+        raise ValueError(f"Ukjente category-verdier i Artskart-data: {', '.join(formatted_unknown_categories)}")
 
 
 @app.cell(hide_code=True)
@@ -551,7 +556,7 @@ def _(DESIRED_RANKS, NORTAXA_API_BASE_URL):
     return extract_hierarchy_and_ids, fetch_taxon_data, get_norwegian_name
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(
     DESIRED_RANKS,
     RATE_LIMIT_DELAY,
@@ -574,7 +579,7 @@ def _(
             Enriched dataframe with taxonomy columns.
 
         Raises:
-            ValueError: If the required ID column is missing or no valid IDs exist.
+            ValueError: If the required ID column is missing or Nei valid IDs exist.
             RuntimeError: If NorTaxa API calls for valid IDs fail or return empty data.
         """
         # Konverterer til Polars for bedre ytelse
@@ -718,7 +723,7 @@ def _(
     return (process_and_enrich_data,)
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(process_and_enrich_data):
     def test_process_and_enrich_data():
 
@@ -785,7 +790,7 @@ def _():
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _add_national_interest_criteria(bird_data):
     def add_national_interest_criteria(df_enriched: pl.DataFrame) -> pl.DataFrame:
         """Add national interest criteria from Excel file to enriched dataframe."""
@@ -1082,7 +1087,7 @@ def _():
     return
 
 
-@app.function
+@app.function(hide_code=True)
 def legg_til_kolonne_arteravnasjonal(input_df: pl.DataFrame) -> pl.DataFrame:
     """
     Adds a new column 'Art av nasjonal forvaltningsinteresse' to the DataFrame.
@@ -1135,7 +1140,7 @@ def legg_til_kolonne_arteravnasjonal(input_df: pl.DataFrame) -> pl.DataFrame:
     return output_df
 
 
-@app.function
+@app.function(hide_code=True)
 def test_legg_til_kolonne_arteravnasjonal():
     sample_df = pl.DataFrame(
         {
@@ -1204,107 +1209,12 @@ def test_legg_til_kolonne_arteravnasjonal():
 @app.cell(hide_code=True)
 def _():
     mo.md(r"""
-    ### Legger til en kolonne med verdi fra M1941
-    """)
-    return
-
-
-@app.function
-def legg_til_verdi_m1941(df: pl.DataFrame) -> pl.DataFrame:
-    """Add 'Verdi M1941' column based on conservation status and criteria.
-
-    Mapping:
-    - LC -> noe verdi
-    - NT -> middels verdi
-    - VU or Andre spesielt hensynskrevende arter -> stor verdi
-    - EN, CR, or Prioriterte arter -> svært stor verdi
-
-    Args:
-        df: DataFrame with ``category`` and criteria columns.
-
-    Returns:
-        DataFrame with the added ``Verdi M1941`` column.
-    """
-    return df.with_columns(
-        pl.when((pl.col("category").is_in(["EN", "CR"])) | (pl.col("Prioriterte arter") == "Yes"))
-        .then(pl.lit("Svært stor verdi"))
-        .when((pl.col("category") == "VU") | (pl.col("Andre spesielt hensynskrevende arter") == "Yes"))
-        .then(pl.lit("Stor verdi"))
-        .when(pl.col("category") == "NT")
-        .then(pl.lit("Middels verdi"))
-        .when(pl.col("category") == "LC")
-        .then(pl.lit("Noe verdi"))
-        .otherwise(pl.lit("Ikke definert"))
-        .alias("Verdi M1941")
-    )
-
-
-@app.function
-def test_legg_til_verdi_m1941():
-    sample_df = pl.DataFrame(
-        {
-            "species": [
-                "Hubro",  # Tester "EN" og "Prioriterte arter" == "Yes" -> Svært stor verdi
-                "Gråspurv",  # Tester "LC" -> Noe verdi
-                "Fjellrev",  # Tester "VU" og "Andre spesielt..." == "Yes" -> Stor verdi
-                "Villmink",  # Tester udefinert kategori ("NA") -> Ikke deffinert
-                "Dverggås",  # Tester "NT" -> Middels verdi
-                "Gaupe",  # Tester "LC" men "Andre spesielt..." == "Yes" -> Stor verdi
-                "Ulv",  # Tester "CR" -> Svært stor verdi
-            ],
-            "category": ["EN", "LC", "VU", "haraball", "NT", "LC", "CR"],
-            "Ansvarsarter": ["Yes", "No", "No", "No", "Yes", "No", "No"],
-            "Trua arter": ["No", "No", "No", "No", "No", "No", "No"],
-            "Andre spesielt hensynskrevende arter": [
-                "No",
-                "No",
-                "Yes",
-                "No",
-                "No",
-                "Yes",
-                "No",
-            ],
-            "Spesielle okologiske former": ["No", "No", "No", "No", "Yes", "No", "No"],
-            "Prioriterte arter": ["Yes", "No", "No", "No", "No", "No", "No"],
-            "Fredete arter": ["Yes", "No", "No", "No", "No", "No", "No"],
-            "NT": ["No", "No", "No", "No", "No", "No", "No"],
-            "Fremmede arter": ["No", "No", "No", "Yes", "No", "No", "No"],
-        }
-    )
-
-    result = legg_til_verdi_m1941(sample_df)
-
-    hubro_df = result.filter(pl.col("species") == "Hubro")
-    assert hubro_df.get_column("Verdi M1941").eq("Svært stor verdi").all(), "Hubro skal ha svært stor verdi"
-
-    gråspurv_df = result.filter(pl.col("species") == "Gråspurv")
-    assert gråspurv_df.get_column("Verdi M1941").eq("Noe verdi").all(), "Gråspurv skal ha noe verdi"
-
-    fjellrev_df = result.filter(pl.col("species") == "Fjellrev")
-    assert fjellrev_df.get_column("Verdi M1941").eq("Stor verdi").all(), "Fjellrev skal ha stor verdi"
-
-    villmink_df = result.filter(pl.col("species") == "Villmink")
-    assert villmink_df.get_column("Verdi M1941").eq("Ikke definert").all(), "Villmink skal ha ikke deffinert"
-
-    dverggås_df = result.filter(pl.col("species") == "Dverggås")
-    assert dverggås_df.get_column("Verdi M1941").eq("Middels verdi").all(), "Dverggås skal ha middels verdi"
-
-    gaupe_df = result.filter(pl.col("species") == "Gaupe")
-    assert gaupe_df.get_column("Verdi M1941").eq("Stor verdi").all(), "Gaupe skal ha stor verdi"
-
-    ulv_df = result.filter(pl.col("species") == "Ulv")
-    assert ulv_df.get_column("Verdi M1941").eq("Svært stor verdi").all(), "Ulv skal ha svært stor verdi"
-
-
-@app.cell(hide_code=True)
-def _():
-    mo.md(r"""
     ### Legger til manglende artsnavn
     """)
     return
 
 
-@app.function
+@app.function(hide_code=True)
 def finn_mangler_navn(df: pl.DataFrame) -> pl.DataFrame:
     """Finn arter som mangler norsk navn (Navn-kolonnen er null)."""
 
@@ -1313,7 +1223,7 @@ def finn_mangler_navn(df: pl.DataFrame) -> pl.DataFrame:
     return mangler_df
 
 
-@app.function
+@app.function(hide_code=True)
 def test_finn_mangler_navn():
     sample_df = pl.DataFrame(
         {
@@ -1380,13 +1290,13 @@ def test_finn_mangler_navn():
     art_list = result.get_column("Art").to_list()
     assert art_list == sorted(art_list), "Resultatet skal være sortert etter Art"
 
-    # Test with no missing names — should return empty DataFrame
+    # Test with Nei missing names — should return empty DataFrame
     complete_df = sample_df.with_columns(pl.col("Navn").fill_null("Ukjent"))
     empty_result = finn_mangler_navn(complete_df)
     assert empty_result.height == 0, "Skal returnere tom DataFrame når alle har navn"
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(console):
     def prompt_mangler_navn(mangler_df: pl.DataFrame) -> dict[str, str]:
         """Vis arter uten norsk navn og be bruker skrive inn navn."""
@@ -1428,7 +1338,7 @@ def _(console):
     return (prompt_mangler_navn,)
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(prompt_mangler_navn):
     def test_prompt_mangler_navn():
         """Test prompt_mangler_navn with mocked user input."""
@@ -1442,7 +1352,7 @@ def _(prompt_mangler_navn):
             }
         )
 
-        # Empty DataFrame → returns empty dict, no prompts
+        # Empty DataFrame → returns empty dict, Nei prompts
         empty_df = pl.DataFrame(
             {"Art": [], "Navn": [], "Familie": [], "Orden": []},
             schema={
@@ -1473,7 +1383,7 @@ def _(prompt_mangler_navn):
     return
 
 
-@app.function
+@app.function(hide_code=True)
 def join_navn_til_orginal_df(
     df: pl.DataFrame, navn_mapping: dict[str, str]
 ) -> pl.DataFrame:  # navn mapping er en dict med key:value som begge er str. hvor f.eks. det latinske navnet er "key" og det norske er "navn"
@@ -1501,7 +1411,7 @@ def join_navn_til_orginal_df(
     return df_med_navn
 
 
-@app.function
+@app.function(hide_code=True)
 def test_join_navn_til_orginal_df():
     """Test that join_navn_til_orginal_df fills in missing names correctly."""
 
@@ -1553,7 +1463,7 @@ def test_join_navn_til_orginal_df():
     dverggaas = result.filter(pl.col("Art") == "Anser erythropus")
     assert dverggaas.get_column("Navn").to_list() == [None], "Anser erythropus er ikke i mapping — skal forbli null"
 
-    # Row count unchanged (left join, no extra rows) ────────────
+    # Row count unchanged (left join, Nei extra rows) ────────────
     assert result.height == df.height, f"Radantall skal være uendret: forventet {df.height}, fikk {result.height}"
 
     # Temporary column Navn_ny is dropped ────────────────────────
@@ -1625,7 +1535,12 @@ def _(console, les_data_og_kjør_alle_funksjoner, prompt_mangler_navn):
 
 
 @app.cell
-def _(add_national_interest_criteria, console, process_and_enrich_data):
+def _(
+    add_national_interest_criteria,
+    console,
+    legg_til_verdi_m1941,
+    process_and_enrich_data,
+):
     def les_data_og_kjør_alle_funksjoner(input_fil_sti: str, filter_year: int = 1990) -> pl.DataFrame:
         """Les CSV med DuckDB, filtrer på år, og kjør alle berikingsfunksjoner."""
 
