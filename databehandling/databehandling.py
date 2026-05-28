@@ -889,13 +889,6 @@ def _():
 
 
 @app.cell
-def _(bird_data):
-    df_nf = bird_data.execute("SELECT * FROM arter_av_nasjonal_forvaltningsinteresse").pl()
-    df_nf
-    return
-
-
-@app.cell
 def _add_national_interest_criteria(bird_data):
     def add_national_interest_criteria(df_enriched: pl.DataFrame) -> pl.DataFrame:
         """Add national interest criteria and combine M1941 values."""
@@ -1784,6 +1777,19 @@ def _(add_national_interest_criteria, console, process_and_enrich_data):
         with console.status("[bold blue]Legger til kriterier for nasjonal interesse..."):
             df_steg1 = df_steg0.pipe(add_national_interest_criteria)
         console.print("  [green]✓[/green] Lagt til Arter av nasjonal forvaltningsinteresse")
+
+        antall_arter_uten_verdi_m1941 = (
+            df_steg1.filter(pl.col("Verdi M1941").is_null())
+            .select(["validScientificNameId", "validScientificName"])
+            .unique()
+            .height
+        )
+        if antall_arter_uten_verdi_m1941 > 0:
+            art_tekst = "art" if antall_arter_uten_verdi_m1941 == 1 else "arter"
+            console.print(
+                f"  [yellow]Advarsel:[/yellow] {antall_arter_uten_verdi_m1941} {art_tekst} "
+                "har manglende verdi i Verdi M1941"
+            )
 
         with console.status("[bold blue]Legger til kolonne for arter av nasjonal forvaltningsinteresse..."):
             df_steg2 = df_steg1.pipe(legg_til_kolonne_arteravnasjonal)
