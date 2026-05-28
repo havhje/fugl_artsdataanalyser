@@ -39,19 +39,9 @@ def todo():
             r"""
     ### Todo
 
-    - [ ] Du må sjekke hvordan verdi settes. Slik det er nå er ikke alle arter I mdir tabellen og disse får ikke treff, men kan ha høy rødlistevurdering. Altså må M1941 verdien settes utifra både mdir tabellen, men også rødliste vurderingen ifra artskart. du må tenke over hvilken logikk som skal gi verdi først og så deretter hvordan den andre skal tas inn.
+    - Sjekk med ny Ki modell når det kommer at alt er korrekt
+    - les over tester til legg til verdi m1941 og legg til arter an nasjonal forvaltning
 
-    Mulig det er best om rødliste er den som gir verdi først, og deretter mdir tabellen. ta inn funksjonen som du slettet tidligere
-
-    Les inn innput og outputtabellene slik at du kan se hvilke dette gjelder for
-
-    - [ ] Forbedre logging/oppsummering for ANF-treff.
-        - Dagens telling av `Treff ikke funnet` viser alle rader som ikke matcher Mdir/ANF-tabellen.
-        - Dette blander reelle ikke-treff med taxa som bør få verdi fra rødlistevurdering fordi de mangler i Mdir/ANF-tabellen.
-        - Lag en egen diagnostikk som skiller mellom:
-            - reelle ikke-treff,
-            - underarter/taxa som mangler i Mdir/ANF, men kan få verdi fra rødlistekategori,
-            - andre mulige navn-/ID-avvik som bør kontrolleres manuelt.
     """
         ),
         kind="info",
@@ -1064,9 +1054,7 @@ def _(add_national_interest_criteria):
         assert kanadagås_verdi.get_column("verdi_rodliste_artskart").eq("Svært stor verdi").all(), (
             "Kanadagås skal få Svært stor verdi fra rødlistekategori EN"
         )
-        assert kanadagås_verdi.get_column("verdi_m1941_nasjonal").eq("-").all(), (
-            "Kanadagås skal få '-' fra ANF-tabellen"
-        )
+        assert kanadagås_verdi.get_column("verdi_m1941_nasjonal").eq("-").all(), "Kanadagås skal få '-' fra ANF-tabellen"
         assert kanadagås_verdi.get_column("Verdi M1941").eq("-").all(), (
             "ANF-tabellens verdi skal også overstyre rødlisteverdi når verdien er '-'"
         )
@@ -1228,9 +1216,7 @@ def _(add_national_interest_criteria):
             assert missing.get_column(col).eq("Treff ikke funnet").all(), (
                 f"Kolonne '{col}' skal være 'Treff ikke funnet' for ukjent art"
             )
-        assert missing.get_column("verdi_m1941_nasjonal").is_null().all(), (
-            "Ukjent art skal ikke få ANF-verdi"
-        )
+        assert missing.get_column("verdi_m1941_nasjonal").is_null().all(), "Ukjent art skal ikke få ANF-verdi"
         assert missing.get_column("verdi_rodliste_artskart").eq("Svært stor verdi").all(), (
             "Ukjent art skal beholde rødlisteverdien fra category"
         )
