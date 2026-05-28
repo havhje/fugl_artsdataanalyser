@@ -804,12 +804,57 @@ def _(process_and_enrich_data):
 @app.cell(hide_code=True)
 def _():
     mo.md(r"""
+    ### Legg til verdi M1941
+    """)
+    return
+
+
+@app.function
+def legg_til_verdi_m1941(df: pl.DataFrame) -> pl.DataFrame:
+    """Add 'Verdi M1941' column based on conservation status and criteria.
+
+    Mapping:
+    - LC -> noe verdi
+    - NT -> middels verdi
+    - VU  -> stor verdi
+    - EN, CR -> svært stor verdi
+
+    Args:
+        df: DataFrame with ``category`` and criteria columns.
+
+    Returns:
+        DataFrame with the added ``Verdi M1941`` column.
+    """
+    return df.with_columns(
+        pl.when(pl.col("category").is_in(["EN", "CR"]))
+            .then(pl.lit("Svært stor verdi"))
+            .when(pl.col("category") == "VU")
+            .then(pl.lit("Stor verdi"))
+            .when(pl.col("category") == "NT")
+            .then(pl.lit("Middels verdi"))
+            .when(pl.col("category") == "LC")
+            .then(pl.lit("Noe verdi"))
+            .otherwise(None)
+            .alias("verdi_rodliste_artskart")
+            )
+
+
+@app.cell(hide_code=True)
+def _():
+    mo.md(r"""
     ### Arter av nasjonal forvaltningsinteresse
     """)
     return
 
 
-@app.cell(hide_code=True)
+@app.cell
+def _(bird_data):
+    df_nf = bird_data.execute("SELECT * FROM arter_av_nasjonal_forvaltningsinteresse").pl()
+    df_nf
+    return
+
+
+@app.cell
 def _add_national_interest_criteria(bird_data):
     def add_national_interest_criteria(df_enriched: pl.DataFrame) -> pl.DataFrame:
         """Add national interest criteria from Excel file to enriched dataframe."""
@@ -842,6 +887,7 @@ def _add_national_interest_criteria(bird_data):
             "Hensynskrevende arter",
             "Ansvarsarter",
             "Fremmede arter",
+            "Verdi M1941",
         ]
 
         criteria_data = df_arter_nf_ryddet.with_columns(
@@ -864,7 +910,7 @@ def _add_national_interest_criteria(bird_data):
                 suffix="_fallback",
             )
             # Tar en second join på artsnavn, legger til alle criteria_data en gang til med eget suffix = fallback
-            .with_columns(*[pl.coalesce(c, f"{c}_fallback").fill_null("Treff ikke funnet") for c in criteria_cols])
+            .with_columns(*[pl.coalesce(c, f"{c}_fallback") for c in criteria_cols])
             # bruker coalece som sier velg først join 1 (c), hvis det finnes null verdier bruk verdiene i join 2 (c_fallback)
             .drop(([f"{c}_fallback" for c in criteria_cols]))
             .drop(pl.col("vitenskapelig_navn_mdir"), pl.col("arts_id_mdir"))
