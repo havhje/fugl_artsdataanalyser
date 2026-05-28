@@ -39,14 +39,19 @@ def todo():
             r"""
     ### Todo
 
-    - [ ] Avklar ANF-join for underarter der eksakt underart ikke finnes i Mdir-tabellen, men parent-arten finnes.
-        - Eksempel: `Larus argentatus subsp. argentatus` får i dag `Treff ikke funnet`, fordi hverken `validScientificNameId` eller eksakt `validScientificName` matcher ANF-tabellen.
-        - Parent-arten `Larus argentatus` finnes derimot i Mdir-tabellen med `Verdi M1941 = Stor verdi`.
-        - Dette kan gi falske negative «Ikke treff» dersom Mdir-verdi/kriterier på artsnivå skal arves av underarter når eksakt underart mangler.
-        - Mulig løsning: legg til en eksplisitt tredje fallback som prøver parent-art for underarter, og merk resultatet med matchnivå, f.eks. `id`, `navn`, `parent_art` eller `ikke_treff`.
+    - [ ] Du må sjekke hvordan verdi settes. Slik det er nå er ikke alle arter I mdir tabellen og disse får ikke treff, men kan ha høy rødlistevurdering. Altså må M1941 verdien settes utifra både mdir tabellen, men også rødliste vurderingen ifra artskart. du må tenke over hvilken logikk som skal gi verdi først og så deretter hvordan den andre skal tas inn.
 
-    - [ ] Fiks slik at loggingen viser faktisk falske negative, og ikke slik som nå hvor den viser alle arter som ikke matcher mdir tabellen (både riktige og gale)
+    Mulig det er best om rødliste er den som gir verdi først, og deretter mdir tabellen. ta inn funksjonen som du slettet tidligere
 
+    Les inn innput og outputtabellene slik at du kan se hvilke dette gjelder for
+
+    - [ ] Forbedre logging/oppsummering for ANF-treff.
+        - Dagens telling av `Treff ikke funnet` viser alle rader som ikke matcher Mdir/ANF-tabellen.
+        - Dette blander reelle ikke-treff med taxa som bør få verdi fra rødlistevurdering fordi de mangler i Mdir/ANF-tabellen.
+        - Lag en egen diagnostikk som skiller mellom:
+            - reelle ikke-treff,
+            - underarter/taxa som mangler i Mdir/ANF, men kan få verdi fra rødlistekategori,
+            - andre mulige navn-/ID-avvik som bør kontrolleres manuelt.
     """
         ),
         kind="info",
@@ -199,7 +204,7 @@ def test_rydd_navn_og_datatyper():
             "scientificNameRank": ["species", "species", "species"],
             "Ansvarsarter": ["Nei", "Nei", "Ja"],
             "Andre spesielt hensynskrevende arter": ["Nei", "Ja", "Nei"],
-            "Spesielle okologiske former": ["Nei", "Nei", "Ja"],
+            "Spesielle økologiske former": ["Nei", "Nei", "Ja"],
             "Prioriterte arter": ["Nei", "Nei", "Ja"],
             "Fredete arter": ["Nei", "Nei", "Nei"],
             "Fremmede arter": ["Nei", "Nei", "Nei"],
