@@ -984,6 +984,8 @@ def _(add_national_interest_criteria):
                     1807,  # pelekreps
                     3454,  # krikkand
                     999999,  # finnes ikke i kriterietabellen
+                    999998,  # finnes ikke i kriterietabellen, mangler vitenskapelig navn
+                    999997,  # finnes ikke i kriterietabellen, mangler vitenskapelig navn og rødlistekategori
                 ],
                 "validScientificName": [
                     "Clangula hyemalis",  # havelle
@@ -996,6 +998,8 @@ def _(add_national_interest_criteria):
                     "Chelura terebrans",  # pelekreps
                     "Anas crecca",  # krikkand
                     "Nonexistent species",  # finnes ikke
+                    None,  # mangler vitenskapelig navn
+                    None,  # mangler vitenskapelig navn
                 ],
                 "category": [
                     "LC",  # havelle får Noe verdi fra rødliste, men Stor verdi fra ANF
@@ -1008,6 +1012,8 @@ def _(add_national_interest_criteria):
                     "DD",
                     "NT",
                     "EN",  # ukjent art får rødlisteverdi som fallback
+                    "VU",  # ukjent art med manglende navn får rødlisteverdi som fallback
+                    None,  # ukjent art uten navn og kategori får ingen M1941-verdi
                 ],
             }
         )
@@ -1036,7 +1042,7 @@ def _(add_national_interest_criteria):
             assert col in test_result.columns, f"Kolonne '{col}' mangler i resultatet"
 
         # Antall rader skal være uendret
-        assert test_result.height == 10, f"Forventet 10 rader, fikk {test_result.height}"
+        assert test_result.height == 12, f"Forventet 12 rader, fikk {test_result.height}"
 
         # Test M1941-verdi: ANF-verdi skal overstyre rødlisteverdi
         havelle_verdi = test_result.filter(pl.col("validScientificNameId") == 3506)
@@ -1237,6 +1243,42 @@ def _(add_national_interest_criteria):
         )
         assert missing.get_column("Verdi M1941").eq("Svært stor verdi").all(), (
             "Rødlisteverdi skal brukes som fallback når ANF-oppslag mangler"
+        )
+
+        # Test ID som ikke finnes og mangler vitenskapelig navn -> "Treff ikke funnet"
+        missing_name = test_result.filter(pl.col("validScientificNameId") == 999998)
+        assert missing_name.height > 0, "Manglende art med tomt vitenskapelig navn ikke funnet i resultatet"
+        for col in expected_criteria_cols:
+            assert missing_name.get_column(col).eq("Treff ikke funnet").all(), (
+                f"Kolonne '{col}' skal være 'Treff ikke funnet' når både ID- og navneoppslag mangler"
+            )
+        assert missing_name.get_column("verdi_m1941_nasjonal").is_null().all(), (
+            "Art uten ID-/navnetreff skal ikke få ANF-verdi"
+        )
+        assert missing_name.get_column("verdi_rodliste_artskart").eq("Stor verdi").all(), (
+            "Art uten ID-/navnetreff skal beholde rødlisteverdien fra category"
+        )
+        assert missing_name.get_column("Verdi M1941").eq("Stor verdi").all(), (
+            "Rødlisteverdi skal brukes som fallback når ID-oppslag mangler og vitenskapelig navn er tomt"
+        )
+
+        # Test ID som ikke finnes, mangler vitenskapelig navn og mangler rødlistekategori
+        missing_name_and_category = test_result.filter(pl.col("validScientificNameId") == 999997)
+        assert missing_name_and_category.height > 0, (
+            "Manglende art med tomt vitenskapelig navn og kategori ikke funnet i resultatet"
+        )
+        for col in expected_criteria_cols:
+            assert missing_name_and_category.get_column(col).eq("Treff ikke funnet").all(), (
+                f"Kolonne '{col}' skal være 'Treff ikke funnet' når både ID- og navneoppslag mangler"
+            )
+        assert missing_name_and_category.get_column("verdi_m1941_nasjonal").is_null().all(), (
+            "Art uten ID-/navnetreff skal ikke få ANF-verdi"
+        )
+        assert missing_name_and_category.get_column("verdi_rodliste_artskart").is_null().all(), (
+            "Art uten rødlistekategori skal ikke få rødlisteverdi"
+        )
+        assert missing_name_and_category.get_column("Verdi M1941").is_null().all(), (
+            "Endelig M1941-verdi skal være null når både ANF-verdi og rødlisteverdi mangler"
         )
 
         # Verdier skal kun være "Ja", "Nei" eller "Treff ikke funnet"
