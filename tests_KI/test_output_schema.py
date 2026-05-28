@@ -59,7 +59,7 @@ def test_rydd_navn_og_datatyper_output_schema_and_dtypes() -> None:
             "scientificNameRank": ["species"],
             "Ansvarsarter": ["Nei"],
             "Andre spesielt hensynskrevende arter": ["Nei"],
-            "Spesielle okologiske former": ["Nei"],
+            "Spesielle økologiske former": ["Nei"],
             "Prioriterte arter": ["Nei"],
             "Fredete arter": ["Nei"],
             "Fremmede arter": ["Nei"],

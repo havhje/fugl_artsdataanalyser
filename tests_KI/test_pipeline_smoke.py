@@ -23,8 +23,8 @@ def expected_filtered_height(filter_year: int) -> int:
     )
 
 
-def test_pipeline_components_smoke_on_fixture_with_mocked_nortaxa_without_m1941_step() -> None:
-    """Kjør nåværende berikingsløp uten den slettede legg_til_verdi_m1941-funksjonen."""
+def test_pipeline_components_smoke_on_fixture_with_mocked_nortaxa() -> None:
+    """Kjør nåværende berikingsløp med M1941-verdi fra rødliste og ANF."""
     fake_fetch = FakeNorTaxa()
     definitions = run_databehandling_app(fake_fetch)
 
@@ -35,7 +35,8 @@ def test_pipeline_components_smoke_on_fixture_with_mocked_nortaxa_without_m1941_
     )
 
     enriched_df = definitions["process_and_enrich_data"](filtered_df)
-    criteria_df = definitions["add_national_interest_criteria"](enriched_df)
+    redlist_df = definitions["legg_til_verdi_m1941"](enriched_df)
+    criteria_df = definitions["add_national_interest_criteria"](redlist_df)
     result = definitions["legg_til_kolonne_arteravnasjonal"](criteria_df)
 
     assert isinstance(result, pl.DataFrame)

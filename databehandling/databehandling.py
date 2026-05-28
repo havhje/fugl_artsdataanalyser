@@ -811,7 +811,7 @@ def _():
 
 @app.function
 def legg_til_verdi_m1941(df: pl.DataFrame) -> pl.DataFrame:
-    """Add 'Verdi M1941' column based on conservation status and criteria.
+    """Add a red-list-based M1941 helper value from Artskart category.
 
     Mapping:
     - LC -> noe verdi
@@ -819,24 +819,65 @@ def legg_til_verdi_m1941(df: pl.DataFrame) -> pl.DataFrame:
     - VU  -> stor verdi
     - EN, CR -> svært stor verdi
 
+    The helper column is later combined with the national-interest lookup in
+    ``add_national_interest_criteria``, where the national value takes precedence.
+
     Args:
-        df: DataFrame with ``category`` and criteria columns.
+        df: DataFrame with a ``category`` column.
 
     Returns:
-        DataFrame with the added ``Verdi M1941`` column.
+        DataFrame with the added ``verdi_rodliste_artskart`` column.
     """
     return df.with_columns(
         pl.when(pl.col("category").is_in(["EN", "CR"]))
-            .then(pl.lit("Svært stor verdi"))
-            .when(pl.col("category") == "VU")
-            .then(pl.lit("Stor verdi"))
-            .when(pl.col("category") == "NT")
-            .then(pl.lit("Middels verdi"))
-            .when(pl.col("category") == "LC")
-            .then(pl.lit("Noe verdi"))
-            .otherwise(None)
-            .alias("verdi_rodliste_artskart")
-            )
+        .then(pl.lit("Svært stor verdi"))
+        .when(pl.col("category") == "VU")
+        .then(pl.lit("Stor verdi"))
+        .when(pl.col("category") == "NT")
+        .then(pl.lit("Middels verdi"))
+        .when(pl.col("category") == "LC")
+        .then(pl.lit("Noe verdi"))
+        .otherwise(None)
+        .alias("verdi_rodliste_artskart")
+    )
+
+
+@app.function(hide_code=True)
+def test_legg_til_verdi_m1941():
+
+    test_df = pl.DataFrame(
+        {
+            "category": ["LC", "NT", "VU", "EN", "CR", "DD", "SE", None],
+            "art": [
+                "livskraftig art",
+                "nær truet art",
+                "sårbar art",
+                "sterkt truet art",
+                "kritisk truet art",
+                "datamangel-art",
+                "fremmedart",
+                "mangler kategori",
+            ],
+        }
+    )
+
+    test_result = legg_til_verdi_m1941(test_df)
+
+    assert "verdi_rodliste_artskart" in test_result.columns, "Kolonne for rødlisteverdi mangler"
+    assert test_result.height == 8, f"Forventet 8 rader, fikk {test_result.height}"
+    assert test_result.get_column("art").to_list() == test_df.get_column("art").to_list(), (
+        "Eksisterende kolonner skal beholdes uendret"
+    )
+    assert test_result.get_column("verdi_rodliste_artskart").to_list() == [
+        "Noe verdi",
+        "Middels verdi",
+        "Stor verdi",
+        "Svært stor verdi",
+        "Svært stor verdi",
+        None,
+        None,
+        None,
+    ], "Rødlistekategori skal mappes til riktig M1941-verdi"
 
 
 @app.cell(hide_code=True)
@@ -857,16 +898,19 @@ def _(bird_data):
 @app.cell
 def _add_national_interest_criteria(bird_data):
     def add_national_interest_criteria(df_enriched: pl.DataFrame) -> pl.DataFrame:
-        """Add national interest criteria from Excel file to enriched dataframe."""
+        """Add national interest criteria and combine M1941 values."""
 
-        # Load Excel with criteria
+        if "verdi_rodliste_artskart" not in df_enriched.columns:
+            df_enriched = df_enriched.with_columns(pl.lit(None, dtype=pl.Utf8).alias("verdi_rodliste_artskart"))
+
+        # Last inn kriterier fra ANF/Mdir-tabellen
         df_arter_nf = bird_data.execute("SELECT * FROM arter_av_nasjonal_forvaltningsinteresse").pl()
 
         df_arter_nf_ryddet = df_arter_nf.select(
             [
                 pl.col("vitenskapelig_navn_id").alias("arts_id_mdir"),
                 pl.col("vitenskapelig_navn").alias("vitenskapelig_navn_mdir"),
-                pl.col("forvaltningsverdi").alias("Verdi M1941"),
+                pl.col("forvaltningsverdi").cast(pl.Utf8).alias("verdi_m1941_nasjonal"),
                 pl.col("kriterium_prioriterte_arter").alias("Prioriterte arter"),
                 pl.col("kriterium_fredete_arter").alias("Fredete arter"),
                 pl.col("kriterium_andre_spesielt_hensynskrevende_arter").alias("Andre spesielt hensynskrevende arter"),
@@ -887,14 +931,14 @@ def _add_national_interest_criteria(bird_data):
             "Hensynskrevende arter",
             "Ansvarsarter",
             "Fremmede arter",
-            "Verdi M1941",
         ]
+        lookup_cols = criteria_cols + ["verdi_m1941_nasjonal"]
 
         criteria_data = df_arter_nf_ryddet.with_columns(
             *[pl.when(pl.col(c) == 1).then(pl.lit("Ja")).otherwise(pl.lit("Nei")).alias(c) for c in criteria_cols]
         )
 
-        # Merge with enriched data
+        # Først match på arts-ID, deretter fallback på vitenskapelig navn.
         df_with_criteria = (
             df_enriched.join(
                 criteria_data,
@@ -904,17 +948,18 @@ def _add_national_interest_criteria(bird_data):
             )
             .join(
                 criteria_data,
-                left_on=("validScientificName"),
-                right_on=("vitenskapelig_navn_mdir"),
+                left_on="validScientificName",
+                right_on="vitenskapelig_navn_mdir",
                 how="left",
                 suffix="_fallback",
             )
-            # Tar en second join på artsnavn, legger til alle criteria_data en gang til med eget suffix = fallback
-            .with_columns(*[pl.coalesce(c, f"{c}_fallback") for c in criteria_cols])
-            # bruker coalece som sier velg først join 1 (c), hvis det finnes null verdier bruk verdiene i join 2 (c_fallback)
-            .drop(([f"{c}_fallback" for c in criteria_cols]))
-            .drop(pl.col("vitenskapelig_navn_mdir"), pl.col("arts_id_mdir"))
-            # dropper kollonene som er lagt til 2 ganger
+            .with_columns(*[pl.coalesce(pl.col(c), pl.col(f"{c}_fallback")).alias(c) for c in lookup_cols])
+            .with_columns(*[pl.col(c).fill_null("Treff ikke funnet").alias(c) for c in criteria_cols])
+            .with_columns(
+                pl.coalesce(pl.col("verdi_m1941_nasjonal"), pl.col("verdi_rodliste_artskart")).alias("Verdi M1941")
+            )
+            .drop([f"{c}_fallback" for c in lookup_cols])
+            .drop("vitenskapelig_navn_mdir", "arts_id_mdir")
         )
 
         return df_with_criteria
@@ -952,10 +997,22 @@ def _(add_national_interest_criteria):
                     "Anas crecca",  # krikkand
                     "Nonexistent species",  # finnes ikke
                 ],
+                "category": [
+                    "LC",  # havelle får Noe verdi fra rødliste, men Stor verdi fra ANF
+                    "NT",
+                    "VU",
+                    "LC",  # dverggås får Noe verdi fra rødliste, men Svært stor verdi fra ANF
+                    "EN",  # kanadagås får Svært stor verdi fra rødliste, men '-' fra ANF
+                    "LC",
+                    "LC",
+                    "DD",
+                    "NT",
+                    "EN",  # ukjent art får rødlisteverdi som fallback
+                ],
             }
         )
 
-        test_result = add_national_interest_criteria(test_df_anf)
+        test_result = test_df_anf.pipe(legg_til_verdi_m1941).pipe(add_national_interest_criteria)
 
         expected_criteria_cols = [
             "Ansvarsarter",
@@ -968,12 +1025,52 @@ def _(add_national_interest_criteria):
             "Fremmede arter",
         ]
 
-        # Alle kriteriekolonner skal finnes i resultatet
-        for col in expected_criteria_cols:
+        expected_value_cols = [
+            "verdi_rodliste_artskart",
+            "verdi_m1941_nasjonal",
+            "Verdi M1941",
+        ]
+
+        # Alle kriterie- og verdikolonner skal finnes i resultatet
+        for col in expected_criteria_cols + expected_value_cols:
             assert col in test_result.columns, f"Kolonne '{col}' mangler i resultatet"
 
         # Antall rader skal være uendret
         assert test_result.height == 10, f"Forventet 10 rader, fikk {test_result.height}"
+
+        # Test M1941-verdi: ANF-verdi skal overstyre rødlisteverdi
+        havelle_verdi = test_result.filter(pl.col("validScientificNameId") == 3506)
+        assert havelle_verdi.get_column("verdi_rodliste_artskart").eq("Noe verdi").all(), (
+            "Havelle skal få Noe verdi fra rødlistekategori LC"
+        )
+        assert havelle_verdi.get_column("verdi_m1941_nasjonal").eq("Stor verdi").all(), (
+            "Havelle skal få Stor verdi fra ANF-tabellen"
+        )
+        assert havelle_verdi.get_column("Verdi M1941").eq("Stor verdi").all(), (
+            "ANF-verdi skal overstyre rødlisteverdi for havelle"
+        )
+
+        dverggås_verdi = test_result.filter(pl.col("validScientificNameId") == 3478)
+        assert dverggås_verdi.get_column("verdi_rodliste_artskart").eq("Noe verdi").all(), (
+            "Dverggås skal få Noe verdi fra rødlistekategori LC"
+        )
+        assert dverggås_verdi.get_column("verdi_m1941_nasjonal").eq("Svært stor verdi").all(), (
+            "Dverggås skal få Svært stor verdi fra ANF-tabellen"
+        )
+        assert dverggås_verdi.get_column("Verdi M1941").eq("Svært stor verdi").all(), (
+            "ANF-verdi skal overstyre rødlisteverdi for dverggås"
+        )
+
+        kanadagås_verdi = test_result.filter(pl.col("validScientificNameId") == 3495)
+        assert kanadagås_verdi.get_column("verdi_rodliste_artskart").eq("Svært stor verdi").all(), (
+            "Kanadagås skal få Svært stor verdi fra rødlistekategori EN"
+        )
+        assert kanadagås_verdi.get_column("verdi_m1941_nasjonal").eq("-").all(), (
+            "Kanadagås skal få '-' fra ANF-tabellen"
+        )
+        assert kanadagås_verdi.get_column("Verdi M1941").eq("-").all(), (
+            "ANF-tabellens verdi skal også overstyre rødlisteverdi når verdien er '-'"
+        )
 
         # Test havelle (3506) – nært trua art og andre spesielt hensynskrevende
         havelle = test_result.filter(pl.col("validScientificNameId") == 3506)
@@ -1132,6 +1229,15 @@ def _(add_national_interest_criteria):
             assert missing.get_column(col).eq("Treff ikke funnet").all(), (
                 f"Kolonne '{col}' skal være 'Treff ikke funnet' for ukjent art"
             )
+        assert missing.get_column("verdi_m1941_nasjonal").is_null().all(), (
+            "Ukjent art skal ikke få ANF-verdi"
+        )
+        assert missing.get_column("verdi_rodliste_artskart").eq("Svært stor verdi").all(), (
+            "Ukjent art skal beholde rødlisteverdien fra category"
+        )
+        assert missing.get_column("Verdi M1941").eq("Svært stor verdi").all(), (
+            "Rødlisteverdi skal brukes som fallback når ANF-oppslag mangler"
+        )
 
         # Verdier skal kun være "Ja", "Nei" eller "Treff ikke funnet"
         valid_values = {"Ja", "Nei", "Treff ikke funnet"}
@@ -1629,8 +1735,12 @@ def _(add_national_interest_criteria, console, process_and_enrich_data):
         # Kjører alle berikingsfunksjonene — progress_bar håndteres inne i process_and_enrich_data
         df_artsdatabanken = process_and_enrich_data(input_filtrert_df)
 
+        with console.status("[bold blue]Beregner M1941-verdi fra rødlistekategori..."):
+            df_steg0 = df_artsdatabanken.pipe(legg_til_verdi_m1941)
+        console.print("  [green]✓[/green] Beregnet M1941-verdi fra rødlistekategori")
+
         with console.status("[bold blue]Legger til kriterier for nasjonal interesse..."):
-            df_steg1 = df_artsdatabanken.pipe(add_national_interest_criteria)
+            df_steg1 = df_steg0.pipe(add_national_interest_criteria)
         console.print("  [green]✓[/green] Lagt til Arter av nasjonal forvaltningsinteresse")
 
         with console.status("[bold blue]Legger til kolonne for arter av nasjonal forvaltningsinteresse..."):
