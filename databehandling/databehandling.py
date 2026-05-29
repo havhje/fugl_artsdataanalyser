@@ -33,7 +33,7 @@ with app.setup(hide_code=True):
 
 
 @app.cell
-def todo():
+def vis_todo_liste():
     todo_liste = mo.callout(
         mo.md(
             r"""
@@ -59,20 +59,20 @@ def todo():
 
 
 @app.cell
-def _():
+def koble_til_fugldatabase():
     DATABASE_URL = "databehandling/fugl_atributt_data"
     bird_data = duckdb.connect(DATABASE_URL, read_only=True)
     return (bird_data,)
 
 
 @app.cell
-def _():
+def opprett_console():
     console = Console()
     return (console,)
 
 
 @app.cell(hide_code=True)
-def _():
+def md_rydd_navn_og_datatyper():
     mo.md(r"""
     ### Rydder opp i navn og datatyper
     """)
@@ -402,7 +402,7 @@ def test_rydd_navn_og_datatyper():
 
 
 @app.cell(hide_code=True)
-def _():
+def md_artskart_inputkontrakt():
     mo.md(r"""
     ### Henter tillatte kolonner fra artskart
     """)
@@ -485,7 +485,7 @@ def validate_artskart_input_contract(df: pl.DataFrame) -> None:
 
 
 @app.cell(hide_code=True)
-def _():
+def md_nortaxa_api():
     mo.md(r"""
     ### API fra artsdatabanken
     """)
@@ -493,7 +493,7 @@ def _():
 
 
 @app.cell(hide_code=True)
-def _():
+def definer_nortaxa_konstanter():
     # Constants
     NORTAXA_API_BASE_URL = "https://nortaxa.artsdatabanken.no/api/v1/TaxonName"
     DESIRED_RANKS = ["Kingdom", "Phylum", "Class", "Order", "Family", "Genus"]
@@ -502,7 +502,7 @@ def _():
 
 
 @app.cell(hide_code=True)
-def _(DESIRED_RANKS, NORTAXA_API_BASE_URL):
+def definer_nortaxa_hjelpefunksjoner(DESIRED_RANKS, NORTAXA_API_BASE_URL):
     @lru_cache(maxsize=10000)
     def fetch_taxon_data(scientific_name_id: int) -> dict[str, Any] | None:
         """Hent taksondata fra NorTaxa for én vitenskapelig navne-ID.
@@ -585,7 +585,7 @@ def _(DESIRED_RANKS, NORTAXA_API_BASE_URL):
 
 
 @app.cell(hide_code=True)
-def _(
+def definer_process_and_enrich_data(
     DESIRED_RANKS,
     RATE_LIMIT_DELAY,
     console,
@@ -762,7 +762,7 @@ def _(
 
 
 @app.cell(hide_code=True)
-def _(process_and_enrich_data):
+def test_process_and_enrich_data_cell(process_and_enrich_data):
     def test_process_and_enrich_data():
 
         # Du må endre df, slik at det abre er species ID som er inputten, er slik funksjonen fungerer
@@ -821,7 +821,7 @@ def _(process_and_enrich_data):
 
 
 @app.cell(hide_code=True)
-def _():
+def md_legg_til_verdi_m1941():
     mo.md(r"""
     ### Legg til verdi M1941
     """)
@@ -934,7 +934,7 @@ def test_legg_til_verdi_m1941():
 
 
 @app.cell(hide_code=True)
-def _():
+def md_arter_av_nasjonal_forvaltningsinteresse():
     mo.md(r"""
     ### Arter av nasjonal forvaltningsinteresse
     """)
@@ -942,7 +942,7 @@ def _():
 
 
 @app.cell
-def _(bird_data):
+def forhandsvis_anf_tabell(bird_data):
     df_arter_nf = bird_data.execute("SELECT * FROM arter_av_nasjonal_forvaltningsinteresse").pl()
 
     tes = df_arter_nf.with_columns(pl.col("forvaltningsverdi").str.replace_all("-", "Ingen"))
@@ -951,7 +951,7 @@ def _(bird_data):
 
 
 @app.cell
-def _add_national_interest_criteria(bird_data):
+def definer_anf_kriterier_og_m1941(bird_data):
     def legg_til_arter_av_nasjonal_forvaltningsinteresse(df_enriched: pl.DataFrame) -> pl.DataFrame:
         """Slå opp ANF/Mdir-kriterier og velg endelig M1941-verdi.
 
@@ -1041,7 +1041,9 @@ def _add_national_interest_criteria(bird_data):
 
 
 @app.cell(hide_code=True)
-def _(legg_til_arter_av_nasjonal_forvaltningsinteresse):
+def test_legg_til_arter_av_nasjonal_forvaltningsinteresse_cell(
+    legg_til_arter_av_nasjonal_forvaltningsinteresse,
+):
     def test_legg_til_arter_av_nasjonal_forvaltningsinteresse():
 
         test_df_anf = pl.DataFrame(
@@ -1362,7 +1364,7 @@ def _(legg_til_arter_av_nasjonal_forvaltningsinteresse):
 
 
 @app.cell(hide_code=True)
-def _():
+def md_oppsummer_anf_kriterier():
     mo.md(r"""
     ### Lager en ny kolonne som inneholder mulige verdier av arter av nasjonal forvaltning
     """)
@@ -1503,7 +1505,7 @@ def test_legg_til_kolonne_arteravnasjonal():
 
 
 @app.cell(hide_code=True)
-def _():
+def md_manglende_artsnavn():
     mo.md(r"""
     ### Legger til manglende artsnavn
     """)
@@ -1600,7 +1602,7 @@ def test_finn_mangler_navn():
 
 
 @app.cell(hide_code=True)
-def _(console):
+def definer_prompt_mangler_navn(console):
     def prompt_mangler_navn(mangler_df: pl.DataFrame) -> dict[str, str]:
         """Be brukeren fylle inn norske navn for arter som mangler navn.
 
@@ -1656,7 +1658,7 @@ def _(console):
 
 
 @app.cell(hide_code=True)
-def _(prompt_mangler_navn):
+def test_prompt_mangler_navn_cell(prompt_mangler_navn):
     def test_prompt_mangler_navn():
         mangler_df = pl.DataFrame(
             {
@@ -1799,7 +1801,7 @@ def test_join_navn_til_orginal_df():
 
 
 @app.cell(column=1, hide_code=True)
-def _():
+def md_cli_og_pipeline():
     mo.md(r"""
     ### Setter sammen alt og definerer rich
     """)
@@ -1807,7 +1809,11 @@ def _():
 
 
 @app.cell
-def _(console, les_data_og_kjør_alle_funksjoner, prompt_mangler_navn):
+def definer_les_data_cli(
+    console,
+    les_data_og_kjør_alle_funksjoner,
+    prompt_mangler_navn,
+):
     cli_app = typer.Typer()
 
 
@@ -1873,7 +1879,7 @@ def _(console, les_data_og_kjør_alle_funksjoner, prompt_mangler_navn):
 
 
 @app.cell
-def _(
+def definer_les_data_og_kjor_alle_funksjoner(
     console,
     legg_til_arter_av_nasjonal_forvaltningsinteresse,
     process_and_enrich_data,
