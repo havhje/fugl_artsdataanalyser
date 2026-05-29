@@ -81,6 +81,20 @@ def _():
 
 @app.function(hide_code=True)
 def rydd_navn_og_datatyper(df_input: pl.DataFrame) -> pl.DataFrame:
+    """Lag sluttabellen med norske kolonnenavn, riktige typer og sortering.
+
+    Args:
+        df_input: Beriket Artskart-data etter taksonomi-, M1941- og
+            ANF-beriking.
+
+    Returns:
+        DataFrame med sluttkolonner, norske kolonnenavn og sortering etter
+        M1941-verdi og kategori.
+
+    Notes:
+        Manglende `individualCount` tolkes som én observasjon. Verdier på
+        formen "1/1" bruker første tall som observert antall.
+    """
 
     VERDI_M1941_ORDER = {
         "Svært stor verdi": 0,
@@ -397,7 +411,7 @@ def _():
 
 @app.function(hide_code=True)
 def get_required_artskart_columns() -> set[str]:
-    """Return the Artskart columns required by the processing pipeline."""
+    """Returner Artskart-kolonnene som inngår i input-kontrakten."""
     return {
         "category",
         "validScientificNameId",
@@ -421,7 +435,7 @@ def get_required_artskart_columns() -> set[str]:
 
 @app.function(hide_code=True)
 def get_allowed_categories() -> set[str]:
-    """Return accepted red-list and alien-species category codes."""
+    """Returner tillatte rødliste- og fremmedartskategorier."""
     return {
         "RE",
         "CR",
@@ -443,7 +457,15 @@ def get_allowed_categories() -> set[str]:
 
 @app.function(hide_code=True)
 def validate_artskart_input_contract(df: pl.DataFrame) -> None:
-    """Validate the Artskart input schema and category domain values."""
+    """Valider at Artskart-data oppfyller input-kontrakten.
+
+    Args:
+        df: Artskart-data før beriking.
+
+    Raises:
+        ValueError: Når obligatoriske kolonner mangler eller `category` har
+            verdier utenfor tillatt domene.
+    """
     required_columns = get_required_artskart_columns()
     missing_columns = sorted(required_columns - set(df.columns))
     if missing_columns:
@@ -483,16 +505,17 @@ def _():
 def _(DESIRED_RANKS, NORTAXA_API_BASE_URL):
     @lru_cache(maxsize=10000)
     def fetch_taxon_data(scientific_name_id: int) -> dict[str, Any] | None:
-        """Fetch taxon data with caching to avoid duplicate API calls.
-
-        Queries the NorTaxa API for a given scientific name ID and returns
-        the full taxon record.
+        """Hent taksondata fra NorTaxa for én vitenskapelig navne-ID.
 
         Args:
-            scientific_name_id: Unique identifier from Artsdatabanken.
+            scientific_name_id: `validScientificNameId` fra Artskart.
 
         Returns:
-            JSON response as a dict, or None if the request fails.
+            API-svar som dict når oppslaget lykkes, ellers None.
+
+        Notes:
+            Resultatene mellomlagres med `lru_cache` for å unngå dupliserte
+            API-kall. Nettverksfeil fanges og gir None.
         """
         try:
             response = requests.get(
@@ -509,16 +532,14 @@ def _(DESIRED_RANKS, NORTAXA_API_BASE_URL):
     def extract_hierarchy_and_ids(
         api_data: dict[str, Any] | None,
     ) -> tuple[dict[str, str], int | None, int | None]:
-        """Extract taxonomic hierarchy and rank IDs from API data.
-
-        Parses the higherClassification field to build a rank-to-name mapping
-        and extracts the scientificNameId for Family and Order ranks.
+        """Trekk ut taksonomisk hierarki og familie-/orden-ID-er fra NorTaxa.
 
         Args:
-            api_data: Parsed JSON response from the NorTaxa API.
+            api_data: Dekodet JSON-respons fra NorTaxa, eller None.
 
         Returns:
-            A tuple of (hierarchy dict, family_id, order_id).
+            Tuple med hierarki per rang, familie-ID og orden-ID. Manglende verdier
+            settes til None.
         """
         hierarchy = {}
         family_id = order_id = None
@@ -538,16 +559,13 @@ def _(DESIRED_RANKS, NORTAXA_API_BASE_URL):
 
 
     def get_norwegian_name(api_data: dict[str, Any] | None) -> str | None:
-        """Extract Norwegian vernacular name (prioritize Bokmål over Nynorsk).
-
-        Looks through vernacularNames in the API response, preferring Bokmål
-        (nb) and falling back to Nynorsk (nn).
+        """Finn norsk navn fra NorTaxa-responsen.
 
         Args:
-            api_data: Parsed JSON response from the NorTaxa API.
+            api_data: Dekodet JSON-respons fra NorTaxa, eller None.
 
         Returns:
-            The Norwegian common name, or None if unavailable.
+            Bokmålsnavn når tilgjengelig, ellers nynorsknavn eller None.
         """
         if not api_data or "vernacularNames" not in api_data:
             return None
@@ -576,21 +594,23 @@ def _(
     get_norwegian_name,
 ):
     def process_and_enrich_data(source_df: pl.DataFrame) -> pl.DataFrame:
-        """Process the dataframe and enrich with taxonomy data.
-
-        Fetches taxonomic hierarchy and Norwegian vernacular names from the
-        NorTaxa API for each unique species ID, then joins the results back
-        onto the source dataframe.
+        """Berik Artskart-data med taksonomi og norske familie-/ordennavn.
 
         Args:
-            source_df: Input dataframe containing a ``validScientificNameId`` column.
+            source_df: DataFrame med kolonnen `validScientificNameId`.
 
         Returns:
-            Enriched dataframe with taxonomy columns.
+            DataFrame med originalradene, taksonomikolonner for ønskede ranger,
+            `FamilieNavn` og `OrdenNavn`.
 
         Raises:
-            ValueError: If the required ID column is missing or Nei valid IDs exist.
-            RuntimeError: If NorTaxa API calls for valid IDs fail or return empty data.
+            ValueError: Når ID-kolonnen mangler eller ingen gyldige ID-er finnes.
+            RuntimeError: Når ett eller flere NorTaxa-oppslag feiler eller gir
+                tomt svar.
+
+        Notes:
+            Funksjonen gjør nettverkskall og skriver fremdrift/advarsler til
+            konsollen.
         """
         # Konverterer til Polars for bedre ytelse
         if isinstance(source_df, pl.DataFrame):
@@ -810,23 +830,19 @@ def _():
 
 @app.function(hide_code=True)
 def legg_til_verdi_m1941(df: pl.DataFrame) -> pl.DataFrame:
-    """Add a red-list-based M1941 helper value from Artskart category.
-
-    Mapping:
-    - LC -> noe verdi
-    - NT -> middels verdi
-    - VU -> stor verdi
-    - EN, CR -> svært stor verdi
-    - RE, DD, SE, HI, PH, LO, NK, NA, NE, Unknown -> Ingen
-
-    The helper column is later combined with the national-interest lookup in
-    ``legg_til_arter_av_nasjonal_forvaltningsinteresse``, where the national value takes precedence.
+    """Legg til foreløpig M1941-verdi basert på Artskart-kategori.
 
     Args:
-        df: DataFrame with a ``category`` column.
+        df: DataFrame med `category`.
 
     Returns:
-        DataFrame with the added ``verdi_rodliste_artskart`` column.
+        DataFrame med ny kolonne `verdi_rodliste_artskart`.
+
+    Notes:
+        Rødlisteverdien brukes som fallback når ANF/Mdir-tabellen ikke gir
+        `verdi_m1941_nasjonal`. EN/CR gir "Svært stor verdi", VU gir
+        "Stor verdi", NT gir "Middels verdi", LC gir "Noe verdi" og øvrige
+        tillatte kategorier gir "Ingen".
     """
     ubetydelig_verdi = ["RE", "DD", "SE", "HI", "PH", "LO", "NK", "NA", "NE", "Unknown"]
 
@@ -937,7 +953,21 @@ def _(bird_data):
 @app.cell
 def _add_national_interest_criteria(bird_data):
     def legg_til_arter_av_nasjonal_forvaltningsinteresse(df_enriched: pl.DataFrame) -> pl.DataFrame:
-        """Add national interest criteria and combine M1941 values."""
+        """Slå opp ANF/Mdir-kriterier og velg endelig M1941-verdi.
+
+        Args:
+            df_enriched: Beriket Artskart-data med `validScientificNameId`,
+                `validScientificName` og `verdi_rodliste_artskart`.
+
+        Returns:
+            DataFrame med kriteriekolonner, `verdi_m1941_nasjonal` og
+            `Verdi M1941`.
+
+        Notes:
+            Leser ANF/Mdir-tabellen fra `bird_data`. Oppslag skjer først på
+            arts-ID og deretter på vitenskapelig navn. Nasjonal M1941-verdi
+            prioriteres over rødlisteverdien.
+        """
 
         # Last inn kriterier fra ANF/Mdir-tabellen
         df_arter_nf = bird_data.execute("SELECT * FROM arter_av_nasjonal_forvaltningsinteresse").pl()
@@ -1341,19 +1371,18 @@ def _():
 
 @app.function
 def legg_til_kolonne_arteravnasjonal(input_df: pl.DataFrame) -> pl.DataFrame:
-    """
-    Adds a new column 'Art av nasjonal forvaltningsinteresse' to the DataFrame.
-
-    The new column is populated based on the values in a predefined list of
-    category columns. If any of these columns have the value "Ja", the new
-    column will contain a comma-separated list of the category names.
-    Otherwise, it will contain the value "Nei".
+    """Oppsummer ANF-kriterier i én lesbar tekstkolonne.
 
     Args:
-        input_df: The input Polars DataFrame.
+        input_df: DataFrame med ANF-kriteriekolonner kodet som "Ja"/"Nei".
 
     Returns:
-        A new Polars DataFrame with the added column.
+        DataFrame med en oppsummeringskolonne for arter av nasjonal
+        forvaltningsinteresse. Kolonnen inneholder kommaseparerte
+        kriterier eller "Nei".
+
+    Notes:
+        Bare kriteriekolonner med verdien "Ja" tas med i oppsummeringen.
     """
     category_columns = [
         "Ansvarsarter",
@@ -1483,7 +1512,14 @@ def _():
 
 @app.function(hide_code=True)
 def finn_mangler_navn(df: pl.DataFrame) -> pl.DataFrame:
-    """Finn arter som mangler norsk navn (Navn-kolonnen er null)."""
+    """Finn unike arter som mangler norsk navn.
+
+    Args:
+        df: Slutttabell med `Art`, `Navn`, `Familie` og `Orden`.
+
+    Returns:
+        DataFrame med unike arter der `Navn` er null, sortert på `Art`.
+    """
 
     mangler_df = df.filter(pl.col("Navn").is_null()).select(["Art", "Navn", "Familie", "Orden"]).unique().sort("Art")
 
@@ -1566,7 +1602,21 @@ def test_finn_mangler_navn():
 @app.cell(hide_code=True)
 def _(console):
     def prompt_mangler_navn(mangler_df: pl.DataFrame) -> dict[str, str]:
-        """Vis arter uten norsk navn og be bruker skrive inn navn."""
+        """Be brukeren fylle inn norske navn for arter som mangler navn.
+
+        Args:
+            mangler_df: DataFrame fra `finn_mangler_navn`.
+
+        Returns:
+            Mapping fra latinsk artsnavn (`Art`) til oppgitt norsk navn.
+
+        Raises:
+            typer.Exit: Når brukeren sender inn tomt navn for en art.
+
+        Notes:
+            Funksjonen skriver en Rich-tabell og leser interaktiv input fra
+            terminalen.
+        """
 
         if mangler_df.is_empty():
             return {}
@@ -1608,8 +1658,6 @@ def _(console):
 @app.cell(hide_code=True)
 def _(prompt_mangler_navn):
     def test_prompt_mangler_navn():
-        """Test prompt_mangler_navn with mocked user input."""
-
         mangler_df = pl.DataFrame(
             {
                 "Art": ["Vulpes lagopus", "Canis lupus"],
@@ -1654,7 +1702,16 @@ def _(prompt_mangler_navn):
 def join_navn_til_orginal_df(
     df: pl.DataFrame, navn_mapping: dict[str, str]
 ) -> pl.DataFrame:  # navn mapping er en dict med key:value som begge er str. hvor f.eks. det latinske navnet er "key" og det norske er "navn"
-    """Oppdater Navn-kolonnen med manuelt oppgitte navn."""
+    """Fyll manglende norske navn fra en manuell navnemapping.
+
+    Args:
+        df: DataFrame med kolonnene `Art` og `Navn`.
+        navn_mapping: Mapping fra latinsk artsnavn til norsk navn.
+
+    Returns:
+        DataFrame der nullverdier i `Navn` er fylt når `Art` finnes i
+        mappingen. Eksisterende navn overskrives ikke.
+    """
 
     if not navn_mapping:
         return df
@@ -1680,8 +1737,6 @@ def join_navn_til_orginal_df(
 
 @app.function(hide_code=True)
 def test_join_navn_til_orginal_df():
-    """Test that join_navn_til_orginal_df fills in missing names correctly."""
-
     df = pl.DataFrame(
         {
             "Art": [
@@ -1762,7 +1817,17 @@ def _(console, les_data_og_kjør_alle_funksjoner, prompt_mangler_navn):
         filter_year: int = typer.Option(1990, help="Filtrer observasjoner fra og med dette året"),
         output: str = typer.Option("output.parquet", help="Sti til utfil (Parquet)"),
     ):
-        """Les fugledata fra CSV, berik med artsdatabanken, og skriv resultatet til fil."""
+        """Kjør hele databehandlingsløpet fra kommandolinjen.
+
+        Args:
+            input_fil_sti: Sti til CSV-fil fra Artskart.
+            filter_year: Første observasjonsår som beholdes.
+            output: Sti til Parquet-filen som skal skrives.
+
+        Notes:
+            Kommandoen leser data, beriker, spør om manglende norske navn og
+            skriver resultatet til disk.
+        """
         console.print(Rule("[bold]Fugl Artsdataanalyser[/bold]"))
         console.print(f"  Inputfil:    [cyan]{input_fil_sti}[/cyan]")
         console.print(f"  Filter år:   [cyan]{filter_year}[/cyan]")
@@ -1814,7 +1879,24 @@ def _(
     process_and_enrich_data,
 ):
     def les_data_og_kjør_alle_funksjoner(input_fil_sti: str, filter_year: int = 1990) -> pl.DataFrame:
-        """Les CSV med DuckDB, filtrer på år, og kjør alle berikingsfunksjoner."""
+        """Les Artskart-CSV, filtrer på år og kjør hele berikingsløpet.
+
+        Args:
+            input_fil_sti: Sti til CSV-fil fra Artskart.
+            filter_year: Første observasjonsår som beholdes.
+
+        Returns:
+            Ferdig behandlet DataFrame klar for eksport.
+
+        Raises:
+            ValueError: Når input ikke følger Artskart-kontrakten eller mangler
+                gyldige ID-er.
+            RuntimeError: Når NorTaxa-oppslag feiler.
+
+        Notes:
+            Observasjoner uten dato fjernes av årfilteret. Funksjonen skriver
+            status og advarsler til konsollen.
+        """
 
         # Bruker DuckDB direkte for å lese CSV — unngår polars sin ragged-lines feil
         with console.status("[bold blue]Leser CSV-fil med DuckDB..."):
