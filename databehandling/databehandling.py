@@ -1,9 +1,9 @@
 import marimo
 
-__generated_with = "0.23.6"
+__generated_with = "0.23.8"
 app = marimo.App(width="columns")
 
-with app.setup:
+with app.setup(hide_code=True):
     import time
     from datetime import date
     from functools import lru_cache
@@ -39,8 +39,15 @@ def todo():
             r"""
     ### Todo
 
+    - Lage en egen md celle med alle testscenarioer for hver enkelt funksjon? 
+
+    - Er testene for gira mot slik koden er nå? Altså er de genrelle nok og fanger de opp intensjonen i funksjonene?
+
+    - Oppdatere alle docstrings 
+
+    - Lage en mermaid celle som viser dataflyten i notebooken 
+
     - Sjekk med ny Ki modell når det kommer at alt er korrekt
-    - les over tester til legg til verdi m1941 og legg til arter an nasjonal forvaltning
 
     """
         ),
@@ -114,7 +121,7 @@ def rydd_navn_og_datatyper(df_input: pl.DataFrame) -> pl.DataFrame:
                 pl.col("validScientificName").alias("Art"),
                 pl.col("individualCount")
                 .fill_null("1")  # antar at alle obs = minimum 1 når observatøren ikke har lagt inn spesifikt antall
-                .str.split("/")  # Noen har en 1/1 antall - aner ikke hva det betyr
+                .str.split("/")  # Noen har en 1/1 antall - antar at det er det første tallet som git antall
                 .list.first()  # Take the first number
                 .cast(pl.Float64)  # Noen har komma, så må ta til float først
                 .cast(pl.Int64)
@@ -130,11 +137,13 @@ def rydd_navn_og_datatyper(df_input: pl.DataFrame) -> pl.DataFrame:
                 pl.col("municipality").alias("Kommune"),
                 pl.col("county").alias("Fylke"),
                 pl.col("scientificNameRank").alias("Taksonomisk nivå"),
-                pl.col("Ansvarsarter"),
                 pl.col("Andre spesielt hensynskrevende arter"),
+                pl.col("Hensynskrevende arter"),
                 pl.col("Spesielle økologiske former"),
                 pl.col("Prioriterte arter"),
                 pl.col("Fredete arter"),
+                pl.col("Datamangel"),
+                pl.col("Ansvarsarter"),
                 pl.col("Fremmede arter"),
                 pl.col("latitude").str.replace_all(",", ".").cast(pl.Float64),
                 pl.col("longitude").str.replace_all(",", ".").cast(pl.Float64),
@@ -461,7 +470,7 @@ def _():
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _():
     # Constants
     NORTAXA_API_BASE_URL = "https://nortaxa.artsdatabanken.no/api/v1/TaxonName"
@@ -799,18 +808,19 @@ def _():
     return
 
 
-@app.function
+@app.function(hide_code=True)
 def legg_til_verdi_m1941(df: pl.DataFrame) -> pl.DataFrame:
     """Add a red-list-based M1941 helper value from Artskart category.
 
     Mapping:
     - LC -> noe verdi
     - NT -> middels verdi
-    - VU  -> stor verdi
+    - VU -> stor verdi
     - EN, CR -> svært stor verdi
+    - RE, DD, SE, HI, PH, LO, NK, NA, NE, Unknown -> Ingen
 
     The helper column is later combined with the national-interest lookup in
-    ``add_national_interest_criteria``, where the national value takes precedence.
+    ``legg_til_arter_av_nasjonal_forvaltningsinteresse``, where the national value takes precedence.
 
     Args:
         df: DataFrame with a ``category`` column.
@@ -818,6 +828,8 @@ def legg_til_verdi_m1941(df: pl.DataFrame) -> pl.DataFrame:
     Returns:
         DataFrame with the added ``verdi_rodliste_artskart`` column.
     """
+    ubetydelig_verdi = ["RE", "DD", "SE", "HI", "PH", "LO", "NK", "NA", "NE", "Unknown"]
+
     return df.with_columns(
         pl.when(pl.col("category").is_in(["EN", "CR"]))
         .then(pl.lit("Svært stor verdi"))
@@ -827,6 +839,8 @@ def legg_til_verdi_m1941(df: pl.DataFrame) -> pl.DataFrame:
         .then(pl.lit("Middels verdi"))
         .when(pl.col("category") == "LC")
         .then(pl.lit("Noe verdi"))
+        .when(pl.col("category").is_in(ubetydelig_verdi))
+        .then(pl.lit("Ingen"))
         .otherwise(None)
         .alias("verdi_rodliste_artskart")
     )
@@ -837,15 +851,40 @@ def test_legg_til_verdi_m1941():
 
     test_df = pl.DataFrame(
         {
-            "category": ["LC", "NT", "VU", "EN", "CR", "DD", "SE", None],
+            "category": [
+                "LC",
+                "NT",
+                "VU",
+                "EN",
+                "CR",
+                "RE",
+                "DD",
+                "SE",
+                "HI",
+                "PH",
+                "LO",
+                "NK",
+                "NA",
+                "NE",
+                "Unknown",
+                None,
+            ],
             "art": [
                 "livskraftig art",
                 "nær truet art",
                 "sårbar art",
                 "sterkt truet art",
                 "kritisk truet art",
+                "regionalt utdødd art",
                 "datamangel-art",
-                "fremmedart",
+                "svært høy risiko fremmedart",
+                "høy risiko fremmedart",
+                "potensielt høy risiko fremmedart",
+                "lav risiko fremmedart",
+                "ingen kjent risiko fremmedart",
+                "ikke egnet art",
+                "ikke vurdert art",
+                "ukjent kategori",
                 "mangler kategori",
             ],
         }
@@ -854,7 +893,7 @@ def test_legg_til_verdi_m1941():
     test_result = legg_til_verdi_m1941(test_df)
 
     assert "verdi_rodliste_artskart" in test_result.columns, "Kolonne for rødlisteverdi mangler"
-    assert test_result.height == 8, f"Forventet 8 rader, fikk {test_result.height}"
+    assert test_result.height == 16, f"Forventet 16 rader, fikk {test_result.height}"
     assert test_result.get_column("art").to_list() == test_df.get_column("art").to_list(), (
         "Eksisterende kolonner skal beholdes uendret"
     )
@@ -864,8 +903,16 @@ def test_legg_til_verdi_m1941():
         "Stor verdi",
         "Svært stor verdi",
         "Svært stor verdi",
-        None,
-        None,
+        "Ingen",
+        "Ingen",
+        "Ingen",
+        "Ingen",
+        "Ingen",
+        "Ingen",
+        "Ingen",
+        "Ingen",
+        "Ingen",
+        "Ingen",
         None,
     ], "Rødlistekategori skal mappes til riktig M1941-verdi"
 
@@ -879,12 +926,18 @@ def _():
 
 
 @app.cell
-def _add_national_interest_criteria(bird_data):
-    def add_national_interest_criteria(df_enriched: pl.DataFrame) -> pl.DataFrame:
-        """Add national interest criteria and combine M1941 values."""
+def _(bird_data):
+    df_arter_nf = bird_data.execute("SELECT * FROM arter_av_nasjonal_forvaltningsinteresse").pl()
 
-        if "verdi_rodliste_artskart" not in df_enriched.columns:
-            df_enriched = df_enriched.with_columns(pl.lit(None, dtype=pl.Utf8).alias("verdi_rodliste_artskart"))
+    tes = df_arter_nf.with_columns(pl.col("forvaltningsverdi").str.replace_all("-", "Ingen"))
+    tes
+    return
+
+
+@app.cell
+def _add_national_interest_criteria(bird_data):
+    def legg_til_arter_av_nasjonal_forvaltningsinteresse(df_enriched: pl.DataFrame) -> pl.DataFrame:
+        """Add national interest criteria and combine M1941 values."""
 
         # Last inn kriterier fra ANF/Mdir-tabellen
         df_arter_nf = bird_data.execute("SELECT * FROM arter_av_nasjonal_forvaltningsinteresse").pl()
@@ -893,7 +946,7 @@ def _add_national_interest_criteria(bird_data):
             [
                 pl.col("vitenskapelig_navn_id").alias("arts_id_mdir"),
                 pl.col("vitenskapelig_navn").alias("vitenskapelig_navn_mdir"),
-                pl.col("forvaltningsverdi").cast(pl.Utf8).alias("verdi_m1941_nasjonal"),
+                pl.col("forvaltningsverdi").cast(pl.Utf8).str.replace_all("-", "Ingen").alias("verdi_m1941_nasjonal"),
                 pl.col("kriterium_prioriterte_arter").alias("Prioriterte arter"),
                 pl.col("kriterium_fredete_arter").alias("Fredete arter"),
                 pl.col("kriterium_andre_spesielt_hensynskrevende_arter").alias("Andre spesielt hensynskrevende arter"),
@@ -902,8 +955,11 @@ def _add_national_interest_criteria(bird_data):
                 pl.col("kriterium_hensynskrevende_arter").alias("Hensynskrevende arter"),
                 pl.col("kriterium_ansvarsart").alias("Ansvarsarter"),
                 pl.col("kriterium_fremmede_arter").alias("Fremmede arter"),
+                pl.col("kriterium_dd").alias("Datamangel"),
             ]
-        )
+        ).with_columns(
+            pl.col("verdi_m1941_nasjonal").str.replace_all("-", "Ingen")
+        )  # fremmed arter har ingen verdi i rødlista skriver eksplisitt "ingen"
 
         criteria_cols = [
             "Prioriterte arter",
@@ -937,9 +993,13 @@ def _add_national_interest_criteria(bird_data):
                 suffix="_fallback",
             )
             .with_columns(*[pl.coalesce(pl.col(c), pl.col(f"{c}_fallback")).alias(c) for c in lookup_cols])
-            .with_columns(*[pl.col(c).fill_null("Treff ikke funnet").alias(c) for c in criteria_cols])
             .with_columns(
-                pl.coalesce(pl.col("verdi_m1941_nasjonal"), pl.col("verdi_rodliste_artskart")).alias("Verdi M1941")
+                *[pl.col(c).fill_null("Nei").alias(c) for c in criteria_cols]
+            )  # altså de artene som ikke er ANF tabellen = Nei ikke ANF
+            .with_columns(
+                pl.coalesce(pl.col("verdi_m1941_nasjonal"), pl.col("verdi_rodliste_artskart")).alias(
+                    "Verdi M1941"
+                )  # tar først å bruker verdien i fra mdir tabellen og for de artene som ikke er der så bruker vi verdien som gitt av rødlista. coalece funker slik at den fyller null verdiene i den første kolonnen med den andre.
             )
             .drop([f"{c}_fallback" for c in lookup_cols])
             .drop("vitenskapelig_navn_mdir", "arts_id_mdir")
@@ -947,12 +1007,12 @@ def _add_national_interest_criteria(bird_data):
 
         return df_with_criteria
 
-    return (add_national_interest_criteria,)
+    return (legg_til_arter_av_nasjonal_forvaltningsinteresse,)
 
 
 @app.cell(hide_code=True)
-def _(add_national_interest_criteria):
-    def test_add_national_interest_criteria():
+def _(legg_til_arter_av_nasjonal_forvaltningsinteresse):
+    def test_legg_til_arter_av_nasjonal_forvaltningsinteresse():
 
         test_df_anf = pl.DataFrame(
             {
@@ -1001,7 +1061,7 @@ def _(add_national_interest_criteria):
             }
         )
 
-        test_result = test_df_anf.pipe(legg_til_verdi_m1941).pipe(add_national_interest_criteria)
+        test_result = test_df_anf.pipe(legg_til_verdi_m1941).pipe(legg_til_arter_av_nasjonal_forvaltningsinteresse)
 
         expected_criteria_cols = [
             "Ansvarsarter",
@@ -1209,12 +1269,12 @@ def _(add_national_interest_criteria):
         assert krikkand.get_column("Fredete arter").eq("Nei").all(), "Krikkand er ikke en fredet art"
         assert krikkand.get_column("Fremmede arter").eq("Nei").all(), "Krikkand er ikke en fremmed art"
 
-        # Test ID som ikke finnes (999999) -> "Treff ikke funnet"
+        # Test ID som ikke finnes (999999) -> "Treff ikke funnet i ANF tabell "
         missing = test_result.filter(pl.col("validScientificNameId") == 999999)
         assert missing.height > 0, "Manglende art (999999) ikke funnet i resultatet"
         for col in expected_criteria_cols:
-            assert missing.get_column(col).eq("Treff ikke funnet").all(), (
-                f"Kolonne '{col}' skal være 'Treff ikke funnet' for ukjent art"
+            assert missing.get_column(col).eq("Treff ikke funnet i ANF tabell ").all(), (
+                f"Kolonne '{col}' skal være 'Treff ikke funnet i ANF tabell ' for ukjent art"
             )
         assert missing.get_column("verdi_m1941_nasjonal").is_null().all(), "Ukjent art skal ikke få ANF-verdi"
         assert missing.get_column("verdi_rodliste_artskart").eq("Svært stor verdi").all(), (
@@ -1224,12 +1284,12 @@ def _(add_national_interest_criteria):
             "Rødlisteverdi skal brukes som fallback når ANF-oppslag mangler"
         )
 
-        # Test ID som ikke finnes og mangler vitenskapelig navn -> "Treff ikke funnet"
+        # Test ID som ikke finnes og mangler vitenskapelig navn -> "Treff ikke funnet i ANF tabell "
         missing_name = test_result.filter(pl.col("validScientificNameId") == 999998)
         assert missing_name.height > 0, "Manglende art med tomt vitenskapelig navn ikke funnet i resultatet"
         for col in expected_criteria_cols:
-            assert missing_name.get_column(col).eq("Treff ikke funnet").all(), (
-                f"Kolonne '{col}' skal være 'Treff ikke funnet' når både ID- og navneoppslag mangler"
+            assert missing_name.get_column(col).eq("Treff ikke funnet i ANF tabell ").all(), (
+                f"Kolonne '{col}' skal være 'Treff ikke funnet i ANF tabell ' når både ID- og navneoppslag mangler"
             )
         assert missing_name.get_column("verdi_m1941_nasjonal").is_null().all(), (
             "Art uten ID-/navnetreff skal ikke få ANF-verdi"
@@ -1247,8 +1307,8 @@ def _(add_national_interest_criteria):
             "Manglende art med tomt vitenskapelig navn og kategori ikke funnet i resultatet"
         )
         for col in expected_criteria_cols:
-            assert missing_name_and_category.get_column(col).eq("Treff ikke funnet").all(), (
-                f"Kolonne '{col}' skal være 'Treff ikke funnet' når både ID- og navneoppslag mangler"
+            assert missing_name_and_category.get_column(col).eq("Treff ikke funnet i ANF tabell ").all(), (
+                f"Kolonne '{col}' skal være 'Treff ikke funnet i ANF tabell ' når både ID- og navneoppslag mangler"
             )
         assert missing_name_and_category.get_column("verdi_m1941_nasjonal").is_null().all(), (
             "Art uten ID-/navnetreff skal ikke få ANF-verdi"
@@ -1260,8 +1320,8 @@ def _(add_national_interest_criteria):
             "Endelig M1941-verdi skal være null når både ANF-verdi og rødlisteverdi mangler"
         )
 
-        # Verdier skal kun være "Ja", "Nei" eller "Treff ikke funnet"
-        valid_values = {"Ja", "Nei", "Treff ikke funnet"}
+        # Verdier skal kun være "Ja", "Nei" eller "Treff ikke funnet i ANF tabell "
+        valid_values = {"Ja", "Nei", "Treff ikke funnet i ANF tabell "}
         for col in expected_criteria_cols:
             unique_vals = set(test_result.get_column(col).unique().to_list())
             assert unique_vals.issubset(valid_values), (
@@ -1279,7 +1339,7 @@ def _():
     return
 
 
-@app.function(hide_code=True)
+@app.function
 def legg_til_kolonne_arteravnasjonal(input_df: pl.DataFrame) -> pl.DataFrame:
     """
     Adds a new column 'Art av nasjonal forvaltningsinteresse' to the DataFrame.
@@ -1306,28 +1366,25 @@ def legg_til_kolonne_arteravnasjonal(input_df: pl.DataFrame) -> pl.DataFrame:
         "Fremmede arter",
     ]
 
-    missing_lookup_marker = "Treff ikke funnet"
-
     category_list = (
         pl.concat_list(  # slår sammen alle anf til en kolonne, men merk List Concatenation  = packing items into a list within a single row ( noe annet enn a stacke tabbeller)
             *[
-                pl.when(pl.col(col) == "Ja").then(pl.lit(col))  # erstatter Ja/Nei med kolonne navnet
+                pl.when(pl.col(col) == "Ja")
+                .then(pl.lit(col))
+                .otherwise(pl.lit(None))  # erstatter Ja/Nei med kolonne navnet
                 for col in category_columns
             ]
         ).list.drop_nulls()  # fjerner null verdier slik at du ikke får NT, null, null, Fremmed art
     )
-    has_missing_lookup = pl.any_horizontal(*[pl.col(col) == missing_lookup_marker for col in category_columns])
 
     output_df = input_df.with_columns(
         pl.when(category_list.list.len() > 0)
-        .then(
-            category_list.list.join(", ")
-        )  # You need .list.join(", ") because pl.concat_list() gives you the computer-code format (a list object), and you want the human-readable format (a single text string). Hvor du da joiner tingene i listen med ,
-        .when(has_missing_lookup)
-        .then(pl.lit(missing_lookup_marker))
+        .then(category_list.list.join(", "))
         .otherwise(pl.lit("Nei"))
-        .alias("Art av nasjonal forvaltningsinteresse")
+        .alias("Art av nasjonal forvaltningsinteresse (eks. rødlista)")
     )
+
+    # You need .list.join(", ") because pl.concat_list() gives you the computer-code format (a list object), and you want the human-readable format (a single text string). Hvor du da joiner tingene i listen med ,
 
     return output_df
 
@@ -1337,7 +1394,7 @@ def test_legg_til_kolonne_arteravnasjonal():
     sample_df = pl.DataFrame(
         {
             "species": ["Hubro", "Gråspurv", "Fjellrev", "Villmink", "Dverggås", "Pelekreps", "Krikkand", "Ukjent art"],
-            "Ansvarsarter": ["Ja", "Nei", "Nei", "Nei", "Ja", "Nei", "Nei", "Treff ikke funnet"],
+            "Ansvarsarter": ["Ja", "Nei", "Nei", "Nei", "Ja", "Nei", "Nei", "Treff ikke funnet i ANF tabell "],
             "Andre spesielt hensynskrevende arter": [
                 "Nei",
                 "Nei",
@@ -1346,14 +1403,32 @@ def test_legg_til_kolonne_arteravnasjonal():
                 "Nei",
                 "Nei",
                 "Nei",
-                "Treff ikke funnet",
+                "Treff ikke funnet i ANF tabell ",
             ],
-            "Hensynskrevende arter": ["Nei", "Nei", "Nei", "Nei", "Nei", "Nei", "Ja", "Treff ikke funnet"],
-            "Spesielle økologiske former": ["Nei", "Nei", "Nei", "Nei", "Ja", "Nei", "Nei", "Treff ikke funnet"],
-            "Datamangel": ["Nei", "Nei", "Nei", "Nei", "Nei", "Ja", "Nei", "Treff ikke funnet"],
-            "Prioriterte arter": ["Ja", "Nei", "Nei", "Nei", "Nei", "Nei", "Nei", "Treff ikke funnet"],
-            "Fredete arter": ["Ja", "Nei", "Nei", "Nei", "Nei", "Nei", "Nei", "Treff ikke funnet"],
-            "Fremmede arter": ["Nei", "Nei", "Nei", "Ja", "Nei", "Nei", "Nei", "Treff ikke funnet"],
+            "Hensynskrevende arter": [
+                "Nei",
+                "Nei",
+                "Nei",
+                "Nei",
+                "Nei",
+                "Nei",
+                "Ja",
+                "Treff ikke funnet i ANF tabell ",
+            ],
+            "Spesielle økologiske former": [
+                "Nei",
+                "Nei",
+                "Nei",
+                "Nei",
+                "Ja",
+                "Nei",
+                "Nei",
+                "Treff ikke funnet i ANF tabell ",
+            ],
+            "Datamangel": ["Nei", "Nei", "Nei", "Nei", "Nei", "Ja", "Nei", "Treff ikke funnet i ANF tabell "],
+            "Prioriterte arter": ["Ja", "Nei", "Nei", "Nei", "Nei", "Nei", "Nei", "Treff ikke funnet i ANF tabell "],
+            "Fredete arter": ["Ja", "Nei", "Nei", "Nei", "Nei", "Nei", "Nei", "Treff ikke funnet i ANF tabell "],
+            "Fremmede arter": ["Nei", "Nei", "Nei", "Ja", "Nei", "Nei", "Nei", "Treff ikke funnet i ANF tabell "],
         }
     )
 
@@ -1394,8 +1469,8 @@ def test_legg_til_kolonne_arteravnasjonal():
     # Krikkand: Hensynskrevende arter
     assert krikkand == "Hensynskrevende arter"
 
-    # Ukjent art: Treff ikke funnet
-    assert ukjent_art == "Treff ikke funnet"
+    # Ukjent art: Treff ikke funnet i ANF tabell
+    assert ukjent_art == "Treff ikke funnet i ANF tabell "
 
 
 @app.cell(hide_code=True)
@@ -1711,7 +1786,7 @@ def _(console, les_data_og_kjør_alle_funksjoner, prompt_mangler_navn):
         # Oppsummering
         unike_arter = df.select("Art").n_unique() if "Art" in df.columns else "—"
         antall_ikke_treff_anf = (
-            df.filter(pl.col("Art av nasjonal forvaltningsinteresse") == "Treff ikke funnet").height
+            df.filter(pl.col("Art av nasjonal forvaltningsinteresse") == "Treff ikke funnet i ANF tabell ").height
             if "Art av nasjonal forvaltningsinteresse" in df.columns
             else "—"
         )
@@ -1733,7 +1808,11 @@ def _(console, les_data_og_kjør_alle_funksjoner, prompt_mangler_navn):
 
 
 @app.cell
-def _(add_national_interest_criteria, console, process_and_enrich_data):
+def _(
+    console,
+    legg_til_arter_av_nasjonal_forvaltningsinteresse,
+    process_and_enrich_data,
+):
     def les_data_og_kjør_alle_funksjoner(input_fil_sti: str, filter_year: int = 1990) -> pl.DataFrame:
         """Les CSV med DuckDB, filtrer på år, og kjør alle berikingsfunksjoner."""
 
@@ -1761,7 +1840,7 @@ def _(add_national_interest_criteria, console, process_and_enrich_data):
         console.print("  [green]✓[/green] Beregnet M1941-verdi fra rødlistekategori")
 
         with console.status("[bold blue]Legger til kriterier for nasjonal interesse..."):
-            df_steg1 = df_steg0.pipe(add_national_interest_criteria)
+            df_steg1 = df_steg0.pipe(legg_til_arter_av_nasjonal_forvaltningsinteresse)
         console.print("  [green]✓[/green] Lagt til Arter av nasjonal forvaltningsinteresse")
 
         antall_arter_uten_verdi_m1941 = (
