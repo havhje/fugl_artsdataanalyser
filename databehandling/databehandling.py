@@ -33,29 +33,6 @@ with app.setup(hide_code=True):
 
 
 @app.cell
-def vis_todo_liste():
-    todo_liste = mo.callout(
-        mo.md(
-            r"""
-    ### Todo
-
-    - Lage en egen md celle med alle testscenarioer for hver enkelt funksjon? 
-
-    - Er testene for gira mot slik koden er nå? Altså er de genrelle nok og fanger de opp intensjonen i funksjonene?
-    - Husk at du kan skrive pl.col.kolonnenavn, du trenger ikke å skrive pl.col("kolonnenavn"). Bruk denne fremover er bedre å lese
-
-    - Sjekk med ny Ki modell når det kommer at alt er korrekt
-
-    """
-        ),
-        kind="info",
-    )
-
-    todo_liste
-    return
-
-
-@app.cell
 def koble_til_fugldatabase():
     DATABASE_URL = "databehandling/fugl_atributt_data"
     bird_data = duckdb.connect(DATABASE_URL, read_only=True)
@@ -664,7 +641,7 @@ def test_process_and_enrich_data_mtm_005(
 @app.cell(hide_code=True)
 def md_legg_til_verdi_m1941():
     mo.md(r"""
-    ### Legg til verdi M1941
+    ## Legg til verdi M1941
     """)
     return
 
@@ -2436,50 +2413,6 @@ def md_manglende_artsnavn():
     return
 
 
-@app.cell(hide_code=True)
-def md_testmatrise_manglende_artsnavn():
-    mo.md(r"""
-    ### Testmatrise: manglende norske artsnavn
-
-    **Tiltenkt oppførsel:** Mini-pipelinen skal finne observasjonsrader der norsk navn mangler (`null`, tom streng eller bare mellomrom), hente manuell navnemapping fra bruker, og fylle navn tilbake uten å endre eksisterende navn eller datastruktur.
-
-    **Kilde til sannhet:** Brukergodkjent matrise 2026-06-05, funksjonsdocstrings, håndberegnede små fixtures og brukeravklaringer 2026-06-05:
-
-    - Tom streng og whitespace i `Navn` regnes som manglende/null.
-    - Samme `Art` med ulike `Familie`/`Orden` skal feile i `finn_mangler_navn`.
-    - `join_navn_til_orginal_df` stoler på at `prompt_mangler_navn` har validert mappingverdier.
-
-    **Inputkontrakt:** Polars `DataFrame` med minst `Art`, `Navn`, `Familie` og `Orden` for `finn_mangler_navn`/`prompt_mangler_navn`; `join_navn_til_orginal_df` krever minst `Art` og `Navn`. `Art` identifiserer latinsk artsnavn. Manglende norsk navn er `null`, `''` eller streng som blir tom etter `strip()`.
-
-    **Outputkontrakt:**
-
-    - `finn_mangler_navn`: returnerer `pl.DataFrame` med nøyaktig kolonnene `Art`, `Navn`, `Familie`, `Orden`; én rad per manglende art/taksonomi; `Navn` normaliseres til `null`; sortert på `Art`.
-    - `prompt_mangler_navn`: returnerer `dict[str, str]`; brukerinput trimmes; blank input avbryter med `typer.Exit(code=1)`; tom inputtabell gir `{}` uten prompt.
-    - `join_navn_til_orginal_df`: returnerer `pl.DataFrame` med samme radantall, radrekkefølge og kolonner som input; fyller bare manglende `Navn` når `Art` finnes i mapping; eksisterende ikke-blanke navn overskrives ikke; ingen hjelpekollonner beholdes.
-
-    **Godkjenningsstatus:** Godkjent av bruker 2026-06-05.
-
-    **Revisjonspolicy:** Hvis forventet oppførsel endres, oppdater og godkjenn denne matrisen på nytt før testene endres.
-
-    | ID | Scenario | Input | Forventet output/invariant | Toleranse | Hvorfor det betyr noe | Feilmodus testen beskytter mot | Testcelle |
-    |---|---|---|---|---|---|---|---|
-    | NAVN-MTM-001 | Finn manglende navn med ekstra kolonner | Blandet DF med `Navn=None`, `''`, `'   '`, gyldige navn og ekstra `category` | Kun manglende arter returneres; `Navn` er `null`; kolonnene er `Art`, `Navn`, `Familie`, `Orden`; sortert på `Art`; ekstra kolonner droppes | Eksakt | Hovedkontrakten for manuell navneutfylling | Tomme tekststrenger overses eller ekstra kolonner lekker ut | `test_finn_mangler_navn_navn_mtm_001_003` |
-    | NAVN-MTM-002 | Duplikate observasjoner for samme art/taksonomi | Samme `Art` med manglende navn finnes flere ganger med samme `Familie`/`Orden` | Arten vises én gang | Eksakt | Bruker skal ikke spørres flere ganger for samme art | Dupliserte prompts og duplikate outputrader | `test_finn_mangler_navn_navn_mtm_001_003` |
-    | NAVN-MTM-003 | Ingen manglende navn og tom input | Komplett DF + tom DF med riktig schema | Tom DF med riktige kolonner | Eksakt | Edge cases skal være trygge | Falske positive mangler eller schema-tap | `test_finn_mangler_navn_navn_mtm_001_003` |
-    | NAVN-MTM-004 | Manglende påkrevd kolonne | DF uten `Navn` | Feiler tydelig med kolonnenavn i feilmelding | Eksakt melding inneholder kolonnenavn | Datakontrakt må være tydelig | Uforståelige Polars-feil senere i pipelinen | `test_finn_mangler_navn_navn_mtm_004_mangler_kolonne` |
-    | NAVN-MTM-005 | Taksonomikonflikt for samme art | Samme `Art` har ulike `Familie`/`Orden` | `finn_mangler_navn` reiser `ValueError` og nevner arten | Eksakt invariant | Bruker skal ikke velge navn for tvetydig taksonomi | `unique()` skjuler datakonflikt | `test_finn_mangler_navn_navn_mtm_005_taksonomikonflikt` |
-    | NAVN-MTM-006 | Tom mangler-DF | Tom DF fra `finn_mangler_navn` | Returnerer `{}` og kaller ikke `Prompt.ask` | Eksakt | Ingen interaksjon når alt er komplett | Notebook/CLI henger på unødvendig prompt | `test_prompt_mangler_navn_navn_mtm_006_tom_df` |
-    | NAVN-MTM-007 | Gyldig brukerinput | To arter, mock input `' Fjellrev '`, `'Ulv'` | Returnerer trimmet mapping | Eksakt | Deterministisk test av interaktiv funksjon | Whitespace lagres som del av navn eller feil art får navn | `test_prompt_mangler_navn_navn_mtm_007_gyldig_input` |
-    | NAVN-MTM-008 | Blank brukerinput | Mock input der én art får `'   '` | Reiser `typer.Exit(code=1)` | Eksakt exit-kode | Hindrer tomme norske navn | Tomme navn blir med videre i datasettet | `test_prompt_mangler_navn_navn_mtm_008_blank_input` |
-    | NAVN-MTM-009 | Join fyller bare manglende navn | Original DF med eksisterende navn, `null`, `''`, `'   '`, og mapping for noen arter | Manglende navn i mapping fylles; eksisterende ikke-blanke navn bevares; manglende uten mapping blir `null` | Eksakt | Kjerneoppførsel ved tilbakeføring | Eksisterende navn overskrives eller blanke navn blir stående | `test_join_navn_til_orginal_df_navn_mtm_009_010` |
-    | NAVN-MTM-010 | Join bevarer datastruktur | Original DF med ekstra kolonner og bestemt radrekkefølge | Samme radantall, radrekkefølge, kolonnerekkefølge; ingen `Navn_ny` | Eksakt | Observasjonsdata må ikke endres av navnejoin | Left join endrer struktur eller lekker hjelpekollonne | `test_join_navn_til_orginal_df_navn_mtm_009_010` |
-    | NAVN-MTM-011 | Duplikate arter i original DF | To rader med samme `Art` og manglende `Navn` | Begge observasjonsrader får samme norske navn | Eksakt | Originalrader er observasjoner, ikke unike arter | Join fyller bare én duplikatrad eller kollapser rader | `test_join_navn_til_orginal_df_navn_mtm_011_duplikate_arter` |
-    | NAVN-MTM-012 | Tom mapping og ekstra mapping-nøkler | Tom mapping + mapping med art som ikke finnes i DF | Tom mapping gir identisk DF; ekstra nøkler ignoreres uten ekstra rader | Eksakt | Robusthet ved ingen eller overflødige manuelle navn | Ekstra mapping lager nye rader eller tom mapping muterer data | `test_join_navn_til_orginal_df_navn_mtm_012_tom_og_ekstra_mapping` |
-    | NAVN-MTM-013 | End-to-end mini-pipeline | Original DF → `finn_mangler_navn` → mock `prompt_mangler_navn` → `join_navn_til_orginal_df` | Manglende navn fylles, eksisterende navn bevares, radantall og radrekkefølge uendret | Eksakt | Tester samspillet mellom alle tre funksjoner | Delene virker isolert, men ikke sammen | `test_manglende_artsnavn_pipeline_navn_mtm_013` |
-    """)
-    return
-
-
 @app.function(hide_code=True)
 def finn_mangler_navn(df: pl.DataFrame) -> pl.DataFrame:
     """Finn unike arter som mangler norsk navn.
@@ -2526,6 +2459,149 @@ def finn_mangler_navn(df: pl.DataFrame) -> pl.DataFrame:
     )
 
     return mangler_df
+
+
+@app.function(hide_code=True)
+def join_navn_til_orginal_df(
+    df: pl.DataFrame, navn_mapping: dict[str, str]
+) -> pl.DataFrame:  # navn mapping er en dict med key:value som begge er str. hvor f.eks. det latinske navnet er "key" og det norske er "navn"
+    """Fyll manglende norske navn fra en manuell navnemapping.
+
+    Args:
+        df: DataFrame med kolonnene `Art` og `Navn`.
+        navn_mapping: Mapping fra latinsk artsnavn til norsk navn.
+
+    Returns:
+        DataFrame der nullverdier, tomme strenger og whitespace i `Navn` er
+        fylt når `Art` finnes i mappingen. Eksisterende ikke-blanke navn
+        overskrives ikke, og datastrukturen beholdes.
+    """
+
+    if not navn_mapping:
+        return df
+
+    mapping_df = pl.DataFrame(
+        {"Art": list(navn_mapping.keys()), "Navn_ny": list(navn_mapping.values())}
+    )  # dette lager en ny poalrs df med to kolonner art og navn_ny hvor du henter navn mapping fra "prompt_mangler navn" og henter ut deres keys og values. Keys og values argumentene er "They're iterator methods that traverse the entire dictionary collection." så trenger ikke iter rows.
+    #  e.g. Polars knows how to build a column from a list of strings. It doesn't know how to build one from a dict_keys view.
+
+    navn_tekst = pl.col("Navn").cast(pl.Utf8)
+    navn_mangler = pl.col("Navn").is_null() | (navn_tekst.str.strip_chars() == "")
+
+    df_med_navn = (
+        df.join(mapping_df, on="Art", how="left")
+        .with_columns(
+            pl.when(navn_mangler & pl.col("Navn_ny").is_not_null())
+            .then(pl.col("Navn_ny"))
+            .when(navn_mangler)
+            .then(pl.lit(None, dtype=pl.Utf8))
+            .otherwise(navn_tekst)
+            .alias("Navn")
+        )
+        .drop("Navn_ny")
+    )
+
+    return df_med_navn
+
+
+@app.cell(hide_code=True)
+def definer_prompt_mangler_navn(console):
+    def prompt_mangler_navn(mangler_df: pl.DataFrame) -> dict[str, str]:
+        """Be brukeren fylle inn norske navn for arter som mangler navn.
+
+        Args:
+            mangler_df: DataFrame fra `finn_mangler_navn`.
+
+        Returns:
+            Mapping fra latinsk artsnavn (`Art`) til oppgitt norsk navn.
+
+        Raises:
+            typer.Exit: Når brukeren sender inn tomt navn for en art.
+
+        Notes:
+            Funksjonen skriver en Rich-tabell og leser interaktiv input fra
+            terminalen.
+        """
+
+        if mangler_df.is_empty():
+            return {}
+
+        arter = mangler_df.get_column("Art").fill_null("—").to_list()
+        familier = mangler_df.get_column("Familie").fill_null("—").to_list()
+        ordener = mangler_df.get_column("Orden").fill_null("—").to_list()
+
+        # Build table - use zip() to iterate corresponding elements
+        table = Table(title="Arter som mangler norsk navn")
+        table.add_column("Art (latinsk)", style="cyan")
+        table.add_column("Familie", style="green")
+        table.add_column("Orden", style="magenta")
+        for art, familie, orden in zip(
+            arter, familier, ordener
+        ):  # zipper sammen listene til en tuple pr art, familie, orden. Slik at alle med posisjon 1 i hver list blir en tuple, osv. Loopen kan da hente art, familie , orden (dvs. posisjon 1, 2 og 3 i hver tuple og det blir argumentet om a legge til en rad med disse verdiene)
+            table.add_row(art, familie, orden)
+        console.print(table)
+        console.print(f"\n[bold]Fant {mangler_df.height} arter uten norsk navn.[/bold]")
+        console.print("Skriv inn norsk navn for hver art:\n")
+
+        # Collect names - iterate using zip on columns
+        navn_mapping = {}  # lager en dictionary som fylles av for loopen under
+        for art in arter:
+            navn = Prompt.ask(f"  [cyan]{art}[/cyan]")
+            if (
+                not navn.strip()
+            ):  # strip er å ta bort alle whitespacses, etc. Sånn at du kun evaluerer om det faktisk er tomt
+                console.print(f"\n[bold red]Feil:[/bold red] Du må skrive inn navn for {art}. Avbryter.")
+                raise typer.Exit(code=1)
+            navn_mapping[art] = (
+                navn.strip()
+            )  # navn_mapping is a dictionary. The square bracket syntax [art] is how you access a specific slot in that dictionary by key. The variable art holds a string like "Sylvia borin", so this means "the slot in navn_mapping whose key is "Sylvia borin"." Slik at du ber programmet skrive over "value" i key:value nøkkelen til dictionary for den gitte arten (i.e key). Slik python funker så legges også art (i.e. the key) til når python ser at denne mangler i dictionarien når den skal assigne en value (navn) til den gitte keyen.
+        return navn_mapping
+
+    return (prompt_mangler_navn,)
+
+
+@app.cell(hide_code=True)
+def md_testmatrise_manglende_artsnavn():
+    mo.md(r"""
+    ### Testmatrise: manglende norske artsnavn
+
+    **Tiltenkt oppførsel:** Mini-pipelinen skal finne observasjonsrader der norsk navn mangler (`null`, tom streng eller bare mellomrom), hente manuell navnemapping fra bruker, og fylle navn tilbake uten å endre eksisterende navn eller datastruktur.
+
+    **Kilde til sannhet:** Brukergodkjent matrise 2026-06-05, funksjonsdocstrings, håndberegnede små fixtures og brukeravklaringer 2026-06-05:
+
+    - Tom streng og whitespace i `Navn` regnes som manglende/null.
+    - Samme `Art` med ulike `Familie`/`Orden` skal feile i `finn_mangler_navn`.
+    - `join_navn_til_orginal_df` stoler på at `prompt_mangler_navn` har validert mappingverdier.
+
+    **Inputkontrakt:** Polars `DataFrame` med minst `Art`, `Navn`, `Familie` og `Orden` for `finn_mangler_navn`/`prompt_mangler_navn`; `join_navn_til_orginal_df` krever minst `Art` og `Navn`. `Art` identifiserer latinsk artsnavn. Manglende norsk navn er `null`, `''` eller streng som blir tom etter `strip()`.
+
+    **Outputkontrakt:**
+
+    - `finn_mangler_navn`: returnerer `pl.DataFrame` med nøyaktig kolonnene `Art`, `Navn`, `Familie`, `Orden`; én rad per manglende art/taksonomi; `Navn` normaliseres til `null`; sortert på `Art`.
+    - `prompt_mangler_navn`: returnerer `dict[str, str]`; brukerinput trimmes; blank input avbryter med `typer.Exit(code=1)`; tom inputtabell gir `{}` uten prompt.
+    - `join_navn_til_orginal_df`: returnerer `pl.DataFrame` med samme radantall, radrekkefølge og kolonner som input; fyller bare manglende `Navn` når `Art` finnes i mapping; eksisterende ikke-blanke navn overskrives ikke; ingen hjelpekollonner beholdes.
+
+    **Godkjenningsstatus:** Godkjent av bruker 2026-06-05.
+
+    **Revisjonspolicy:** Hvis forventet oppførsel endres, oppdater og godkjenn denne matrisen på nytt før testene endres.
+
+    | ID | Scenario | Input | Forventet output/invariant | Toleranse | Hvorfor det betyr noe | Feilmodus testen beskytter mot | Testcelle |
+    |---|---|---|---|---|---|---|---|
+    | NAVN-MTM-001 | Finn manglende navn med ekstra kolonner | Blandet DF med `Navn=None`, `''`, `'   '`, gyldige navn og ekstra `category` | Kun manglende arter returneres; `Navn` er `null`; kolonnene er `Art`, `Navn`, `Familie`, `Orden`; sortert på `Art`; ekstra kolonner droppes | Eksakt | Hovedkontrakten for manuell navneutfylling | Tomme tekststrenger overses eller ekstra kolonner lekker ut | `test_finn_mangler_navn_navn_mtm_001_003` |
+    | NAVN-MTM-002 | Duplikate observasjoner for samme art/taksonomi | Samme `Art` med manglende navn finnes flere ganger med samme `Familie`/`Orden` | Arten vises én gang | Eksakt | Bruker skal ikke spørres flere ganger for samme art | Dupliserte prompts og duplikate outputrader | `test_finn_mangler_navn_navn_mtm_001_003` |
+    | NAVN-MTM-003 | Ingen manglende navn og tom input | Komplett DF + tom DF med riktig schema | Tom DF med riktige kolonner | Eksakt | Edge cases skal være trygge | Falske positive mangler eller schema-tap | `test_finn_mangler_navn_navn_mtm_001_003` |
+    | NAVN-MTM-004 | Manglende påkrevd kolonne | DF uten `Navn` | Feiler tydelig med kolonnenavn i feilmelding | Eksakt melding inneholder kolonnenavn | Datakontrakt må være tydelig | Uforståelige Polars-feil senere i pipelinen | `test_finn_mangler_navn_navn_mtm_004_mangler_kolonne` |
+    | NAVN-MTM-005 | Taksonomikonflikt for samme art | Samme `Art` har ulike `Familie`/`Orden` | `finn_mangler_navn` reiser `ValueError` og nevner arten | Eksakt invariant | Bruker skal ikke velge navn for tvetydig taksonomi | `unique()` skjuler datakonflikt | `test_finn_mangler_navn_navn_mtm_005_taksonomikonflikt` |
+    | NAVN-MTM-006 | Tom mangler-DF | Tom DF fra `finn_mangler_navn` | Returnerer `{}` og kaller ikke `Prompt.ask` | Eksakt | Ingen interaksjon når alt er komplett | Notebook/CLI henger på unødvendig prompt | `test_prompt_mangler_navn_navn_mtm_006_tom_df` |
+    | NAVN-MTM-007 | Gyldig brukerinput | To arter, mock input `' Fjellrev '`, `'Ulv'` | Returnerer trimmet mapping | Eksakt | Deterministisk test av interaktiv funksjon | Whitespace lagres som del av navn eller feil art får navn | `test_prompt_mangler_navn_navn_mtm_007_gyldig_input` |
+    | NAVN-MTM-008 | Blank brukerinput | Mock input der én art får `'   '` | Reiser `typer.Exit(code=1)` | Eksakt exit-kode | Hindrer tomme norske navn | Tomme navn blir med videre i datasettet | `test_prompt_mangler_navn_navn_mtm_008_blank_input` |
+    | NAVN-MTM-009 | Join fyller bare manglende navn | Original DF med eksisterende navn, `null`, `''`, `'   '`, og mapping for noen arter | Manglende navn i mapping fylles; eksisterende ikke-blanke navn bevares; manglende uten mapping blir `null` | Eksakt | Kjerneoppførsel ved tilbakeføring | Eksisterende navn overskrives eller blanke navn blir stående | `test_join_navn_til_orginal_df_navn_mtm_009_010` |
+    | NAVN-MTM-010 | Join bevarer datastruktur | Original DF med ekstra kolonner og bestemt radrekkefølge | Samme radantall, radrekkefølge, kolonnerekkefølge; ingen `Navn_ny` | Eksakt | Observasjonsdata må ikke endres av navnejoin | Left join endrer struktur eller lekker hjelpekollonne | `test_join_navn_til_orginal_df_navn_mtm_009_010` |
+    | NAVN-MTM-011 | Duplikate arter i original DF | To rader med samme `Art` og manglende `Navn` | Begge observasjonsrader får samme norske navn | Eksakt | Originalrader er observasjoner, ikke unike arter | Join fyller bare én duplikatrad eller kollapser rader | `test_join_navn_til_orginal_df_navn_mtm_011_duplikate_arter` |
+    | NAVN-MTM-012 | Tom mapping og ekstra mapping-nøkler | Tom mapping + mapping med art som ikke finnes i DF | Tom mapping gir identisk DF; ekstra nøkler ignoreres uten ekstra rader | Eksakt | Robusthet ved ingen eller overflødige manuelle navn | Ekstra mapping lager nye rader eller tom mapping muterer data | `test_join_navn_til_orginal_df_navn_mtm_012_tom_og_ekstra_mapping` |
+    | NAVN-MTM-013 | End-to-end mini-pipeline | Original DF → `finn_mangler_navn` → mock `prompt_mangler_navn` → `join_navn_til_orginal_df` | Manglende navn fylles, eksisterende navn bevares, radantall og radrekkefølge uendret | Eksakt | Tester samspillet mellom alle tre funksjoner | Delene virker isolert, men ikke sammen | `test_manglende_artsnavn_pipeline_navn_mtm_013` |
+    """)
+    return
 
 
 @app.cell(hide_code=True)
@@ -2640,62 +2716,6 @@ def _():
 
 
 @app.cell(hide_code=True)
-def definer_prompt_mangler_navn(console):
-    def prompt_mangler_navn(mangler_df: pl.DataFrame) -> dict[str, str]:
-        """Be brukeren fylle inn norske navn for arter som mangler navn.
-
-        Args:
-            mangler_df: DataFrame fra `finn_mangler_navn`.
-
-        Returns:
-            Mapping fra latinsk artsnavn (`Art`) til oppgitt norsk navn.
-
-        Raises:
-            typer.Exit: Når brukeren sender inn tomt navn for en art.
-
-        Notes:
-            Funksjonen skriver en Rich-tabell og leser interaktiv input fra
-            terminalen.
-        """
-
-        if mangler_df.is_empty():
-            return {}
-
-        arter = mangler_df.get_column("Art").fill_null("—").to_list()
-        familier = mangler_df.get_column("Familie").fill_null("—").to_list()
-        ordener = mangler_df.get_column("Orden").fill_null("—").to_list()
-
-        # Build table - use zip() to iterate corresponding elements
-        table = Table(title="Arter som mangler norsk navn")
-        table.add_column("Art (latinsk)", style="cyan")
-        table.add_column("Familie", style="green")
-        table.add_column("Orden", style="magenta")
-        for art, familie, orden in zip(
-            arter, familier, ordener
-        ):  # zipper sammen listene til en tuple pr art, familie, orden. Slik at alle med posisjon 1 i hver list blir en tuple, osv. Loopen kan da hente art, familie , orden (dvs. posisjon 1, 2 og 3 i hver tuple og det blir argumentet om a legge til en rad med disse verdiene)
-            table.add_row(art, familie, orden)
-        console.print(table)
-        console.print(f"\n[bold]Fant {mangler_df.height} arter uten norsk navn.[/bold]")
-        console.print("Skriv inn norsk navn for hver art:\n")
-
-        # Collect names - iterate using zip on columns
-        navn_mapping = {}  # lager en dictionary som fylles av for loopen under
-        for art in arter:
-            navn = Prompt.ask(f"  [cyan]{art}[/cyan]")
-            if (
-                not navn.strip()
-            ):  # strip er å ta bort alle whitespacses, etc. Sånn at du kun evaluerer om det faktisk er tomt
-                console.print(f"\n[bold red]Feil:[/bold red] Du må skrive inn navn for {art}. Avbryter.")
-                raise typer.Exit(code=1)
-            navn_mapping[art] = (
-                navn.strip()
-            )  # navn_mapping is a dictionary. The square bracket syntax [art] is how you access a specific slot in that dictionary by key. The variable art holds a string like "Sylvia borin", so this means "the slot in navn_mapping whose key is "Sylvia borin"." Slik at du ber programmet skrive over "value" i key:value nøkkelen til dictionary for den gitte arten (i.e key). Slik python funker så legges også art (i.e. the key) til når python ser at denne mangler i dictionarien når den skal assigne en value (navn) til den gitte keyen.
-        return navn_mapping
-
-    return (prompt_mangler_navn,)
-
-
-@app.cell(hide_code=True)
 def test_prompt_mangler_navn_cell(console, prompt_mangler_navn):
     def test_prompt_mangler_navn_navn_mtm_006_tom_df():
         """NAVN-MTM-006: tom mangler-DF gir tom mapping uten prompt."""
@@ -2753,49 +2773,6 @@ def test_prompt_mangler_navn_cell(console, prompt_mangler_navn):
     test_prompt_mangler_navn_navn_mtm_007_gyldig_input()
     test_prompt_mangler_navn_navn_mtm_008_blank_input()
     return
-
-
-@app.function(hide_code=True)
-def join_navn_til_orginal_df(
-    df: pl.DataFrame, navn_mapping: dict[str, str]
-) -> pl.DataFrame:  # navn mapping er en dict med key:value som begge er str. hvor f.eks. det latinske navnet er "key" og det norske er "navn"
-    """Fyll manglende norske navn fra en manuell navnemapping.
-
-    Args:
-        df: DataFrame med kolonnene `Art` og `Navn`.
-        navn_mapping: Mapping fra latinsk artsnavn til norsk navn.
-
-    Returns:
-        DataFrame der nullverdier, tomme strenger og whitespace i `Navn` er
-        fylt når `Art` finnes i mappingen. Eksisterende ikke-blanke navn
-        overskrives ikke, og datastrukturen beholdes.
-    """
-
-    if not navn_mapping:
-        return df
-
-    mapping_df = pl.DataFrame(
-        {"Art": list(navn_mapping.keys()), "Navn_ny": list(navn_mapping.values())}
-    )  # dette lager en ny poalrs df med to kolonner art og navn_ny hvor du henter navn mapping fra "prompt_mangler navn" og henter ut deres keys og values. Keys og values argumentene er "They're iterator methods that traverse the entire dictionary collection." så trenger ikke iter rows.
-    #  e.g. Polars knows how to build a column from a list of strings. It doesn't know how to build one from a dict_keys view.
-
-    navn_tekst = pl.col("Navn").cast(pl.Utf8)
-    navn_mangler = pl.col("Navn").is_null() | (navn_tekst.str.strip_chars() == "")
-
-    df_med_navn = (
-        df.join(mapping_df, on="Art", how="left")
-        .with_columns(
-            pl.when(navn_mangler & pl.col("Navn_ny").is_not_null())
-            .then(pl.col("Navn_ny"))
-            .when(navn_mangler)
-            .then(pl.lit(None, dtype=pl.Utf8))
-            .otherwise(navn_tekst)
-            .alias("Navn")
-        )
-        .drop("Navn_ny")
-    )
-
-    return df_med_navn
 
 
 @app.cell(hide_code=True)
@@ -3044,6 +3021,43 @@ def definer_les_data_og_kjor_alle_funksjoner(
             console.print(f"  [yellow]Advarsel:[/yellow] {null_count} observasjoner uten dato fjernet")
         console.print(f"  [dim]Filtrert til {input_filtrert_df.height} rader (fra og med {filter_year})[/dim]")
 
+        if input_filtrert_df.is_empty():
+            console.print("  [yellow]Advarsel:[/yellow] Ingen observasjoner etter årfilter; returnerer tomt resultat")
+            tomt_mellomresultat = pl.DataFrame(
+                schema={
+                    "Verdi M1941": pl.Utf8,
+                    "category": pl.Utf8,
+                    "Art av nasjonal forvaltningsinteresse (eks. rødlista)": pl.Utf8,
+                    "preferredPopularName": pl.Utf8,
+                    "validScientificName": pl.Utf8,
+                    "individualCount": pl.Utf8,
+                    "behavior": pl.Utf8,
+                    "dateTimeCollected": pl.Datetime,
+                    "coordinateUncertaintyInMeters": pl.Int64,
+                    "FamilieNavn": pl.Utf8,
+                    "OrdenNavn": pl.Utf8,
+                    "taxonGroupName": pl.Utf8,
+                    "collector": pl.Utf8,
+                    "locality": pl.Utf8,
+                    "municipality": pl.Utf8,
+                    "county": pl.Utf8,
+                    "scientificNameRank": pl.Utf8,
+                    "Andre spesielt hensynskrevende arter": pl.Utf8,
+                    "Hensynskrevende arter": pl.Utf8,
+                    "Spesielle økologiske former": pl.Utf8,
+                    "Prioriterte arter": pl.Utf8,
+                    "Fredete arter": pl.Utf8,
+                    "Datamangel": pl.Utf8,
+                    "Ansvarsarter": pl.Utf8,
+                    "Fremmede arter": pl.Utf8,
+                    "latitude": pl.Utf8,
+                    "longitude": pl.Utf8,
+                    "geometry": pl.Utf8,
+                    "validScientificNameId": pl.Int64,
+                }
+            )
+            return rydd_navn_og_datatyper(tomt_mellomresultat)
+
         # Kjører alle berikingsfunksjonene — progress_bar håndteres inne i process_and_enrich_data
         df_artsdatabanken = process_and_enrich_data(input_filtrert_df)
 
@@ -3079,6 +3093,468 @@ def definer_les_data_og_kjor_alle_funksjoner(
         return df_alle_funksjoner
 
     return (les_data_og_kjør_alle_funksjoner,)
+
+
+@app.cell(hide_code=True)
+def md_testmatrise_les_data_og_kjor_alle_funksjoner():
+    mo.md(r"""
+    ### Testmatrise: `les_data_og_kjør_alle_funksjoner`
+
+    **Tiltenkt oppførsel:** Funksjonen skal lese Artskart-CSV med DuckDB, validere inputkontrakten, filtrere observasjoner fra og med `filter_year`, kjøre hele berikingsløpet og returnere ferdig sluttabell klar for eksport.
+
+    **Kilde til sannhet:** Godkjent matrise 2026-06-05, funksjonsdocstring, Artskart inputkontrakt og allerede godkjente testmatriser for underfunksjonene.
+
+    **Inputkontrakt:** `input_fil_sti` peker til en CSV-fil som DuckDB kan lese. CSV-en må inneholde alle obligatoriske Artskart-kolonner fra `get_required_artskart_columns()`. `category` må være ikke-null og i tillatt domene fra `get_allowed_categories()`. `dateTimeCollected` må kunne tolkes som dato/datetime. `filter_year` er første observasjonsår som beholdes.
+
+    **Outputkontrakt:** Returnerer `pl.DataFrame` med sluttkolonnene fra `rydd_navn_og_datatyper`. Bare observasjoner med dato fra og med `filter_year` skal inngå. Observasjoner med null dato fjernes av årfilteret. Hvis årfilteret gir null rader, returneres en tom slutt-DataFrame med riktig sluttkolonneliste.
+
+    **Godkjenningsstatus:** Godkjent av bruker 2026-06-05. PIPE-MTM-006 er avklart av bruker samme dato: tomt datasett etter årfilter skal returnere tom DataFrame, og konsollmeldingen skal vise at 0 rader/observasjoner ble inkludert.
+
+    **Revisjonspolicy:** Hvis forventet oppførsel endres, oppdater og godkjenn denne matrisen på nytt før tester eller funksjonslogikk endres.
+
+    | ID | Scenario | Input | Forventet output/invariant | Toleranse | Hvorfor det betyr noe | Feilmodus testen beskytter mot | Testcelle |
+    |---|---|---|---|---|---|---|---|
+    | PIPE-MTM-001 | Happy path mini-integrasjon | Liten gyldig Artskart-CSV med to observasjoner på/etter `filter_year`; NorTaxa og ANF erstattes med deterministiske fakes | Returnerer `pl.DataFrame` med godkjente sluttkolonner; begge rader inngår; pipe-kjeden får bare filtrert input; sluttverdier kommer fra de reelle lokale stegene for M1941, ANF-oppsummering og opprydding | Eksakt radantall, kolonneliste og utvalgte verdier | Bekrefter at hele pipeline-løpet henger sammen uten live API | Steg kobles feil, sluttformat endres, CSV-lesing eller pipe-kjede brekker | `PIPE_MTM_001` |
+    | PIPE-MTM-002 | Årfilter fjerner eldre og null dato | CSV med én observasjon før `filter_year`, én på grensen/etter `filter_year`, og én med null dato; NorTaxa og ANF erstattes med fakes | Bare raden på/etter `filter_year` behandles og finnes i output; konsollen melder om null-dato og filtrert radantall | Eksakt art-ID/radantall og tekstutdrag | Dokumenterer sentral filtreringsregel | Gamle observasjoner eller null-datoer slipper gjennom | `PIPE_MTM_002` |
+    | PIPE-MTM-003 | Manglende obligatorisk Artskart-kolonne | CSV uten f.eks. `category` | `ValueError` med tekst som nevner manglende obligatoriske kolonner og den manglende kolonnen | Exception-type og tekstutdrag | Inputfeil skal stoppe tidlig, før API/oppslag | Utydelig feil senere i pipeline | `PIPE_MTM_003` |
+    | PIPE-MTM-004 | Ugyldig `category` | CSV med `category="XYZ"` | `ValueError` med tekst om ukjente `category`-verdier og verdien `XYZ` | Exception-type og tekstutdrag | Kategorien styrer M1941 og må være validert | Feil kategori gir stille feilklassifisering | `PIPE_MTM_004` |
+    | PIPE-MTM-005 | Ingen gyldige ID-er etter filtrering | Gyldig CSV der gjenværende rad etter årfilter har ugyldig `validScientificNameId`, f.eks. tekst som ikke kan konverteres til `int` | `ValueError` fra berikingssteget om ingen gyldige `validScientificNameId`-verdier | Exception-type og tekstutdrag | Pipeline skal ikke produsere ufullstendig taksonomi | Tomt/ugyldig grunnlag går videre som falsk suksess | `PIPE_MTM_005` |
+    | PIPE-MTM-006 | Tomt datasett etter årfilter | Gyldig CSV der alle observasjoner er før `filter_year` | Returnerer tom `pl.DataFrame` med godkjente sluttkolonner; NorTaxa/API-beriking kjøres ikke; konsollmeldingen sier semantisk at filteret ga `0 rader`/`0 observasjoner` | Eksakt radantall/kolonner og tekstutdrag | Viktig edge case når bruker filtrerer bort alt | Tomt filtrert datasett feiler unødvendig eller prøver API-oppslag uten rader | `PIPE_MTM_006` |
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def pipeline_testhjelpere():
+    from contextlib import contextmanager
+    from pathlib import Path
+
+
+    PIPELINE_KRITERIEKOLONNER = [
+        "Prioriterte arter",
+        "Fredete arter",
+        "Andre spesielt hensynskrevende arter",
+        "Spesielle økologiske former",
+        "Datamangel",
+        "Hensynskrevende arter",
+        "Ansvarsarter",
+        "Fremmede arter",
+    ]
+
+
+    def lag_pipeline_artskart_df(rad_overrides: list[dict[str, object]] | None = None) -> pl.DataFrame:
+        """Lag en liten Artskart-CSV-fixture for pipeline-testene."""
+        if rad_overrides is None:
+            rad_overrides = [{}]
+
+        grunnrad = {
+            "category": "LC",
+            "validScientificNameId": 1001,
+            "validScientificName": "Poecile montanus",
+            "preferredPopularName": "granmeis",
+            "taxonGroupName": "Fugler",
+            "collector": "Test Observatør",
+            "dateTimeCollected": datetime(2020, 1, 2, 12, 0, 0),
+            "locality": "Testlokalitet",
+            "coordinateUncertaintyInMeters": 10,
+            "municipality": "Test kommune",
+            "county": "Test fylke",
+            "individualCount": "1/1",
+            "latitude": "60,123",
+            "longitude": "10,456",
+            "geometry": "POINT (10.456 60.123)",
+            "scientificNameRank": "Species",
+            "behavior": "sett",
+        }
+        return pl.DataFrame([{**grunnrad, **overrides} for overrides in rad_overrides])
+
+
+    def skriv_pipeline_artskart_csv(tmpdir: str, df: pl.DataFrame, filnavn: str = "artskart.csv") -> str:
+        """Skriv pipeline-fixture til CSV og returner filsti."""
+        csv_sti = Path(tmpdir) / filnavn
+        df.write_csv(csv_sti)
+        return str(csv_sti)
+
+
+    def legg_til_pipeline_fake_taksonomi(df: pl.DataFrame) -> pl.DataFrame:
+        """Legg til deterministiske taksonomikolonner uten NorTaxa-oppslag."""
+        return df.with_columns(
+            pl.lit("Animalia").alias("Kingdom"),
+            pl.lit("Chordata").alias("Phylum"),
+            pl.lit("Aves").alias("Class"),
+            pl.lit("Passeriformes").alias("Order"),
+            pl.lit("Paridae").alias("Family"),
+            pl.lit("Poecile").alias("Genus"),
+            pl.lit("testfamilien").alias("FamilieNavn"),
+            pl.lit("testordenen").alias("OrdenNavn"),
+        )
+
+
+    def legg_til_pipeline_fake_anf(df: pl.DataFrame) -> pl.DataFrame:
+        """Legg til deterministiske ANF-kolonner uten DuckDB-oppslag."""
+        return df.with_columns(
+            *[pl.lit("Nei").alias(kolonne) for kolonne in PIPELINE_KRITERIEKOLONNER],
+            pl.lit(None, dtype=pl.Utf8).alias("verdi_m1941_nasjonal"),
+            pl.col("verdi_rodliste_artskart").alias("Verdi M1941"),
+        )
+
+
+    def lag_pipeline_fake_process(calls: list[tuple[str, list[object]]]):
+        """Lag fake for `process_and_enrich_data` som registrerer filtrert input."""
+
+        def fake_process(df: pl.DataFrame) -> pl.DataFrame:
+            calls.append(("process_and_enrich_data", df.get_column("validScientificNameId").to_list()))
+            return legg_til_pipeline_fake_taksonomi(df)
+
+        return fake_process
+
+
+    def lag_pipeline_fake_anf(calls: list[tuple[str, list[object]]]):
+        """Lag fake for ANF-steget som registrerer filtrert input."""
+
+        def fake_anf(df: pl.DataFrame) -> pl.DataFrame:
+            calls.append(
+                ("legg_til_arter_av_nasjonal_forvaltningsinteresse", df.get_column("validScientificNameId").to_list())
+            )
+            return legg_til_pipeline_fake_anf(df)
+
+        return fake_anf
+
+
+    @contextmanager
+    def pipeline_fake_status(*_args, **_kwargs):
+        """No-op context manager for å dempe Rich status i pipeline-tester."""
+        yield
+
+    return (
+        lag_pipeline_artskart_df,
+        lag_pipeline_fake_anf,
+        lag_pipeline_fake_process,
+        pipeline_fake_status,
+        skriv_pipeline_artskart_csv,
+    )
+
+
+@app.cell(hide_code=True)
+def PIPE_MTM_001(
+    console,
+    lag_pipeline_artskart_df,
+    lag_pipeline_fake_anf,
+    lag_pipeline_fake_process,
+    les_data_og_kjør_alle_funksjoner,
+    pipeline_fake_status,
+    rydd_navn_og_datatyper_forventede_kolonner,
+    skriv_pipeline_artskart_csv,
+):
+    def test_les_data_og_kjør_alle_funksjoner_pipe_mtm_001():
+        """PIPE-MTM-001: happy path mini-integrasjon med fake NorTaxa/ANF."""
+        import tempfile
+
+        calls: list[tuple[str, list[object]]] = []
+        utskrifter: list[str] = []
+
+        def fake_print(*args, **kwargs):
+            utskrifter.append(" ".join(str(arg) for arg in args))
+
+        test_df = lag_pipeline_artskart_df(
+            [
+                {
+                    "category": "LC",
+                    "validScientificNameId": 1001,
+                    "validScientificName": "Poecile montanus",
+                    "preferredPopularName": "granmeis",
+                    "dateTimeCollected": datetime(2020, 1, 2, 12, 0, 0),
+                    "individualCount": "1/1",
+                },
+                {
+                    "category": "EN",
+                    "validScientificNameId": 1002,
+                    "validScientificName": "Bubo bubo",
+                    "preferredPopularName": "hubro",
+                    "dateTimeCollected": datetime(2021, 5, 10, 8, 30, 0),
+                    "individualCount": "2/1",
+                },
+            ]
+        )
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            csv_sti = skriv_pipeline_artskart_csv(tmpdir, test_df)
+            with (
+                patch.dict(
+                    les_data_og_kjør_alle_funksjoner.__globals__,
+                    {
+                        "process_and_enrich_data": lag_pipeline_fake_process(calls),
+                        "legg_til_arter_av_nasjonal_forvaltningsinteresse": lag_pipeline_fake_anf(calls),
+                    },
+                ),
+                patch.object(console, "status", pipeline_fake_status),
+                patch.object(console, "print", fake_print),
+            ):
+                result = les_data_og_kjør_alle_funksjoner(csv_sti, filter_year=2020)
+
+        assert isinstance(result, pl.DataFrame), "PIPE-MTM-001 skal returnere Polars DataFrame"
+        assert result.columns == rydd_navn_og_datatyper_forventede_kolonner(), (
+            "PIPE-MTM-001 skal returnere godkjent sluttkolonneliste"
+        )
+        assert result.height == 2, "PIPE-MTM-001 begge rader etter filter_year skal inngå"
+        assert calls == [
+            ("process_and_enrich_data", [1001, 1002]),
+            ("legg_til_arter_av_nasjonal_forvaltningsinteresse", [1001, 1002]),
+        ], "PIPE-MTM-001 pipe-steg skal få filtrert input i riktig rekkefølge"
+        assert result.get_column("Artens ID").to_list() == [1002, 1001], (
+            "PIPE-MTM-001 sluttabellen skal sorteres av rydd_navn_og_datatyper"
+        )
+        assert result.get_column("Kategori").to_list() == ["EN", "LC"], "PIPE-MTM-001 kategori skal følge sluttresultatet"
+        assert result.get_column("Verdi M1941").to_list() == ["Svært stor verdi", "Noe verdi"], (
+            "PIPE-MTM-001 M1941 skal beregnes av reelt M1941-steg"
+        )
+        assert result.get_column("Art av nasjonal forvaltningsinteresse (eks. rødlista)").to_list() == ["Nei", "Nei"], (
+            "PIPE-MTM-001 ANF-oppsummering skal kjøres i pipeline"
+        )
+        assert result.get_column("Familie").to_list() == ["testfamilien", "testfamilien"], (
+            "PIPE-MTM-001 fake taksonomi skal gå gjennom oppryddingssteget"
+        )
+        assert any("Filtrert til 2 rader" in tekst for tekst in utskrifter), (
+            "PIPE-MTM-001 konsollen skal melde filtrert radantall"
+        )
+
+
+    test_les_data_og_kjør_alle_funksjoner_pipe_mtm_001()
+    return
+
+
+@app.cell(hide_code=True)
+def PIPE_MTM_002(
+    console,
+    lag_pipeline_artskart_df,
+    lag_pipeline_fake_anf,
+    lag_pipeline_fake_process,
+    les_data_og_kjør_alle_funksjoner,
+    pipeline_fake_status,
+    skriv_pipeline_artskart_csv,
+):
+    def test_les_data_og_kjør_alle_funksjoner_pipe_mtm_002():
+        """PIPE-MTM-002: årfilter fjerner eldre rader og null dato."""
+        import tempfile
+
+        calls: list[tuple[str, list[object]]] = []
+        utskrifter: list[str] = []
+
+        def fake_print(*args, **kwargs):
+            utskrifter.append(" ".join(str(arg) for arg in args))
+
+        test_df = lag_pipeline_artskart_df(
+            [
+                {
+                    "validScientificNameId": 2001,
+                    "validScientificName": "Gammel art",
+                    "preferredPopularName": "gammel",
+                    "dateTimeCollected": datetime(1989, 12, 31, 23, 0, 0),
+                    "category": "LC",
+                },
+                {
+                    "validScientificNameId": 2002,
+                    "validScientificName": "Grense art",
+                    "preferredPopularName": "grense",
+                    "dateTimeCollected": datetime(1990, 1, 1, 0, 0, 0),
+                    "category": "NT",
+                },
+                {
+                    "validScientificNameId": 2003,
+                    "validScientificName": "Null dato",
+                    "preferredPopularName": "nulldato",
+                    "dateTimeCollected": None,
+                    "category": "EN",
+                },
+            ]
+        )
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            csv_sti = skriv_pipeline_artskart_csv(tmpdir, test_df)
+            with (
+                patch.dict(
+                    les_data_og_kjør_alle_funksjoner.__globals__,
+                    {
+                        "process_and_enrich_data": lag_pipeline_fake_process(calls),
+                        "legg_til_arter_av_nasjonal_forvaltningsinteresse": lag_pipeline_fake_anf(calls),
+                    },
+                ),
+                patch.object(console, "status", pipeline_fake_status),
+                patch.object(console, "print", fake_print),
+            ):
+                result = les_data_og_kjør_alle_funksjoner(csv_sti, filter_year=1990)
+
+        assert result.height == 1, "PIPE-MTM-002 bare én rad skal overleve årfilteret"
+        assert result.get_column("Artens ID").to_list() == [2002], (
+            "PIPE-MTM-002 bare raden på/etter filter_year skal finnes i output"
+        )
+        assert result.get_column("Observert dato").to_list() == [dt_date(1990, 1, 1)], (
+            "PIPE-MTM-002 grensedato filter_year-01-01 skal beholdes"
+        )
+        assert calls == [
+            ("process_and_enrich_data", [2002]),
+            ("legg_til_arter_av_nasjonal_forvaltningsinteresse", [2002]),
+        ], "PIPE-MTM-002 downstream-steg skal bare få filtrert rad"
+        assert any("1 observasjoner uten dato fjernet" in tekst for tekst in utskrifter), (
+            "PIPE-MTM-002 konsollen skal melde null-datoer som fjernes"
+        )
+        assert any("Filtrert til 1 rader" in tekst for tekst in utskrifter), (
+            "PIPE-MTM-002 konsollen skal melde filtrert radantall"
+        )
+
+
+    test_les_data_og_kjør_alle_funksjoner_pipe_mtm_002()
+    return
+
+
+@app.cell(hide_code=True)
+def PIPE_MTM_003(
+    console,
+    lag_pipeline_artskart_df,
+    les_data_og_kjør_alle_funksjoner,
+    pipeline_fake_status,
+    skriv_pipeline_artskart_csv,
+):
+    def test_les_data_og_kjør_alle_funksjoner_pipe_mtm_003():
+        """PIPE-MTM-003: manglende obligatorisk Artskart-kolonne feiler tidlig."""
+        import tempfile
+
+        test_df = lag_pipeline_artskart_df().drop("category")
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            csv_sti = skriv_pipeline_artskart_csv(tmpdir, test_df)
+            with patch.object(console, "status", pipeline_fake_status):
+                with pytest.raises(ValueError) as exc_info:
+                    les_data_og_kjør_alle_funksjoner(csv_sti, filter_year=2020)
+
+        feilmelding = str(exc_info.value)
+        assert "Mangler obligatoriske Artskart-kolonner" in feilmelding, (
+            "PIPE-MTM-003 skal feile med tydelig kontraktsmelding"
+        )
+        assert "category" in feilmelding, "PIPE-MTM-003 feilmeldingen skal nevne manglende category-kolonne"
+
+
+    test_les_data_og_kjør_alle_funksjoner_pipe_mtm_003()
+    return
+
+
+@app.cell(hide_code=True)
+def PIPE_MTM_004(
+    console,
+    lag_pipeline_artskart_df,
+    les_data_og_kjør_alle_funksjoner,
+    pipeline_fake_status,
+    skriv_pipeline_artskart_csv,
+):
+    def test_les_data_og_kjør_alle_funksjoner_pipe_mtm_004():
+        """PIPE-MTM-004: ugyldig category stoppes av inputvalidering."""
+        import tempfile
+
+        test_df = lag_pipeline_artskart_df([{"category": "XYZ"}])
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            csv_sti = skriv_pipeline_artskart_csv(tmpdir, test_df)
+            with patch.object(console, "status", pipeline_fake_status):
+                with pytest.raises(ValueError) as exc_info:
+                    les_data_og_kjør_alle_funksjoner(csv_sti, filter_year=2020)
+
+        feilmelding = str(exc_info.value)
+        assert "Ukjente category-verdier" in feilmelding, "PIPE-MTM-004 skal feile på category-domenet"
+        assert "XYZ" in feilmelding, "PIPE-MTM-004 feilmeldingen skal nevne ugyldig category-verdi"
+
+
+    test_les_data_og_kjør_alle_funksjoner_pipe_mtm_004()
+    return
+
+
+@app.cell(hide_code=True)
+def PIPE_MTM_005(
+    console,
+    lag_pipeline_artskart_df,
+    les_data_og_kjør_alle_funksjoner,
+    pipeline_fake_status,
+    skriv_pipeline_artskart_csv,
+):
+    def test_les_data_og_kjør_alle_funksjoner_pipe_mtm_005():
+        """PIPE-MTM-005: ingen gyldige ID-er etter filtrering feiler tydelig."""
+        import tempfile
+
+        test_df = lag_pipeline_artskart_df([{"validScientificNameId": "ikke-id"}])
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            csv_sti = skriv_pipeline_artskart_csv(tmpdir, test_df)
+            with (
+                patch.object(console, "status", pipeline_fake_status),
+                patch.object(console, "print", lambda *args, **kwargs: None),
+            ):
+                with pytest.raises(ValueError) as exc_info:
+                    les_data_og_kjør_alle_funksjoner(csv_sti, filter_year=2020)
+
+        feilmelding = str(exc_info.value)
+        assert "Ingen gyldige validScientificNameId-verdier" in feilmelding, (
+            "PIPE-MTM-005 skal feile når filtrert input ikke har gyldige art-ID-er"
+        )
+
+
+    test_les_data_og_kjør_alle_funksjoner_pipe_mtm_005()
+    return
+
+
+@app.cell(hide_code=True)
+def PIPE_MTM_006(
+    console,
+    lag_pipeline_artskart_df,
+    les_data_og_kjør_alle_funksjoner,
+    pipeline_fake_status,
+    rydd_navn_og_datatyper_forventede_kolonner,
+    skriv_pipeline_artskart_csv,
+):
+    def test_les_data_og_kjør_alle_funksjoner_pipe_mtm_006():
+        """PIPE-MTM-006: tomt datasett etter årfilter gir tom slutt-DataFrame."""
+        import tempfile
+
+        utskrifter: list[str] = []
+
+        def fake_print(*args, **kwargs):
+            utskrifter.append(" ".join(str(arg) for arg in args))
+
+        def fail_process(df: pl.DataFrame) -> pl.DataFrame:
+            raise AssertionError("PIPE-MTM-006 process_and_enrich_data skal ikke kalles når årfilteret gir 0 rader")
+
+        test_df = lag_pipeline_artskart_df(
+            [
+                {"validScientificNameId": 3001, "dateTimeCollected": datetime(1988, 1, 1, 12, 0, 0)},
+                {"validScientificNameId": 3002, "dateTimeCollected": datetime(1989, 12, 31, 23, 59, 0)},
+            ]
+        )
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            csv_sti = skriv_pipeline_artskart_csv(tmpdir, test_df)
+            with (
+                patch.dict(
+                    les_data_og_kjør_alle_funksjoner.__globals__,
+                    {"process_and_enrich_data": fail_process},
+                ),
+                patch.object(console, "status", pipeline_fake_status),
+                patch.object(console, "print", fake_print),
+            ):
+                result = les_data_og_kjør_alle_funksjoner(csv_sti, filter_year=1990)
+
+        assert isinstance(result, pl.DataFrame), "PIPE-MTM-006 skal returnere Polars DataFrame"
+        assert result.height == 0, "PIPE-MTM-006 årfilter uten treff skal gi tom DataFrame"
+        assert result.columns == rydd_navn_og_datatyper_forventede_kolonner(), (
+            "PIPE-MTM-006 tomt resultat skal ha godkjente sluttkolonner"
+        )
+        assert any("Filtrert til 0 rader" in tekst for tekst in utskrifter), (
+            "PIPE-MTM-006 konsollen skal melde at filteret ga 0 rader"
+        )
+        assert any("Ingen observasjoner etter årfilter" in tekst for tekst in utskrifter), (
+            "PIPE-MTM-006 konsollen skal forklare tomt resultat etter årfilter"
+        )
+
+
+    test_les_data_og_kjør_alle_funksjoner_pipe_mtm_006()
+    return
 
 
 if __name__ == "__main__":
