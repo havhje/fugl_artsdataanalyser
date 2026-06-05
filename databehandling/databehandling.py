@@ -2436,6 +2436,50 @@ def md_manglende_artsnavn():
     return
 
 
+@app.cell(hide_code=True)
+def md_testmatrise_manglende_artsnavn():
+    mo.md(r"""
+    ### Testmatrise: manglende norske artsnavn
+
+    **Tiltenkt oppførsel:** Mini-pipelinen skal finne observasjonsrader der norsk navn mangler (`null`, tom streng eller bare mellomrom), hente manuell navnemapping fra bruker, og fylle navn tilbake uten å endre eksisterende navn eller datastruktur.
+
+    **Kilde til sannhet:** Brukergodkjent matrise 2026-06-05, funksjonsdocstrings, håndberegnede små fixtures og brukeravklaringer 2026-06-05:
+
+    - Tom streng og whitespace i `Navn` regnes som manglende/null.
+    - Samme `Art` med ulike `Familie`/`Orden` skal feile i `finn_mangler_navn`.
+    - `join_navn_til_orginal_df` stoler på at `prompt_mangler_navn` har validert mappingverdier.
+
+    **Inputkontrakt:** Polars `DataFrame` med minst `Art`, `Navn`, `Familie` og `Orden` for `finn_mangler_navn`/`prompt_mangler_navn`; `join_navn_til_orginal_df` krever minst `Art` og `Navn`. `Art` identifiserer latinsk artsnavn. Manglende norsk navn er `null`, `''` eller streng som blir tom etter `strip()`.
+
+    **Outputkontrakt:**
+
+    - `finn_mangler_navn`: returnerer `pl.DataFrame` med nøyaktig kolonnene `Art`, `Navn`, `Familie`, `Orden`; én rad per manglende art/taksonomi; `Navn` normaliseres til `null`; sortert på `Art`.
+    - `prompt_mangler_navn`: returnerer `dict[str, str]`; brukerinput trimmes; blank input avbryter med `typer.Exit(code=1)`; tom inputtabell gir `{}` uten prompt.
+    - `join_navn_til_orginal_df`: returnerer `pl.DataFrame` med samme radantall, radrekkefølge og kolonner som input; fyller bare manglende `Navn` når `Art` finnes i mapping; eksisterende ikke-blanke navn overskrives ikke; ingen hjelpekollonner beholdes.
+
+    **Godkjenningsstatus:** Godkjent av bruker 2026-06-05.
+
+    **Revisjonspolicy:** Hvis forventet oppførsel endres, oppdater og godkjenn denne matrisen på nytt før testene endres.
+
+    | ID | Scenario | Input | Forventet output/invariant | Toleranse | Hvorfor det betyr noe | Feilmodus testen beskytter mot | Testcelle |
+    |---|---|---|---|---|---|---|---|
+    | NAVN-MTM-001 | Finn manglende navn med ekstra kolonner | Blandet DF med `Navn=None`, `''`, `'   '`, gyldige navn og ekstra `category` | Kun manglende arter returneres; `Navn` er `null`; kolonnene er `Art`, `Navn`, `Familie`, `Orden`; sortert på `Art`; ekstra kolonner droppes | Eksakt | Hovedkontrakten for manuell navneutfylling | Tomme tekststrenger overses eller ekstra kolonner lekker ut | `test_finn_mangler_navn_navn_mtm_001_003` |
+    | NAVN-MTM-002 | Duplikate observasjoner for samme art/taksonomi | Samme `Art` med manglende navn finnes flere ganger med samme `Familie`/`Orden` | Arten vises én gang | Eksakt | Bruker skal ikke spørres flere ganger for samme art | Dupliserte prompts og duplikate outputrader | `test_finn_mangler_navn_navn_mtm_001_003` |
+    | NAVN-MTM-003 | Ingen manglende navn og tom input | Komplett DF + tom DF med riktig schema | Tom DF med riktige kolonner | Eksakt | Edge cases skal være trygge | Falske positive mangler eller schema-tap | `test_finn_mangler_navn_navn_mtm_001_003` |
+    | NAVN-MTM-004 | Manglende påkrevd kolonne | DF uten `Navn` | Feiler tydelig med kolonnenavn i feilmelding | Eksakt melding inneholder kolonnenavn | Datakontrakt må være tydelig | Uforståelige Polars-feil senere i pipelinen | `test_finn_mangler_navn_navn_mtm_004_mangler_kolonne` |
+    | NAVN-MTM-005 | Taksonomikonflikt for samme art | Samme `Art` har ulike `Familie`/`Orden` | `finn_mangler_navn` reiser `ValueError` og nevner arten | Eksakt invariant | Bruker skal ikke velge navn for tvetydig taksonomi | `unique()` skjuler datakonflikt | `test_finn_mangler_navn_navn_mtm_005_taksonomikonflikt` |
+    | NAVN-MTM-006 | Tom mangler-DF | Tom DF fra `finn_mangler_navn` | Returnerer `{}` og kaller ikke `Prompt.ask` | Eksakt | Ingen interaksjon når alt er komplett | Notebook/CLI henger på unødvendig prompt | `test_prompt_mangler_navn_navn_mtm_006_tom_df` |
+    | NAVN-MTM-007 | Gyldig brukerinput | To arter, mock input `' Fjellrev '`, `'Ulv'` | Returnerer trimmet mapping | Eksakt | Deterministisk test av interaktiv funksjon | Whitespace lagres som del av navn eller feil art får navn | `test_prompt_mangler_navn_navn_mtm_007_gyldig_input` |
+    | NAVN-MTM-008 | Blank brukerinput | Mock input der én art får `'   '` | Reiser `typer.Exit(code=1)` | Eksakt exit-kode | Hindrer tomme norske navn | Tomme navn blir med videre i datasettet | `test_prompt_mangler_navn_navn_mtm_008_blank_input` |
+    | NAVN-MTM-009 | Join fyller bare manglende navn | Original DF med eksisterende navn, `null`, `''`, `'   '`, og mapping for noen arter | Manglende navn i mapping fylles; eksisterende ikke-blanke navn bevares; manglende uten mapping blir `null` | Eksakt | Kjerneoppførsel ved tilbakeføring | Eksisterende navn overskrives eller blanke navn blir stående | `test_join_navn_til_orginal_df_navn_mtm_009_010` |
+    | NAVN-MTM-010 | Join bevarer datastruktur | Original DF med ekstra kolonner og bestemt radrekkefølge | Samme radantall, radrekkefølge, kolonnerekkefølge; ingen `Navn_ny` | Eksakt | Observasjonsdata må ikke endres av navnejoin | Left join endrer struktur eller lekker hjelpekollonne | `test_join_navn_til_orginal_df_navn_mtm_009_010` |
+    | NAVN-MTM-011 | Duplikate arter i original DF | To rader med samme `Art` og manglende `Navn` | Begge observasjonsrader får samme norske navn | Eksakt | Originalrader er observasjoner, ikke unike arter | Join fyller bare én duplikatrad eller kollapser rader | `test_join_navn_til_orginal_df_navn_mtm_011_duplikate_arter` |
+    | NAVN-MTM-012 | Tom mapping og ekstra mapping-nøkler | Tom mapping + mapping med art som ikke finnes i DF | Tom mapping gir identisk DF; ekstra nøkler ignoreres uten ekstra rader | Eksakt | Robusthet ved ingen eller overflødige manuelle navn | Ekstra mapping lager nye rader eller tom mapping muterer data | `test_join_navn_til_orginal_df_navn_mtm_012_tom_og_ekstra_mapping` |
+    | NAVN-MTM-013 | End-to-end mini-pipeline | Original DF → `finn_mangler_navn` → mock `prompt_mangler_navn` → `join_navn_til_orginal_df` | Manglende navn fylles, eksisterende navn bevares, radantall og radrekkefølge uendret | Eksakt | Tester samspillet mellom alle tre funksjoner | Delene virker isolert, men ikke sammen | `test_manglende_artsnavn_pipeline_navn_mtm_013` |
+    """)
+    return
+
+
 @app.function(hide_code=True)
 def finn_mangler_navn(df: pl.DataFrame) -> pl.DataFrame:
     """Finn unike arter som mangler norsk navn.
@@ -2444,85 +2488,155 @@ def finn_mangler_navn(df: pl.DataFrame) -> pl.DataFrame:
         df: Slutttabell med `Art`, `Navn`, `Familie` og `Orden`.
 
     Returns:
-        DataFrame med unike arter der `Navn` er null, sortert på `Art`.
+        DataFrame med unike arter der `Navn` er null, tom streng eller bare
+        whitespace, sortert på `Art`. `Navn` normaliseres til null i output.
+
+    Raises:
+        ValueError: Når obligatoriske kolonner mangler, eller samme `Art` har
+            flere `Familie`/`Orden`-kombinasjoner.
     """
 
-    mangler_df = df.filter(pl.col("Navn").is_null()).select(["Art", "Navn", "Familie", "Orden"]).unique().sort("Art")
+    required_columns = {"Art", "Navn", "Familie", "Orden"}
+    missing_columns = sorted(required_columns - set(df.columns))
+    if missing_columns:
+        raise ValueError(f"Mangler obligatoriske kolonner: {', '.join(missing_columns)}")
+
+    taksonomi_konflikter = (
+        df.select(["Art", "Familie", "Orden"])
+        .unique()
+        .group_by("Art")
+        .len()
+        .filter(pl.col("len") > 1)
+        .get_column("Art")
+        .to_list()
+    )
+    if taksonomi_konflikter:
+        konflikter_tekst = ", ".join(sorted("<null>" if art is None else str(art) for art in taksonomi_konflikter))
+        raise ValueError(f"Samme Art har flere Familie/Orden-kombinasjoner: {konflikter_tekst}")
+
+    navn_tekst = pl.col("Navn").cast(pl.Utf8)
+    navn_mangler = pl.col("Navn").is_null() | (navn_tekst.str.strip_chars() == "")
+
+    mangler_df = (
+        df.with_columns(pl.when(navn_mangler).then(pl.lit(None, dtype=pl.Utf8)).otherwise(navn_tekst).alias("Navn"))
+        .filter(pl.col("Navn").is_null())
+        .select(["Art", "Navn", "Familie", "Orden"])
+        .unique()
+        .sort("Art")
+    )
 
     return mangler_df
 
 
-@app.function(hide_code=True)
-def test_finn_mangler_navn():
-    sample_df = pl.DataFrame(
-        {
-            "Art": [
-                "Bubo bubo",
-                "Passer domesticus",
-                "Vulpes lagopus",
-                "Neogale vison",
-                "Anser erythropus",
-                "Lynx lynx",
-                "Canis lupus",
-            ],
-            "Navn": [
-                "Hubro",
-                "Gråspurv",
-                None,  # Fjellrev mangler norsk navn
-                "Villmink",
-                None,  # Dverggås mangler norsk navn
-                "Gaupe",
-                None,  # Ulv mangler norsk navn
-            ],
-            "Familie": [
-                "Strigidae",
-                "Passeridae",
-                "Canidae",
-                "Mustelidae",
-                "Anatidae",
-                "Felidae",
-                "Canidae",
-            ],
-            "Orden": [
-                "Strigiformes",
-                "Passeriformes",
-                "Carnivora",
-                "Carnivora",
-                "Anseriformes",
-                "Carnivora",
-                "Carnivora",
-            ],
-            "category": ["EN", "LC", "VU", "haraball", "NT", "LC", "CR"],
-        }
-    )
+@app.cell(hide_code=True)
+def _():
+    def test_finn_mangler_navn_navn_mtm_001_003():
+        """NAVN-MTM-001/002/003: manglende navn, duplikater og tomme resultater."""
+        sample_df = pl.DataFrame(
+            {
+                "Art": [
+                    "Bubo bubo",
+                    "Vulpes lagopus",
+                    "Vulpes lagopus",
+                    "Canis lupus",
+                    "Anser erythropus",
+                    "Passer domesticus",
+                ],
+                "Navn": [
+                    "Hubro",
+                    None,
+                    "",
+                    "   ",
+                    None,
+                    "Gråspurv",
+                ],
+                "Familie": [
+                    "Strigidae",
+                    "Canidae",
+                    "Canidae",
+                    "Canidae",
+                    "Anatidae",
+                    "Passeridae",
+                ],
+                "Orden": [
+                    "Strigiformes",
+                    "Carnivora",
+                    "Carnivora",
+                    "Carnivora",
+                    "Anseriformes",
+                    "Passeriformes",
+                ],
+                "category": ["LC", "VU", "VU", "CR", "NT", "LC"],
+            }
+        )
 
-    result = finn_mangler_navn(sample_df)
+        result = finn_mangler_navn(sample_df)
 
-    # Should find exactly the 3 rows with Navn == null
-    assert result.height == 3, f"Forventet 3 arter uten navn, fikk {result.height}"
+        assert result.columns == ["Art", "Navn", "Familie", "Orden"], "NAVN-MTM-001 output skal bare ha godkjente kolonner"
+        assert result.height == 3, f"NAVN-MTM-001/002 forventet 3 unike arter uten navn, fikk {result.height}"
+        assert result.get_column("Navn").null_count() == result.height, (
+            "NAVN-MTM-001 tom streng og whitespace skal normaliseres til null"
+        )
+        assert result.get_column("Art").to_list() == [
+            "Anser erythropus",
+            "Canis lupus",
+            "Vulpes lagopus",
+        ], "NAVN-MTM-001 resultatet skal sorteres på Art"
+        assert result.filter(pl.col("Art") == "Vulpes lagopus").height == 1, (
+            "NAVN-MTM-002 duplikate observasjoner for samme art/taksonomi skal gi én rad"
+        )
 
-    # Should only contain the correct columns
-    assert result.columns == ["Art", "Navn", "Familie", "Orden"]
+        complete_df = sample_df.with_columns(pl.lit("Ukjent").alias("Navn"))
+        complete_result = finn_mangler_navn(complete_df)
+        assert complete_result.height == 0, "NAVN-MTM-003 komplett DF skal gi tomt resultat"
+        assert complete_result.columns == ["Art", "Navn", "Familie", "Orden"], (
+            "NAVN-MTM-003 tomt resultat skal beholde outputkolonnene"
+        )
 
-    # All returned rows should have null Navn
-    assert result.get_column("Navn").is_null().all(), "Alle returnerte rader skal ha null Navn"
+        empty_df = pl.DataFrame(
+            {"Art": [], "Navn": [], "Familie": [], "Orden": []},
+            schema={"Art": pl.Utf8, "Navn": pl.Utf8, "Familie": pl.Utf8, "Orden": pl.Utf8},
+        )
+        empty_result = finn_mangler_navn(empty_df)
+        assert empty_result.height == 0, "NAVN-MTM-003 tom input skal gi tomt resultat"
+        assert empty_result.columns == ["Art", "Navn", "Familie", "Orden"], (
+            "NAVN-MTM-003 tom input skal gi riktig outputschema"
+        )
 
-    # The specific species missing names
-    arter_uten_navn = set(
-        result.get_column("Art").to_list()
-    )  # bruker set istenden for list, for da betyr ikke rekkefølgen av variablene noe. Sets ignore order, so {"A", "B"} == {"B", "A"} is True. If you used lists instead, ["A", "B"] == ["B", "A"] would be False. This makes the assertion robust — you don't care which order the rows came in, just which species are present.
-    assert arter_uten_navn == {"Vulpes lagopus", "Anser erythropus", "Canis lupus"}, (
-        f"Feil arter returnert: {arter_uten_navn}"
-    )
 
-    # Should be sorted by Art
-    art_list = result.get_column("Art").to_list()
-    assert art_list == sorted(art_list), "Resultatet skal være sortert etter Art"
+    def test_finn_mangler_navn_navn_mtm_004_mangler_kolonne():
+        """NAVN-MTM-004: manglende obligatorisk kolonne feiler tydelig."""
+        mangler_navn_df = pl.DataFrame(
+            {
+                "Art": ["Vulpes lagopus"],
+                "Familie": ["Canidae"],
+                "Orden": ["Carnivora"],
+            }
+        )
 
-    # Test with Nei missing names — should return empty DataFrame
-    complete_df = sample_df.with_columns(pl.col("Navn").fill_null("Ukjent"))
-    empty_result = finn_mangler_navn(complete_df)
-    assert empty_result.height == 0, "Skal returnere tom DataFrame når alle har navn"
+        with pytest.raises(ValueError, match="Navn"):
+            finn_mangler_navn(mangler_navn_df)
+
+
+    def test_finn_mangler_navn_navn_mtm_005_taksonomikonflikt():
+        """NAVN-MTM-005: samme Art med ulik Familie/Orden skal feile."""
+        konflikt_df = pl.DataFrame(
+            {
+                "Art": ["Vulpes lagopus", "Vulpes lagopus"],
+                "Navn": [None, ""],
+                "Familie": ["Canidae", "Ursidae"],
+                "Orden": ["Carnivora", "Carnivora"],
+            }
+        )
+
+        with pytest.raises(ValueError, match="Vulpes lagopus"):
+            finn_mangler_navn(konflikt_df)
+
+
+    test_finn_mangler_navn_navn_mtm_001_003()
+    test_finn_mangler_navn_navn_mtm_004_mangler_kolonne()
+    test_finn_mangler_navn_navn_mtm_005_taksonomikonflikt()
+    return
 
 
 @app.cell(hide_code=True)
@@ -2582,8 +2696,23 @@ def definer_prompt_mangler_navn(console):
 
 
 @app.cell(hide_code=True)
-def test_prompt_mangler_navn_cell(prompt_mangler_navn):
-    def test_prompt_mangler_navn():
+def test_prompt_mangler_navn_cell(console, prompt_mangler_navn):
+    def test_prompt_mangler_navn_navn_mtm_006_tom_df():
+        """NAVN-MTM-006: tom mangler-DF gir tom mapping uten prompt."""
+        empty_df = pl.DataFrame(
+            {"Art": [], "Navn": [], "Familie": [], "Orden": []},
+            schema={"Art": pl.Utf8, "Navn": pl.Utf8, "Familie": pl.Utf8, "Orden": pl.Utf8},
+        )
+
+        with patch.object(Prompt, "ask") as mock_ask:
+            result = prompt_mangler_navn(empty_df)
+
+        assert result == {}, "NAVN-MTM-006 tom DataFrame skal gi tom dict"
+        mock_ask.assert_not_called()
+
+
+    def test_prompt_mangler_navn_navn_mtm_007_gyldig_input():
+        """NAVN-MTM-007: brukerinput trimmes og mappes til riktig Art."""
         mangler_df = pl.DataFrame(
             {
                 "Art": ["Vulpes lagopus", "Canis lupus"],
@@ -2593,34 +2722,36 @@ def test_prompt_mangler_navn_cell(prompt_mangler_navn):
             }
         )
 
-        # Empty DataFrame → returns empty dict, Nei prompts
-        empty_df = pl.DataFrame(
-            {"Art": [], "Navn": [], "Familie": [], "Orden": []},
-            schema={
-                "Art": pl.Utf8,
-                "Navn": pl.Utf8,
-                "Familie": pl.Utf8,
-                "Orden": pl.Utf8,
-            },
-        )
-        assert prompt_mangler_navn(empty_df) == {}, "Tom DataFrame skal gi tom dict"
-
-        # Happy path: user provides valid names
-        with patch.object(
-            Prompt, "ask", side_effect=["Fjellrev", "Ulv"]
-        ):  # patch.object er fra unittests og lar deg mocke den menneskelige inputen som rich ber om i terminalen.
+        with patch.object(console, "print"), patch.object(Prompt, "ask", side_effect=[" Fjellrev ", "Ulv"]):
             result = prompt_mangler_navn(mangler_df)
 
         assert result == {
             "Vulpes lagopus": "Fjellrev",
             "Canis lupus": "Ulv",
-        }, f"Forventet riktig mapping, fikk {result}"
+        }, f"NAVN-MTM-007 forventet trimmet mapping, fikk {result}"
 
-        # Blank input → should raise typer.Exit
-        with patch.object(Prompt, "ask", side_effect=["Fjellrev", "   "]):
-            with pytest.raises(typer.Exit):
+
+    def test_prompt_mangler_navn_navn_mtm_008_blank_input():
+        """NAVN-MTM-008: blank input avbryter med typer.Exit(code=1)."""
+        mangler_df = pl.DataFrame(
+            {
+                "Art": ["Vulpes lagopus", "Canis lupus"],
+                "Navn": [None, None],
+                "Familie": ["Canidae", "Canidae"],
+                "Orden": ["Carnivora", "Carnivora"],
+            }
+        )
+
+        with patch.object(console, "print"), patch.object(Prompt, "ask", side_effect=["Fjellrev", "   "]):
+            with pytest.raises(typer.Exit) as exc_info:
                 prompt_mangler_navn(mangler_df)
 
+        assert getattr(exc_info.value, "exit_code", None) == 1, "NAVN-MTM-008 blank input skal avbryte med exit-kode 1"
+
+
+    test_prompt_mangler_navn_navn_mtm_006_tom_df()
+    test_prompt_mangler_navn_navn_mtm_007_gyldig_input()
+    test_prompt_mangler_navn_navn_mtm_008_blank_input()
     return
 
 
@@ -2635,8 +2766,9 @@ def join_navn_til_orginal_df(
         navn_mapping: Mapping fra latinsk artsnavn til norsk navn.
 
     Returns:
-        DataFrame der nullverdier i `Navn` er fylt når `Art` finnes i
-        mappingen. Eksisterende navn overskrives ikke.
+        DataFrame der nullverdier, tomme strenger og whitespace i `Navn` er
+        fylt når `Art` finnes i mappingen. Eksisterende ikke-blanke navn
+        overskrives ikke, og datastrukturen beholdes.
     """
 
     if not navn_mapping:
@@ -2647,12 +2779,17 @@ def join_navn_til_orginal_df(
     )  # dette lager en ny poalrs df med to kolonner art og navn_ny hvor du henter navn mapping fra "prompt_mangler navn" og henter ut deres keys og values. Keys og values argumentene er "They're iterator methods that traverse the entire dictionary collection." så trenger ikke iter rows.
     #  e.g. Polars knows how to build a column from a list of strings. It doesn't know how to build one from a dict_keys view.
 
+    navn_tekst = pl.col("Navn").cast(pl.Utf8)
+    navn_mangler = pl.col("Navn").is_null() | (navn_tekst.str.strip_chars() == "")
+
     df_med_navn = (
         df.join(mapping_df, on="Art", how="left")
         .with_columns(
-            pl.when(pl.col("Navn").is_null() & pl.col("Navn_ny").is_not_null())
+            pl.when(navn_mangler & pl.col("Navn_ny").is_not_null())
             .then(pl.col("Navn_ny"))
-            .otherwise(pl.col("Navn"))
+            .when(navn_mangler)
+            .then(pl.lit(None, dtype=pl.Utf8))
+            .otherwise(navn_tekst)
             .alias("Navn")
         )
         .drop("Navn_ny")
@@ -2661,67 +2798,130 @@ def join_navn_til_orginal_df(
     return df_med_navn
 
 
-@app.function(hide_code=True)
-def test_join_navn_til_orginal_df():
-    df = pl.DataFrame(
-        {
-            "Art": [
-                "Bubo bubo",
-                "Passer domesticus",
-                "Vulpes lagopus",
-                "Canis lupus",
-                "Anser erythropus",
-            ],
-            "Navn": [
-                "Hubro",  # already has a name
-                "Gråspurv",  # already has a name
-                None,  # missing — should be filled
-                None,  # missing — should be filled
-                None,  # missing — but NOT in mapping
-            ],
-            "Familie": ["Strigidae", "Passeridae", "Canidae", "Canidae", "Anatidae"],
+@app.cell(hide_code=True)
+def _(console, prompt_mangler_navn):
+    def test_join_navn_til_orginal_df_navn_mtm_009_010():
+        """NAVN-MTM-009/010: join fyller manglende navn og bevarer datastruktur."""
+        df = pl.DataFrame(
+            {
+                "observasjon_id": ["hubro-1", "graaspurv-1", "fjellrev-1", "ulv-1", "dverggaas-1"],
+                "Art": [
+                    "Bubo bubo",
+                    "Passer domesticus",
+                    "Vulpes lagopus",
+                    "Canis lupus",
+                    "Anser erythropus",
+                ],
+                "Navn": [
+                    "Hubro",
+                    "Gråspurv",
+                    None,
+                    "   ",
+                    "",
+                ],
+                "Familie": ["Strigidae", "Passeridae", "Canidae", "Canidae", "Anatidae"],
+            }
+        )
+        mapping = {
+            "Vulpes lagopus": "Fjellrev",
+            "Canis lupus": "Ulv",
         }
-    )
 
-    mapping = {
-        "Vulpes lagopus": "Fjellrev",
-        "Canis lupus": "Ulv",
-    }
+        result = join_navn_til_orginal_df(df, mapping)
 
-    # Null names are filled from the mapping ─────────────────────
-    result = join_navn_til_orginal_df(df, mapping)
+        assert result.height == df.height, "NAVN-MTM-010 radantall skal være uendret"
+        assert result.columns == df.columns, "NAVN-MTM-010 kolonnerekkefølge skal være uendret"
+        assert result.get_column("observasjon_id").to_list() == df.get_column("observasjon_id").to_list(), (
+            "NAVN-MTM-010 radrekkefølge skal være uendret"
+        )
+        assert "Navn_ny" not in result.columns, "NAVN-MTM-010 hjelpkolonnen Navn_ny skal fjernes"
+        assert result.get_column("Navn").to_list() == [
+            "Hubro",
+            "Gråspurv",
+            "Fjellrev",
+            "Ulv",
+            None,
+        ], "NAVN-MTM-009 navn skal fylles uten å overskrive eksisterende navn"
 
-    fjellrev = result.filter(pl.col("Art") == "Vulpes lagopus")
-    assert fjellrev.get_column("Navn").to_list() == ["Fjellrev"], "Vulpes lagopus skal få navnet Fjellrev"
-    # Må bruke to list, get_column returnerer kun er polars series som ikke er det samme som en list
 
-    ulv = result.filter(pl.col("Art") == "Canis lupus")
-    assert ulv.get_column("Navn").to_list() == ["Ulv"], "Canis lupus skal få navnet Ulv"
+    def test_join_navn_til_orginal_df_navn_mtm_011_duplikate_arter():
+        """NAVN-MTM-011: duplikate originalrader for samme Art fylles alle."""
+        df = pl.DataFrame(
+            {
+                "observasjon_id": ["fjellrev-1", "fjellrev-2", "hubro-1"],
+                "Art": ["Vulpes lagopus", "Vulpes lagopus", "Bubo bubo"],
+                "Navn": [None, "", "Hubro"],
+            }
+        )
 
-    # Existing names are NOT overwritten ─────────────────────────
-    hubro = result.filter(pl.col("Art") == "Bubo bubo")
-    assert hubro.get_column("Navn").to_list() == ["Hubro"], "Bubo bubo har allerede navn — skal ikke overskrives"
+        result = join_navn_til_orginal_df(df, {"Vulpes lagopus": "Fjellrev"})
 
-    graaspurv = result.filter(pl.col("Art") == "Passer domesticus")
-    assert graaspurv.get_column("Navn").to_list() == ["Gråspurv"], (
-        "Passer domesticus har allerede navn — skal ikke overskrives"
-    )
+        fjellrev_navn = result.filter(pl.col("Art") == "Vulpes lagopus").get_column("Navn").to_list()
+        assert fjellrev_navn == ["Fjellrev", "Fjellrev"], "NAVN-MTM-011 alle duplikate observasjonsrader skal fylles"
+        assert result.height == df.height, "NAVN-MTM-011 join skal ikke kollapse duplikatrader"
 
-    # Null names NOT in mapping stay null ────────────────────────
-    dverggaas = result.filter(pl.col("Art") == "Anser erythropus")
-    assert dverggaas.get_column("Navn").to_list() == [None], "Anser erythropus er ikke i mapping — skal forbli null"
 
-    # Row count unchanged (left join, Nei extra rows) ────────────
-    assert result.height == df.height, f"Radantall skal være uendret: forventet {df.height}, fikk {result.height}"
+    def test_join_navn_til_orginal_df_navn_mtm_012_tom_og_ekstra_mapping():
+        """NAVN-MTM-012: tom mapping endrer ingenting og ekstra mappingnøkler ignoreres."""
+        from polars.testing import assert_frame_equal
 
-    # Temporary column Navn_ny is dropped ────────────────────────
-    assert "Navn_ny" not in result.columns, "Hjelpkolonnen Navn_ny skal være fjernet"
+        df = pl.DataFrame(
+            {
+                "observasjon_id": ["hubro-1", "fjellrev-1"],
+                "Art": ["Bubo bubo", "Vulpes lagopus"],
+                "Navn": ["Hubro", None],
+            }
+        )
 
-    # Empty mapping → nothing changes ────────────────────────────
-    result_empty = join_navn_til_orginal_df(df, {})
-    assert result_empty.get_column("Navn").to_list() == df.get_column("Navn").to_list(), (
-        "Tom mapping skal ikke endre noe"
-    )
+        result_empty = join_navn_til_orginal_df(df, {})
+        assert_frame_equal(result_empty, df)
+
+        result_extra = join_navn_til_orginal_df(df, {"Ikke i datasettet": "Fantominavn"})
+        assert result_extra.height == df.height, "NAVN-MTM-012 ekstra mappingnøkler skal ikke lage nye rader"
+        assert result_extra.get_column("Art").to_list() == df.get_column("Art").to_list(), (
+            "NAVN-MTM-012 ekstra mappingnøkler skal ignoreres"
+        )
+        assert result_extra.get_column("Navn").to_list() == ["Hubro", None], (
+            "NAVN-MTM-012 ekstra mappingnøkler skal ikke endre eksisterende data"
+        )
+
+
+    def test_manglende_artsnavn_pipeline_navn_mtm_013():
+        """NAVN-MTM-013: end-to-end fra finn via prompt til join."""
+        original_df = pl.DataFrame(
+            {
+                "observasjon_id": ["hubro-1", "fjellrev-1", "ulv-1", "dverggaas-1"],
+                "Art": ["Bubo bubo", "Vulpes lagopus", "Canis lupus", "Anser erythropus"],
+                "Navn": ["Hubro", None, "   ", "Dverggås"],
+                "Familie": ["Strigidae", "Canidae", "Canidae", "Anatidae"],
+                "Orden": ["Strigiformes", "Carnivora", "Carnivora", "Anseriformes"],
+            }
+        )
+
+        mangler_df = finn_mangler_navn(original_df)
+        assert mangler_df.get_column("Art").to_list() == ["Canis lupus", "Vulpes lagopus"], (
+            "NAVN-MTM-013 finn_mangler_navn skal gi sortert promptrekkefølge"
+        )
+
+        with patch.object(console, "print"), patch.object(Prompt, "ask", side_effect=["Ulv", "Fjellrev"]):
+            navn_mapping = prompt_mangler_navn(mangler_df)
+
+        result = join_navn_til_orginal_df(original_df, navn_mapping)
+
+        assert result.height == original_df.height, "NAVN-MTM-013 radantall skal være uendret"
+        assert result.get_column("observasjon_id").to_list() == original_df.get_column("observasjon_id").to_list(), (
+            "NAVN-MTM-013 radrekkefølge skal være uendret"
+        )
+        assert result.get_column("Navn").to_list() == ["Hubro", "Fjellrev", "Ulv", "Dverggås"], (
+            "NAVN-MTM-013 pipeline skal fylle manglende navn og bevare eksisterende"
+        )
+
+
+    test_join_navn_til_orginal_df_navn_mtm_009_010()
+    test_join_navn_til_orginal_df_navn_mtm_011_duplikate_arter()
+    test_join_navn_til_orginal_df_navn_mtm_012_tom_og_ekstra_mapping()
+    test_manglende_artsnavn_pipeline_navn_mtm_013()
+    return
 
 
 @app.cell(column=1, hide_code=True)
