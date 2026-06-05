@@ -1579,94 +1579,238 @@ def md_testmatrise_legg_til_kolonne_arteravnasjonal():
     return
 
 
-@app.function(hide_code=True)
-def test_legg_til_kolonne_arteravnasjonal():
-    sample_df = pl.DataFrame(
-        {
-            "species": ["Hubro", "Gråspurv", "Fjellrev", "Villmink", "Dverggås", "Pelekreps", "Krikkand", "Ukjent art"],
-            "Ansvarsarter": ["Ja", "Nei", "Nei", "Nei", "Ja", "Nei", "Nei", "Treff ikke funnet i ANF tabell "],
-            "Andre spesielt hensynskrevende arter": [
-                "Nei",
-                "Nei",
-                "Ja",
-                "Nei",
-                "Nei",
-                "Nei",
-                "Nei",
-                "Treff ikke funnet i ANF tabell ",
-            ],
-            "Hensynskrevende arter": [
-                "Nei",
-                "Nei",
-                "Nei",
-                "Nei",
-                "Nei",
-                "Nei",
-                "Ja",
-                "Treff ikke funnet i ANF tabell ",
-            ],
-            "Spesielle økologiske former": [
-                "Nei",
-                "Nei",
-                "Nei",
-                "Nei",
-                "Ja",
-                "Nei",
-                "Nei",
-                "Treff ikke funnet i ANF tabell ",
-            ],
-            "Datamangel": ["Nei", "Nei", "Nei", "Nei", "Nei", "Ja", "Nei", "Treff ikke funnet i ANF tabell "],
-            "Prioriterte arter": ["Ja", "Nei", "Nei", "Nei", "Nei", "Nei", "Nei", "Treff ikke funnet i ANF tabell "],
-            "Fredete arter": ["Ja", "Nei", "Nei", "Nei", "Nei", "Nei", "Nei", "Treff ikke funnet i ANF tabell "],
-            "Fremmede arter": ["Nei", "Nei", "Nei", "Ja", "Nei", "Nei", "Nei", "Treff ikke funnet i ANF tabell "],
-        }
-    )
+@app.cell(hide_code=True)
+def _():
+    def test_legg_til_kolonne_arteravnasjonal_anf_sum_mtm_001():
+        """ANF-SUM-MTM-001: enkel og sammensatt oppsummering."""
+        output_col = "Art av nasjonal forvaltningsinteresse (eks. rødlista)"
+        test_df = pl.DataFrame(
+            {
+                "art": ["ingen ANF-kriterier", "datamangel", "hubro"],
+                "Ansvarsarter": ["Nei", "Nei", "Ja"],
+                "Andre spesielt hensynskrevende arter": ["Nei", "Nei", "Nei"],
+                "Hensynskrevende arter": ["Nei", "Nei", "Nei"],
+                "Spesielle økologiske former": ["Nei", "Nei", "Nei"],
+                "Datamangel": ["Nei", "Ja", "Nei"],
+                "Prioriterte arter": ["Nei", "Nei", "Ja"],
+                "Fredete arter": ["Nei", "Nei", "Ja"],
+                "Fremmede arter": ["Nei", "Nei", "Nei"],
+            }
+        )
 
-    result = legg_til_kolonne_arteravnasjonal(sample_df)
+        result = legg_til_kolonne_arteravnasjonal(test_df)
 
-    # Column should exist. Henter alle kolonne navnene med .columns til en liste du tester mot (i.e. in "the list")
-    assert "Art av nasjonal forvaltningsinteresse" in result.columns
+        assert output_col in result.columns, "ANF-SUM-MTM-001 oppsummeringskolonnen skal finnes"
+        assert result.get_column(output_col).to_list() == [
+            "Nei",
+            "Datamangel",
+            "Ansvarsarter, Prioriterte arter, Fredete arter",
+        ], "ANF-SUM-MTM-001 feil oppsummering for 0, 1 eller flere Ja-verdier"
 
-    # Tar verdiene i kolonnen "art av nasjonal forvaltningsinteresse" og gjør verdiene for hver rad i kolonnen om til en liste med verdiene og en index som korrensponderer til raden/arten
-    values = result.get_column("Art av nasjonal forvaltningsinteresse").to_list()
 
-    # Unpacker (en egen python greie (må ha samme "lengde") lista inn i artene (som er de fra df), slik at disse får sine korrensponderende verdier fra ANF kolonnen i orginal df
-    hubro, graspurv, fjellrev, villmink, dverggas, pelekreps, krikkand, ukjent_art = values
+    test_legg_til_kolonne_arteravnasjonal_anf_sum_mtm_001()
+    return
 
-    # Kan da skrive de riktige "assertene" i testen
-    # Hubro: Ansvarsarter, Prioriterte arter, Fredete arter
-    assert "Ansvarsarter" in hubro
-    assert "Prioriterte arter" in hubro
-    assert "Fredete arter" in hubro
 
-    # Gråspurv: none → "Nei"
-    assert graspurv == "Nei"
+@app.cell(hide_code=True)
+def ANF_SUM_MTM_002():
+    def test_legg_til_kolonne_arteravnasjonal_anf_sum_mtm_002():
+        """ANF-SUM-MTM-002: alle kriterier er Ja og inngår i fast rekkefølge."""
+        output_col = "Art av nasjonal forvaltningsinteresse (eks. rødlista)"
+        category_columns = [
+            "Ansvarsarter",
+            "Andre spesielt hensynskrevende arter",
+            "Hensynskrevende arter",
+            "Spesielle økologiske former",
+            "Datamangel",
+            "Prioriterte arter",
+            "Fredete arter",
+            "Fremmede arter",
+        ]
+        test_df = pl.DataFrame({col: ["Ja"] for col in category_columns})
 
-    # Fjellrev: Andre spesielt hensynskrevende arter
-    assert fjellrev == "Andre spesielt hensynskrevende arter"
+        result = legg_til_kolonne_arteravnasjonal(test_df)
+        expected = ", ".join(category_columns)
 
-    # Villmink: Fremmede arter
-    assert villmink == "Fremmede arter"
+        assert result.height == 1, "ANF-SUM-MTM-002 radantall skal beholdes"
+        assert result.get_column(output_col).to_list() == [expected], (
+            "ANF-SUM-MTM-002 alle kriterier skal inngå én gang i fast rekkefølge"
+        )
 
-    # Dverggås: Ansvarsarter + Spesielle økologiske former
-    assert "Ansvarsarter" in dverggas
-    assert "Spesielle økologiske former" in dverggas
-    assert dverggas.count(",") == 1
 
-    # Pelekreps: Datamangel
-    assert pelekreps == "Datamangel"
+    test_legg_til_kolonne_arteravnasjonal_anf_sum_mtm_002()
+    return
 
-    # Krikkand: Hensynskrevende arter
-    assert krikkand == "Hensynskrevende arter"
 
-    # Ukjent art: Treff ikke funnet i ANF tabell
-    assert ukjent_art == "Treff ikke funnet i ANF tabell "
+@app.cell(hide_code=True)
+def ANF_SUM_MTM_003():
+    def test_legg_til_kolonne_arteravnasjonal_anf_sum_mtm_003():
+        """ANF-SUM-MTM-003: bare eksakt Ja telles som ANF-treff."""
+        output_col = "Art av nasjonal forvaltningsinteresse (eks. rødlista)"
+        ikke_treff = "Treff ikke funnet i ANF tabell "
+        test_df = pl.DataFrame(
+            {
+                "art": ["ingen eksakt Ja", "kun fredete er eksakt Ja"],
+                "Ansvarsarter": ["ja", ikke_treff],
+                "Andre spesielt hensynskrevende arter": [None, " JA "],
+                "Hensynskrevende arter": [" JA ", "Nei"],
+                "Spesielle økologiske former": [ikke_treff, "ja"],
+                "Datamangel": ["Nei", None],
+                "Prioriterte arter": ["", "TRUE"],
+                "Fredete arter": ["nei", "Ja"],
+                "Fremmede arter": ["1", ikke_treff],
+            }
+        )
+
+        result = legg_til_kolonne_arteravnasjonal(test_df)
+
+        assert result.get_column(output_col).to_list() == ["Nei", "Fredete arter"], (
+            "ANF-SUM-MTM-003 bare eksakt 'Ja' skal telles; andre verdier skal ignoreres"
+        )
+
+
+    test_legg_til_kolonne_arteravnasjonal_anf_sum_mtm_003()
+    return
+
+
+@app.cell(hide_code=True)
+def ANF_SUM_MTM_004():
+    def test_legg_til_kolonne_arteravnasjonal_anf_sum_mtm_004():
+        """ANF-SUM-MTM-004: radrekkefølge, duplikater og originalkolonner bevares."""
+        from polars.testing import assert_frame_equal
+
+        output_col = "Art av nasjonal forvaltningsinteresse (eks. rødlista)"
+        test_df = pl.DataFrame(
+            {
+                "obs_id": ["obs-1", "obs-2", "obs-2"],
+                "art": ["hubro", "gråspurv", "gråspurv"],
+                "Ansvarsarter": ["Ja", "Nei", "Nei"],
+                "Andre spesielt hensynskrevende arter": ["Nei", "Nei", "Nei"],
+                "Hensynskrevende arter": ["Nei", "Nei", "Nei"],
+                "Spesielle økologiske former": ["Nei", "Nei", "Nei"],
+                "Datamangel": ["Nei", "Nei", "Nei"],
+                "Prioriterte arter": ["Ja", "Nei", "Nei"],
+                "Fredete arter": ["Ja", "Nei", "Nei"],
+                "Fremmede arter": ["Nei", "Nei", "Nei"],
+                "ekstra_kolonne": [10, 20, 20],
+            }
+        )
+        original_cols = test_df.columns
+
+        result = legg_til_kolonne_arteravnasjonal(test_df)
+
+        assert result.height == test_df.height, "ANF-SUM-MTM-004 radantall skal beholdes"
+        assert result.columns == [*original_cols, output_col], (
+            "ANF-SUM-MTM-004 originalkolonner skal beholdes og ny kolonne legges til sist"
+        )
+        assert result.get_column("obs_id").to_list() == ["obs-1", "obs-2", "obs-2"], (
+            "ANF-SUM-MTM-004 radrekkefølge og duplikate observasjoner skal beholdes"
+        )
+        assert_frame_equal(result.select(original_cols), test_df)
+
+
+    test_legg_til_kolonne_arteravnasjonal_anf_sum_mtm_004()
+    return
+
+
+@app.cell(hide_code=True)
+def ANF_SUM_MTM_005():
+    def test_legg_til_kolonne_arteravnasjonal_anf_sum_mtm_005():
+        """ANF-SUM-MTM-005: tom input med riktig schema gir tom output med oppsummeringskolonne."""
+        output_col = "Art av nasjonal forvaltningsinteresse (eks. rødlista)"
+        category_columns = [
+            "Ansvarsarter",
+            "Andre spesielt hensynskrevende arter",
+            "Hensynskrevende arter",
+            "Spesielle økologiske former",
+            "Datamangel",
+            "Prioriterte arter",
+            "Fredete arter",
+            "Fremmede arter",
+        ]
+        test_df = pl.DataFrame({col: pl.Series(col, [], dtype=pl.Utf8) for col in category_columns})
+
+        result = legg_til_kolonne_arteravnasjonal(test_df)
+
+        assert result.height == 0, "ANF-SUM-MTM-005 tom input skal gi tom output"
+        assert result.columns == [*category_columns, output_col], (
+            "ANF-SUM-MTM-005 oppsummeringskolonnen skal finnes i tom output"
+        )
+        assert result.schema[output_col] == pl.Utf8, "ANF-SUM-MTM-005 oppsummeringskolonnen skal være tekst"
+
+
+    test_legg_til_kolonne_arteravnasjonal_anf_sum_mtm_005()
+    return
+
+
+@app.cell(hide_code=True)
+def ANF_SUM_MTM_006():
+    def test_legg_til_kolonne_arteravnasjonal_anf_sum_mtm_006():
+        """ANF-SUM-MTM-006: manglende kriteriekolonne feiler tydelig."""
+        category_columns = [
+            "Ansvarsarter",
+            "Andre spesielt hensynskrevende arter",
+            "Hensynskrevende arter",
+            "Spesielle økologiske former",
+            "Datamangel",
+            "Prioriterte arter",
+            "Fredete arter",
+            "Fremmede arter",
+        ]
+
+        def assert_missing_column_raises(column_name: str) -> None:
+            test_df = pl.DataFrame({col: ["Nei"] for col in category_columns if col != column_name})
+            try:
+                legg_til_kolonne_arteravnasjonal(test_df)
+            except Exception as exc:
+                assert column_name in str(exc), (
+                    f"ANF-SUM-MTM-006 feilmeldingen for manglende {column_name} skal nevne kolonnen; fikk {exc!r}"
+                )
+            else:
+                raise AssertionError(f"ANF-SUM-MTM-006 manglende {column_name} skulle gi feil")
+
+        assert_missing_column_raises("Ansvarsarter")
+        assert_missing_column_raises("Fremmede arter")
+
+
+    test_legg_til_kolonne_arteravnasjonal_anf_sum_mtm_006()
+    return
 
 
 @app.cell(hide_code=True)
 def md_rydd_navn_og_datatyper():
     mo.md(r"""
     ### Rydder opp i navn og datatyper
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def md_testmatrise_rydd_navn_og_datatyper():
+    mo.md(r"""
+    ### Testmatrise: `rydd_navn_og_datatyper`
+
+    **Tiltenkt oppførsel:** Funksjonen skal lage sluttabellen med norske kolonnenavn, riktige datatyper, faste sluttkolonner og sortering etter `Verdi M1941` og `Kategori`.
+
+    **Kilde til sannhet:** Godkjent matrise 2026-06-05, funksjonsdocstring, pipeline-kontrakt fra forrige steg, godkjent nytt ANF-kolonnenavn og håndberegnede små eksempler.
+
+    **Inputkontrakt:** `df_input` er en `pl.DataFrame` etter ANF-beriking, med kolonnene `Verdi M1941`, `category`, `Art av nasjonal forvaltningsinteresse (eks. rødlista)`, `preferredPopularName`, `validScientificName`, `individualCount`, `behavior`, `dateTimeCollected`, `coordinateUncertaintyInMeters`, taksonomi-, lokalitets-, koordinat- og ANF-kriteriekolonner.
+
+    **Outputkontrakt:** Returnerer `pl.DataFrame` med kun sluttbrukerrettede kolonner i fast rekkefølge. Radantall beholdes, men rader sorteres. Ekstra inputkolonner droppes. `Verdi M1941` sorteres slik: `Svært stor verdi`, `Stor verdi`, `Middels verdi`, `Noe verdi`, `Ingen`, der ukjente/default-verdier kommer sist.
+
+    **Godkjenningsstatus:** Godkjent av bruker 2026-06-05.
+
+    **Revisjonspolicy:** Hvis forventet oppførsel endres, oppdater og godkjenn denne matrisen på nytt før tester eller funksjonslogikk endres.
+
+    | ID | Scenario | Input | Forventet output/invariant | Toleranse | Hvorfor det betyr noe | Feilmodus testen beskytter mot | Testcelle |
+    |---|---|---|---|---|---|---|---|
+    | RYDD-MTM-001 | Sluttschema og kolonnerekkefølge | Liten komplett DataFrame med alle påkrevde kolonner + én ekstra kolonne | Kun sluttkolonner beholdes, i godkjent rekkefølge. ANF-kolonnen heter `Art av nasjonal forvaltningsinteresse (eks. rødlista)` | Eksakt kolonneliste | Sluttskjemaet er kontrakten mot eksport/analyse | Gammelt ANF-kolonnenavn, feil kolonnerekkefølge eller lekkasje av hjelpekolonner | `RYDD_MTM_001` |
+    | RYDD-MTM-002 | Sortering etter M1941 og kategori | Rader i usortert rekkefølge med `Svært stor verdi`, `Stor verdi`, `Middels verdi`, `Noe verdi`, `Ingen` og ukjent verdi | Sortert etter M1941-prioritet først: 0–4, ukjente verdier sist; deretter kategori-prioritet. Like sorteringsnøkler beholder inputrekkefølge | Eksakt radrekkefølge | Riktig prioritering er viktig for sluttpresentasjon | Feil sorteringsrekkefølge, `Ingen` feilplassert eller ustabil sortering | `RYDD_MTM_002` |
+    | RYDD-MTM-003 | `individualCount` → `Antall` | Verdier `"6"`, `None`, `"3/1"` | `"6" → 6`, `None → 1`, `"3/1" → 3`; dtype `Int64` | Eksakt verdi og dtype | Antall brukes i summeringer og må være numerisk | Null tolkes feil, brøkformat håndteres feil eller dtype blir tekst | `RYDD_MTM_003` |
+    | RYDD-MTM-004 | Dato, usikkerhet og koordinater | Datetime, null/usikkerhet, latitude/longitude med komma og punktum | `dateTimeCollected → Observert dato` som `pl.Date`; `coordinateUncertaintyInMeters → Int64`; koordinater → `Float64` | Eksakt dtype, dato og numerisk toleranse `1e-6` | Sluttdata må ha riktige typer for kart og filtrering | Koordinater forblir tekst, dato beholder tid eller usikkerhet får feil type | `RYDD_MTM_004` |
+    | RYDD-MTM-005 | Omdøping og passthrough-verdier | Kjente verdier for artsnavn, taksonomi, lokalitet, ANF-kriterier, geometry og ID | Norske kolonnenavn får riktige verdier etter sortering; ANF-kriteriekolonner og geometry bevares | Eksakt tekst-/listekontroll | Sikrer at sluttkolonner peker på riktig kildekolonne | Feil alias, verdier forskyves etter sortering eller kriterier mistes | `RYDD_MTM_005` |
+    | RYDD-MTM-006 | Tom input med riktig schema | Tom DataFrame med alle påkrevde inputkolonner og riktige datatyper | Returnerer tom DataFrame med sluttkolonner og forventede dtypes | Eksakt schema-/kolonnesjekk | Pipeline bør tåle tomme datasett etter filtrering | Tom input gir crash eller manglende outputkolonner | `RYDD_MTM_006` |
+    | RYDD-MTM-007 | Manglende obligatorisk kolonne | DataFrame mangler én påkrevd inputkolonne | Feiler med exception som nevner manglende kolonne | Exception og tekstutdrag | Inputfeil skal være tydelige | Skjult feil eller utydelig kontraktsbrudd ved manglende inputkolonne | `RYDD_MTM_007` |
     """)
     return
 
@@ -1693,7 +1837,7 @@ def rydd_navn_og_datatyper(df_input: pl.DataFrame) -> pl.DataFrame:
         "Stor verdi": 1,
         "Middels verdi": 2,
         "Noe verdi": 3,
-        "Ikke definert": 4,
+        "Ingen": 4,
     }
 
     KATEGORI_ORDER = {
@@ -1776,221 +1920,512 @@ def rydd_navn_og_datatyper(df_input: pl.DataFrame) -> pl.DataFrame:
     return df_alle_funksjoner_ferdig_kjørt
 
 
-@app.function(hide_code=True)
-def test_rydd_navn_og_datatyper():
+@app.cell(hide_code=True)
+def rydd_navn_og_datatyper_testhjelpere():
+    def rydd_navn_og_datatyper_forventede_kolonner() -> list[str]:
+        """Returner godkjent sluttkolonnerekkefølge for rydd_navn_og_datatyper-testene."""
+        return [
+            "Verdi M1941",
+            "Kategori",
+            "Art av nasjonal forvaltningsinteresse (eks. rødlista)",
+            "Navn",
+            "Art",
+            "Antall",
+            "Atferd",
+            "Observert dato",
+            "Usikkerhet meter",
+            "Familie",
+            "Orden",
+            "Artsgruppe",
+            "Observatør",
+            "Lokalitet",
+            "Kommune",
+            "Fylke",
+            "Taksonomisk nivå",
+            "Andre spesielt hensynskrevende arter",
+            "Hensynskrevende arter",
+            "Spesielle økologiske former",
+            "Prioriterte arter",
+            "Fredete arter",
+            "Datamangel",
+            "Ansvarsarter",
+            "Fremmede arter",
+            "latitude",
+            "longitude",
+            "geometry",
+            "Artens ID",
+        ]
 
-    # ── Build test input with all required columns ──────────────────
-    test_df = pl.DataFrame(
-        {
-            "category": ["LC", "NT", "EN"],
-            "Art av nasjonal forvaltningsinteresse": ["Ja", "Nei", "Ja"],
-            "Verdi M1941": ["C", "D", "B"],
-            "preferredPopularName": ["dompap", "kråke", "tjeld"],
-            "validScientificName": [
-                "Pyrrhula pyrrhula",
-                "Corvus cornix",
-                "Haematopus ostralegus",
-            ],
-            "individualCount": ["6", None, "3/1"],
-            "behavior": ["singing", None, "flying"],
-            "dateTimeCollected": [
-                datetime(2022, 5, 15, 10, 30, 0),
-                datetime(2023, 7, 4, 14, 0, 0),
-                datetime(2019, 6, 1, 7, 4, 19),
-            ],
-            "coordinateUncertaintyInMeters": [300, None, 9],
-            "FamilieNavn": ["Fringillidae", "Corvidae", "Haematopodidae"],
-            "OrdenNavn": ["Passeriformes", "Passeriformes", "Charadriiformes"],
-            "taxonGroupName": ["Fugler", "Fugler", "Fugler"],
-            "collector": ["Ola Nordmann", "Kari Nordmann", None],
-            "locality": ["Sommarøyveien 21", "Strengelvågfjorden", None],
-            "municipality": ["Øksnes", "Øksnes", "Øksnes"],
-            "county": ["Nordland", "Nordland", "Nordland"],
-            "scientificNameRank": ["species", "species", "species"],
-            "Ansvarsarter": ["Nei", "Nei", "Ja"],
-            "Andre spesielt hensynskrevende arter": ["Nei", "Ja", "Nei"],
-            "Spesielle økologiske former": ["Nei", "Nei", "Ja"],
-            "Prioriterte arter": ["Nei", "Nei", "Ja"],
-            "Fredete arter": ["Nei", "Nei", "Nei"],
-            "Fremmede arter": ["Nei", "Nei", "Nei"],
-            "latitude": ["68,904168", "68,962388", "68.974144"],
-            "longitude": ["15,066918", "15,148183", "14.947151"],
-            "geometry": [
-                "POINT (502688 7643678)",
-                "POINT (505937 7650175)",
-                "POINT (497884 7651480)",
-            ],
-            "validScientificNameId": [4263, 4164, 3664],
+
+    def lag_rydd_navn_og_datatyper_input(rad_overrides: list[dict[str, object]] | None = None) -> pl.DataFrame:
+        """Lag komplett, liten inputfixture for rydd_navn_og_datatyper."""
+        if rad_overrides is None:
+            rad_overrides = [{}]
+
+        grunnrad = {
+            "Verdi M1941": "Noe verdi",
+            "category": "LC",
+            "Art av nasjonal forvaltningsinteresse (eks. rødlista)": "Nei",
+            "preferredPopularName": "standardnavn",
+            "validScientificName": "Species standardus",
+            "individualCount": "1",
+            "behavior": None,
+            "dateTimeCollected": datetime(2020, 1, 1, 12, 0, 0),
+            "coordinateUncertaintyInMeters": None,
+            "FamilieNavn": "Standardfamilie",
+            "OrdenNavn": "Standardorden",
+            "taxonGroupName": "Fugler",
+            "collector": "Standard observatør",
+            "locality": "Standardlokalitet",
+            "municipality": "Standardkommune",
+            "county": "Standardfylke",
+            "scientificNameRank": "species",
+            "Andre spesielt hensynskrevende arter": "Nei",
+            "Hensynskrevende arter": "Nei",
+            "Spesielle økologiske former": "Nei",
+            "Prioriterte arter": "Nei",
+            "Fredete arter": "Nei",
+            "Datamangel": "Nei",
+            "Ansvarsarter": "Nei",
+            "Fremmede arter": "Nei",
+            "latitude": "68,000000",
+            "longitude": "15,000000",
+            "geometry": "POINT (0 0)",
+            "validScientificNameId": 1000,
+            "ekstra_inputkolonne": "skal droppes",
         }
+
+        rader = []
+        for indeks, overrides in enumerate(rad_overrides):
+            rad = {
+                **grunnrad,
+                "preferredPopularName": f"standardnavn-{indeks}",
+                "validScientificName": f"Species standardus {indeks}",
+                "validScientificNameId": 1000 + indeks,
+                "geometry": f"POINT ({indeks} {indeks})",
+            }
+            rad.update(overrides)
+            rader.append(rad)
+
+        return pl.DataFrame(rader)
+
+
+    def lag_tom_rydd_navn_og_datatyper_input() -> pl.DataFrame:
+        """Lag tom inputfixture med riktig schema for rydd_navn_og_datatyper."""
+        tekstkolonner = [
+            "Verdi M1941",
+            "category",
+            "Art av nasjonal forvaltningsinteresse (eks. rødlista)",
+            "preferredPopularName",
+            "validScientificName",
+            "individualCount",
+            "behavior",
+            "FamilieNavn",
+            "OrdenNavn",
+            "taxonGroupName",
+            "collector",
+            "locality",
+            "municipality",
+            "county",
+            "scientificNameRank",
+            "Andre spesielt hensynskrevende arter",
+            "Hensynskrevende arter",
+            "Spesielle økologiske former",
+            "Prioriterte arter",
+            "Fredete arter",
+            "Datamangel",
+            "Ansvarsarter",
+            "Fremmede arter",
+            "latitude",
+            "longitude",
+            "geometry",
+            "ekstra_inputkolonne",
+        ]
+        kolonner = {kolonne: pl.Series(kolonne, [], dtype=pl.Utf8) for kolonne in tekstkolonner}
+        kolonner["dateTimeCollected"] = pl.Series("dateTimeCollected", [], dtype=pl.Datetime)
+        kolonner["coordinateUncertaintyInMeters"] = pl.Series("coordinateUncertaintyInMeters", [], dtype=pl.Int64)
+        kolonner["validScientificNameId"] = pl.Series("validScientificNameId", [], dtype=pl.Int64)
+        return pl.DataFrame(kolonner)
+
+    return (
+        lag_rydd_navn_og_datatyper_input,
+        lag_tom_rydd_navn_og_datatyper_input,
+        rydd_navn_og_datatyper_forventede_kolonner,
     )
 
-    test_result = rydd_navn_og_datatyper(test_df)
 
-    # ── Antall rader skal være uendret ──────────────────────────────
-    assert test_result.height == 3, f"Forventet 3 rader, fikk {test_result.height}"
+@app.cell(hide_code=True)
+def RYDD_MTM_001(
+    lag_rydd_navn_og_datatyper_input,
+    rydd_navn_og_datatyper_forventede_kolonner,
+):
+    def test_rydd_navn_og_datatyper_rydd_mtm_001():
+        """RYDD-MTM-001: sluttschema og kolonnerekkefølge."""
+        test_df = lag_rydd_navn_og_datatyper_input(
+            [
+                {
+                    "preferredPopularName": "dompap",
+                    "validScientificName": "Pyrrhula pyrrhula",
+                    "Art av nasjonal forvaltningsinteresse (eks. rødlista)": "Ansvarsarter",
+                }
+            ]
+        )
 
-    # ── Alle forventede kolonner skal finnes
-    expected_cols = [
-        "Kategori",
-        "Art av nasjonal forvaltningsinteresse",
-        "Verdi M1941",
-        "Navn",
-        "Art",
-        "Antall",
-        "Atferd",
-        "Observert dato",
-        "Usikkerhet meter",
-        "Familie",
-        "Orden",
-        "Artsgruppe",
-        "Observatør",
-        "Lokalitet",
-        "Kommune",
-        "Fylke",
-        "Taksonomisk nivå",
-        "Ansvarsarter",
-        "Andre spesielt hensynskrevende arter",
-        "Spesielle økologiske former",
-        "Prioriterte arter",
-        "Fredete arter",
-        "Fremmede arter",
-        "latitude",
-        "longitude",
-        "geometry",
-        "Artens ID",
-    ]
+        result = rydd_navn_og_datatyper(test_df)
+        expected_cols = rydd_navn_og_datatyper_forventede_kolonner()
 
-    for col in expected_cols:
-        assert col in test_result.columns, f"Kolonne '{col}' mangler i resultatet"
+        assert result.height == test_df.height, "RYDD-MTM-001 radantall skal beholdes"
+        assert result.columns == expected_cols, (
+            f"RYDD-MTM-001 forventet sluttkolonner i fast rekkefølge; fikk {result.columns}"
+        )
+        assert "ekstra_inputkolonne" not in result.columns, "RYDD-MTM-001 ekstra inputkolonner skal droppes"
+        assert "Art av nasjonal forvaltningsinteresse" not in result.columns, (
+            "RYDD-MTM-001 gammelt ANF-kolonnenavn uten '(eks. rødlista)' skal ikke være i output"
+        )
+        assert "Art av nasjonal forvaltningsinteresse (eks. rødlista)" in result.columns, (
+            "RYDD-MTM-001 nytt ANF-kolonnenavn skal være i output"
+        )
 
-    assert len(test_result.columns) == len(expected_cols), (
-        f"Forventet {len(expected_cols)} kolonner, fikk {len(test_result.columns)}: {test_result.columns}"
-    )
 
-    # ── Test kolonneomnavning og sortert rekkefølge ─────────────────
-    # Funksjonen sorterer radene etter Verdi M1941 og Kategori.
-    # Testdataene har ukjente M1941-verdier (B/C/D), så sortering skjer etter Kategori.
-    # category → Kategori
-    assert test_result.get_column("Kategori").to_list() == ["EN", "NT", "LC"], (
-        "category skal omdøpes til Kategori og sorteres etter kategori"
-    )
+    test_rydd_navn_og_datatyper_rydd_mtm_001()
+    return
 
-    # preferredPopularName → Navn
-    assert test_result.get_column("Navn").to_list() == ["tjeld", "kråke", "dompap"], (
-        "preferredPopularName skal omdøpes til Navn"
-    )
 
-    # validScientificName → Art
-    assert test_result.get_column("Art").to_list() == [
-        "Haematopus ostralegus",
-        "Corvus cornix",
-        "Pyrrhula pyrrhula",
-    ], "validScientificName skal omdøpes til Art"
+@app.cell(hide_code=True)
+def RYDD_MTM_002(lag_rydd_navn_og_datatyper_input):
+    def test_rydd_navn_og_datatyper_rydd_mtm_002():
+        """RYDD-MTM-002: sortering etter Verdi M1941 og kategori."""
+        test_df = lag_rydd_navn_og_datatyper_input(
+            [
+                {"validScientificName": "noe-lc", "Verdi M1941": "Noe verdi", "category": "LC"},
+                {"validScientificName": "svært-en", "Verdi M1941": "Svært stor verdi", "category": "EN"},
+                {"validScientificName": "ingen-se", "Verdi M1941": "Ingen", "category": "SE"},
+                {"validScientificName": "stor-lc", "Verdi M1941": "Stor verdi", "category": "LC"},
+                {"validScientificName": "middels-nt", "Verdi M1941": "Middels verdi", "category": "NT"},
+                {"validScientificName": "noe-cr-1", "Verdi M1941": "Noe verdi", "category": "CR"},
+                {"validScientificName": "svært-cr", "Verdi M1941": "Svært stor verdi", "category": "CR"},
+                {"validScientificName": "ukjent-cr", "Verdi M1941": "Ukjent verdi", "category": "CR"},
+                {"validScientificName": "ingen-lc", "Verdi M1941": "Ingen", "category": "LC"},
+                {"validScientificName": "noe-cr-2", "Verdi M1941": "Noe verdi", "category": "CR"},
+            ]
+        )
 
-    # validScientificNameId → Artens ID
-    assert test_result.get_column("Artens ID").to_list() == [3664, 4164, 4263], (
-        "validScientificNameId skal omdøpes til Artens ID"
-    )
+        result = rydd_navn_og_datatyper(test_df)
 
-    # FamilieNavn → Familie
-    assert test_result.get_column("Familie").to_list() == [
-        "Haematopodidae",
-        "Corvidae",
-        "Fringillidae",
-    ], "FamilieNavn skal omdøpes til Familie"
+        assert result.get_column("Art").to_list() == [
+            "svært-cr",
+            "svært-en",
+            "stor-lc",
+            "middels-nt",
+            "noe-cr-1",
+            "noe-cr-2",
+            "noe-lc",
+            "ingen-lc",
+            "ingen-se",
+            "ukjent-cr",
+        ], "RYDD-MTM-002 rader skal sorteres etter M1941, kategori og stabil inputrekkefølge"
+        assert result.get_column("Verdi M1941").to_list() == [
+            "Svært stor verdi",
+            "Svært stor verdi",
+            "Stor verdi",
+            "Middels verdi",
+            "Noe verdi",
+            "Noe verdi",
+            "Noe verdi",
+            "Ingen",
+            "Ingen",
+            "Ukjent verdi",
+        ], "RYDD-MTM-002 'Ingen' skal komme etter 'Noe verdi' og ukjente verdier sist"
+        assert result.get_column("Kategori").to_list() == [
+            "CR",
+            "EN",
+            "LC",
+            "NT",
+            "CR",
+            "CR",
+            "LC",
+            "LC",
+            "SE",
+            "CR",
+        ], "RYDD-MTM-002 kategori skal sorteres innenfor samme M1941-verdi"
 
-    # OrdenNavn → Orden
-    assert test_result.get_column("Orden").to_list() == [
-        "Charadriiformes",
-        "Passeriformes",
-        "Passeriformes",
-    ], "OrdenNavn skal omdøpes til Orden"
 
-    # Spesielle okologiske former → Spesielle økologiske former (ø)
-    assert "Spesielle økologiske former" in test_result.columns, (
-        "'Spesielle okologiske former' skal omdøpes til 'Spesielle økologiske former' med ø"
-    )
+    test_rydd_navn_og_datatyper_rydd_mtm_002()
+    return
 
-    # ── Test individualCount-transformasjon → Antall ────────────────
-    antall = test_result.get_column("Antall")
-    assert antall.dtype == pl.Int64, f"Antall skal være Int64, fikk {antall.dtype}"
 
-    # "3/1" → 3 (split på '/' og ta første) - sortert til rad 0
-    assert antall[0] == 3, f"individualCount '3/1' skal bli 3, fikk {antall[0]}"
+@app.cell(hide_code=True)
+def RYDD_MTM_003(lag_rydd_navn_og_datatyper_input):
+    def test_rydd_navn_og_datatyper_rydd_mtm_003():
+        """RYDD-MTM-003: individualCount transformeres til Antall."""
+        test_df = lag_rydd_navn_og_datatyper_input(
+            [
+                {
+                    "individualCount": "6",
+                    "validScientificName": "antall-seks",
+                    "Verdi M1941": "Middels verdi",
+                    "category": "LC",
+                },
+                {
+                    "individualCount": None,
+                    "validScientificName": "antall-null",
+                    "Verdi M1941": "Middels verdi",
+                    "category": "LC",
+                },
+                {
+                    "individualCount": "3/1",
+                    "validScientificName": "antall-brøk",
+                    "Verdi M1941": "Middels verdi",
+                    "category": "LC",
+                },
+            ]
+        )
 
-    # None → 1 (fill_null med "1") - sortert til rad 1
-    assert antall[1] == 1, f"individualCount null skal bli 1, fikk {antall[1]}"
+        result = rydd_navn_og_datatyper(test_df)
+        antall = result.get_column("Antall")
 
-    # "6" → 6 - sortert til rad 2
-    assert antall[2] == 6, f"individualCount '6' skal bli 6, fikk {antall[2]}"
+        assert antall.dtype == pl.Int64, f"RYDD-MTM-003 Antall skal være Int64, fikk {antall.dtype}"
+        assert antall.to_list() == [6, 1, 3], "RYDD-MTM-003 individualCount skal bli [6, 1, 3] for '6', null og '3/1'"
+        assert result.get_column("Art").to_list() == ["antall-seks", "antall-null", "antall-brøk"], (
+            "RYDD-MTM-003 like sorteringsnøkler skal beholde inputrekkefølge"
+        )
 
-    # ── Test dateTimeCollected → Observert dato (date) ──────────────
-    obs_dato = test_result.get_column("Observert dato")
-    assert obs_dato.dtype == pl.Date, f"Observert dato skal være Date, fikk {obs_dato.dtype}"
-    assert obs_dato[0] == dt_date(2019, 6, 1), f"Dato for sortert rad 0 skal være 2019-06-01, fikk {obs_dato[0]}"
-    assert obs_dato[1] == dt_date(2023, 7, 4), f"Dato for sortert rad 1 skal være 2023-07-04, fikk {obs_dato[1]}"
-    assert obs_dato[2] == dt_date(2022, 5, 15), f"Dato for sortert rad 2 skal være 2022-05-15, fikk {obs_dato[2]}"
 
-    # ── Test coordinateUncertaintyInMeters → Usikkerhet meter ───────
-    usikkerhet = test_result.get_column("Usikkerhet meter")
-    assert usikkerhet.dtype == pl.Int64, f"Usikkerhet meter skal være Int64, fikk {usikkerhet.dtype}"
-    assert usikkerhet[0] == 9, f"Usikkerhet for sortert rad 0 skal være 9, fikk {usikkerhet[0]}"
-    assert usikkerhet[1] is None, f"Usikkerhet for sortert rad 1 skal være None, fikk {usikkerhet[1]}"
-    assert usikkerhet[2] == 300, f"Usikkerhet for sortert rad 2 skal være 300, fikk {usikkerhet[2]}"
+    test_rydd_navn_og_datatyper_rydd_mtm_003()
+    return
 
-    # ── Test latitude komma → punktum → Float64 ────────────────────
-    lat = test_result.get_column("latitude")
-    assert lat.dtype == pl.Float64, f"latitude skal være Float64, fikk {lat.dtype}"
-    # Latitude med punktum skal også fungere - sortert til rad 0
-    assert abs(lat[0] - 68.974144) < 1e-5, f"latitude '68.974144' skal bli 68.974144, fikk {lat[0]}"
-    assert abs(lat[1] - 68.962388) < 1e-5, f"latitude '68,962388' skal bli 68.962388, fikk {lat[1]}"
-    assert abs(lat[2] - 68.904168) < 1e-5, f"latitude '68,904168' skal bli 68.904168, fikk {lat[2]}"
 
-    # ── Test longitude komma → punktum → Float64 ───────────────────
-    lon = test_result.get_column("longitude")
-    assert lon.dtype == pl.Float64, f"longitude skal være Float64, fikk {lon.dtype}"
-    assert abs(lon[0] - 14.947151) < 1e-5, f"longitude '14.947151' skal bli 14.947151, fikk {lon[0]}"
-    assert abs(lon[1] - 15.148183) < 1e-5, f"longitude '15,148183' skal bli 15.148183, fikk {lon[1]}"
-    assert abs(lon[2] - 15.066918) < 1e-5, f"longitude '15,066918' skal bli 15.066918, fikk {lon[2]}"
+@app.cell(hide_code=True)
+def RYDD_MTM_004(lag_rydd_navn_og_datatyper_input):
+    def test_rydd_navn_og_datatyper_rydd_mtm_004():
+        """RYDD-MTM-004: dato, usikkerhet og koordinater får riktige typer."""
+        test_df = lag_rydd_navn_og_datatyper_input(
+            [
+                {
+                    "validScientificName": "rad-med-komma",
+                    "dateTimeCollected": datetime(2022, 5, 15, 10, 30, 0),
+                    "coordinateUncertaintyInMeters": 300,
+                    "latitude": "68,904168",
+                    "longitude": "15,066918",
+                    "Verdi M1941": "Middels verdi",
+                    "category": "LC",
+                },
+                {
+                    "validScientificName": "rad-med-punktum-og-null",
+                    "dateTimeCollected": datetime(2023, 7, 4, 14, 0, 0),
+                    "coordinateUncertaintyInMeters": None,
+                    "latitude": "68.962388",
+                    "longitude": "15.148183",
+                    "Verdi M1941": "Middels verdi",
+                    "category": "LC",
+                },
+            ]
+        )
 
-    # ── Test at kolonner som ikke omdøpes beholder verdier ──────────
-    assert test_result.get_column("Atferd").to_list() == ["flying", None, "singing"], (
-        "behavior skal omdøpes til Atferd med riktige verdier"
-    )
-    assert test_result.get_column("Artsgruppe").to_list() == [
-        "Fugler",
-        "Fugler",
-        "Fugler",
-    ], "taxonGroupName skal omdøpes til Artsgruppe"
+        result = rydd_navn_og_datatyper(test_df)
 
-    assert test_result.get_column("Kommune").to_list() == [
-        "Øksnes",
-        "Øksnes",
-        "Øksnes",
-    ], "municipality skal omdøpes til Kommune"
+        obs_dato = result.get_column("Observert dato")
+        assert obs_dato.dtype == pl.Date, f"RYDD-MTM-004 Observert dato skal være Date, fikk {obs_dato.dtype}"
+        assert obs_dato.to_list() == [dt_date(2022, 5, 15), dt_date(2023, 7, 4)], (
+            "RYDD-MTM-004 dateTimeCollected skal konverteres til dato uten klokkeslett"
+        )
 
-    assert test_result.get_column("Fylke").to_list() == [
-        "Nordland",
-        "Nordland",
-        "Nordland",
-    ], "county skal omdøpes til Fylke"
+        usikkerhet = result.get_column("Usikkerhet meter")
+        assert usikkerhet.dtype == pl.Int64, f"RYDD-MTM-004 Usikkerhet meter skal være Int64, fikk {usikkerhet.dtype}"
+        assert usikkerhet.to_list() == [300, None], "RYDD-MTM-004 usikkerhet skal castes til Int64 og bevare null"
 
-    # ── Test at passthrough-kolonner ikke endres ────────────────────
-    assert test_result.get_column("geometry").to_list() == [
-        "POINT (497884 7651480)",
-        "POINT (505937 7650175)",
-        "POINT (502688 7643678)",
-    ], "geometry skal beholde sine verdier i sortert radrekkefølge"
+        lat = result.get_column("latitude")
+        lon = result.get_column("longitude")
+        assert lat.dtype == pl.Float64, f"RYDD-MTM-004 latitude skal være Float64, fikk {lat.dtype}"
+        assert lon.dtype == pl.Float64, f"RYDD-MTM-004 longitude skal være Float64, fikk {lon.dtype}"
+        assert abs(lat[0] - 68.904168) < 1e-6, f"RYDD-MTM-004 latitude med komma feil: {lat[0]}"
+        assert abs(lat[1] - 68.962388) < 1e-6, f"RYDD-MTM-004 latitude med punktum feil: {lat[1]}"
+        assert abs(lon[0] - 15.066918) < 1e-6, f"RYDD-MTM-004 longitude med komma feil: {lon[0]}"
+        assert abs(lon[1] - 15.148183) < 1e-6, f"RYDD-MTM-004 longitude med punktum feil: {lon[1]}"
 
-    assert test_result.get_column("Art av nasjonal forvaltningsinteresse").to_list() == [
-        "Ja",
-        "Nei",
-        "Ja",
-    ], "Art av nasjonal forvaltningsinteresse skal beholde sine verdier"
 
-    assert test_result.get_column("Verdi M1941").to_list() == ["B", "D", "C"], (
-        "Verdi M1941 skal beholde sine verdier i sortert radrekkefølge"
-    )
+    test_rydd_navn_og_datatyper_rydd_mtm_004()
+    return
+
+
+@app.cell(hide_code=True)
+def RYDD_MTM_005(lag_rydd_navn_og_datatyper_input):
+    def test_rydd_navn_og_datatyper_rydd_mtm_005():
+        """RYDD-MTM-005: omdøping og passthrough-verdier bevares etter sortering."""
+        output_col = "Art av nasjonal forvaltningsinteresse (eks. rødlista)"
+        test_df = lag_rydd_navn_og_datatyper_input(
+            [
+                {
+                    "Verdi M1941": "Noe verdi",
+                    "category": "LC",
+                    output_col: "Ansvarsarter",
+                    "preferredPopularName": "dompap",
+                    "validScientificName": "Pyrrhula pyrrhula",
+                    "behavior": "singing",
+                    "FamilieNavn": "Fringillidae",
+                    "OrdenNavn": "Passeriformes",
+                    "taxonGroupName": "Fugler",
+                    "collector": "Ola Nordmann",
+                    "locality": "Sommarøyveien 21",
+                    "municipality": "Øksnes",
+                    "county": "Nordland",
+                    "scientificNameRank": "species",
+                    "Ansvarsarter": "Ja",
+                    "Andre spesielt hensynskrevende arter": "Nei",
+                    "Hensynskrevende arter": "Nei",
+                    "Spesielle økologiske former": "Nei",
+                    "Prioriterte arter": "Nei",
+                    "Fredete arter": "Nei",
+                    "Datamangel": "Nei",
+                    "Fremmede arter": "Nei",
+                    "geometry": "POINT (502688 7643678)",
+                    "validScientificNameId": 4263,
+                },
+                {
+                    "Verdi M1941": "Svært stor verdi",
+                    "category": "EN",
+                    output_col: "Prioriterte arter, Fredete arter",
+                    "preferredPopularName": "tjeld",
+                    "validScientificName": "Haematopus ostralegus",
+                    "behavior": "flying",
+                    "FamilieNavn": "Haematopodidae",
+                    "OrdenNavn": "Charadriiformes",
+                    "taxonGroupName": "Fugler",
+                    "collector": "Kari Nordmann",
+                    "locality": "Strengelvågfjorden",
+                    "municipality": "Øksnes",
+                    "county": "Nordland",
+                    "scientificNameRank": "species",
+                    "Ansvarsarter": "Nei",
+                    "Andre spesielt hensynskrevende arter": "Ja",
+                    "Hensynskrevende arter": "Nei",
+                    "Spesielle økologiske former": "Ja",
+                    "Prioriterte arter": "Ja",
+                    "Fredete arter": "Ja",
+                    "Datamangel": "Nei",
+                    "Fremmede arter": "Nei",
+                    "geometry": "POINT (497884 7651480)",
+                    "validScientificNameId": 3664,
+                },
+            ]
+        )
+
+        result = rydd_navn_og_datatyper(test_df)
+
+        assert result.get_column("Kategori").to_list() == ["EN", "LC"], "RYDD-MTM-005 category skal bli Kategori"
+        assert result.get_column("Navn").to_list() == ["tjeld", "dompap"], "RYDD-MTM-005 preferredPopularName skal bli Navn"
+        assert result.get_column("Art").to_list() == ["Haematopus ostralegus", "Pyrrhula pyrrhula"], (
+            "RYDD-MTM-005 validScientificName skal bli Art"
+        )
+        assert result.get_column("Artens ID").to_list() == [3664, 4263], (
+            "RYDD-MTM-005 validScientificNameId skal bli Artens ID"
+        )
+        assert result.get_column("Familie").to_list() == ["Haematopodidae", "Fringillidae"], (
+            "RYDD-MTM-005 FamilieNavn skal bli Familie"
+        )
+        assert result.get_column("Orden").to_list() == ["Charadriiformes", "Passeriformes"], (
+            "RYDD-MTM-005 OrdenNavn skal bli Orden"
+        )
+        assert result.get_column("Artsgruppe").to_list() == ["Fugler", "Fugler"], (
+            "RYDD-MTM-005 taxonGroupName skal bli Artsgruppe"
+        )
+        assert result.get_column("Observatør").to_list() == ["Kari Nordmann", "Ola Nordmann"], (
+            "RYDD-MTM-005 collector skal bli Observatør"
+        )
+        assert result.get_column("Lokalitet").to_list() == ["Strengelvågfjorden", "Sommarøyveien 21"], (
+            "RYDD-MTM-005 locality skal bli Lokalitet"
+        )
+        assert result.get_column("Kommune").to_list() == ["Øksnes", "Øksnes"], "RYDD-MTM-005 municipality skal bli Kommune"
+        assert result.get_column("Fylke").to_list() == ["Nordland", "Nordland"], "RYDD-MTM-005 county skal bli Fylke"
+        assert result.get_column("Taksonomisk nivå").to_list() == ["species", "species"], (
+            "RYDD-MTM-005 scientificNameRank skal bli Taksonomisk nivå"
+        )
+        assert result.get_column(output_col).to_list() == ["Prioriterte arter, Fredete arter", "Ansvarsarter"], (
+            "RYDD-MTM-005 ANF-oppsummeringskolonnen skal bevares med nytt navn"
+        )
+        assert result.get_column("Prioriterte arter").to_list() == ["Ja", "Nei"], (
+            "RYDD-MTM-005 Prioriterte arter skal bevares"
+        )
+        assert result.get_column("Fredete arter").to_list() == ["Ja", "Nei"], "RYDD-MTM-005 Fredete arter skal bevares"
+        assert result.get_column("Ansvarsarter").to_list() == ["Nei", "Ja"], "RYDD-MTM-005 Ansvarsarter skal bevares"
+        assert result.get_column("Andre spesielt hensynskrevende arter").to_list() == ["Ja", "Nei"], (
+            "RYDD-MTM-005 Andre spesielt hensynskrevende arter skal bevares"
+        )
+        assert result.get_column("Spesielle økologiske former").to_list() == ["Ja", "Nei"], (
+            "RYDD-MTM-005 Spesielle økologiske former skal bevares"
+        )
+        assert result.get_column("geometry").to_list() == ["POINT (497884 7651480)", "POINT (502688 7643678)"], (
+            "RYDD-MTM-005 geometry skal bevares i sortert radrekkefølge"
+        )
+
+
+    test_rydd_navn_og_datatyper_rydd_mtm_005()
+    return
+
+
+@app.cell(hide_code=True)
+def RYDD_MTM_006(
+    lag_tom_rydd_navn_og_datatyper_input,
+    rydd_navn_og_datatyper_forventede_kolonner,
+):
+    def test_rydd_navn_og_datatyper_rydd_mtm_006():
+        """RYDD-MTM-006: tom input med riktig schema gir tom sluttabell."""
+        test_df = lag_tom_rydd_navn_og_datatyper_input()
+
+        result = rydd_navn_og_datatyper(test_df)
+        expected_cols = rydd_navn_og_datatyper_forventede_kolonner()
+
+        assert result.height == 0, "RYDD-MTM-006 tom input skal gi tom output"
+        assert result.columns == expected_cols, "RYDD-MTM-006 tom output skal ha godkjent sluttkolonnerekkefølge"
+
+        expected_dtypes = {
+            "Verdi M1941": pl.Utf8,
+            "Kategori": pl.Utf8,
+            "Art av nasjonal forvaltningsinteresse (eks. rødlista)": pl.Utf8,
+            "Navn": pl.Utf8,
+            "Art": pl.Utf8,
+            "Antall": pl.Int64,
+            "Atferd": pl.Utf8,
+            "Observert dato": pl.Date,
+            "Usikkerhet meter": pl.Int64,
+            "latitude": pl.Float64,
+            "longitude": pl.Float64,
+            "Artens ID": pl.Int64,
+        }
+        for column_name, expected_dtype in expected_dtypes.items():
+            assert result.schema[column_name] == expected_dtype, (
+                f"RYDD-MTM-006 {column_name} skal ha dtype {expected_dtype}, fikk {result.schema[column_name]}"
+            )
+
+
+    test_rydd_navn_og_datatyper_rydd_mtm_006()
+    return
+
+
+@app.cell(hide_code=True)
+def RYDD_MTM_007(lag_rydd_navn_og_datatyper_input):
+    def test_rydd_navn_og_datatyper_rydd_mtm_007():
+        """RYDD-MTM-007: manglende obligatorisk inputkolonne feiler tydelig."""
+        full_df = lag_rydd_navn_og_datatyper_input()
+
+        def assert_missing_column_raises(column_name: str) -> None:
+            test_df = full_df.drop(column_name)
+            try:
+                rydd_navn_og_datatyper(test_df)
+            except Exception as exc:
+                assert column_name in str(exc), (
+                    f"RYDD-MTM-007 feilmeldingen for manglende {column_name} skal nevne kolonnen; fikk {exc!r}"
+                )
+            else:
+                raise AssertionError(f"RYDD-MTM-007 manglende {column_name} skulle gi feil")
+
+        assert_missing_column_raises("Art av nasjonal forvaltningsinteresse (eks. rødlista)")
+        assert_missing_column_raises("Hensynskrevende arter")
+        assert_missing_column_raises("validScientificNameId")
+
+
+    test_rydd_navn_og_datatyper_rydd_mtm_007()
+    return
 
 
 @app.cell(hide_code=True)
