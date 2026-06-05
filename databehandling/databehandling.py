@@ -971,7 +971,7 @@ def md_testmatrise_legg_til_arter_av_nasjonal_forvaltningsinteresse():
 
     **Outputkontrakt:** Returnerer `pl.DataFrame` med alle originalrader og originalkolonner bevart, pluss kriteriekolonnene `Prioriterte arter`, `Fredete arter`, `Andre spesielt hensynskrevende arter`, `Spesielle økologiske former`, `Datamangel`, `Hensynskrevende arter`, `Ansvarsarter`, `Fremmede arter`, samt `verdi_m1941_nasjonal` og `Verdi M1941`. Interne join-kolonner skal ikke være med i output.
 
-    **Godkjenningsstatus:** Godkjent av bruker 2026-06-05.
+    **Godkjenningsstatus:** Godkjent av bruker 2026-06-05; ANF-MTM-013 lagt til etter brukeravklaring samme dato.
 
     **Revisjonspolicy:** Hvis forventet oppførsel endres, oppdater og godkjenn denne matrisen på nytt før testene endres.
 
@@ -989,6 +989,7 @@ def md_testmatrise_legg_til_arter_av_nasjonal_forvaltningsinteresse():
     | ANF-MTM-010 | Rad-/kolonnekontrakt med duplikater | Flere rader inkl. duplikat-ID og ukjent art | Radantall og radrekkefølge beholdes; originalkolonner beholdes; interne join-kolonner droppes; kriterier kun `Ja`/`Nei` | Eksakt liste-/kolonnesjekk | Beriking skal ikke endre observasjonsgrunnlaget | Join mister/dupliserer/sorterer rader eller lekker hjelpekolonner | `ANF_MTM_010` |
     | ANF-MTM-011 | Tom input med riktig schema | Tom `pl.DataFrame` med nødvendige kolonner | Returnerer tom DataFrame med kriterie- og verdikolonner | Eksakt schema-/kolonnesjekk | Pipeline-steg bør tåle tomme datasett etter filtrering | Tom input gir crash eller manglende outputkolonner | `ANF_MTM_011` |
     | ANF-MTM-012 | Manglende obligatoriske kolonner | DataFrame mangler én av `validScientificNameId`, `validScientificName`, `verdi_rodliste_artskart` | Feiler med exception som nevner manglende kolonne | Exception og tekstutdrag | Inputfeil skal være tydelige | Skjult feil eller utydelig feilmelding ved kontraktsbrudd | `ANF_MTM_012` |
+    | ANF-MTM-013 | Preferansekjede for `Verdi M1941` | To rader: dverggås `3478` med rødlisteverdi `Noe verdi`, og ukjent art med rødlisteverdi `Middels verdi` | Dverggås får `verdi_m1941_nasjonal=Svært stor verdi` og `Verdi M1941=Svært stor verdi`; ukjent art får `verdi_m1941_nasjonal=null` og `Verdi M1941=Middels verdi` | Eksakt tekst-/nullsjekk | Dokumenterer at ANF/Mdir-verdi prioriteres når den finnes, mens rødlisteverdien bare er fallback uten ANF-treff | Rødlisteverdi overstyrer ANF/Mdir-verdi, eller arter uten ANF-treff mister rødlistefallback | `ANF_MTM_013` |
     """)
     return
 
@@ -1458,6 +1459,41 @@ def ANF_MTM_012(legg_til_arter_av_nasjonal_forvaltningsinteresse):
 
 
 @app.cell(hide_code=True)
+def ANF_MTM_013(legg_til_arter_av_nasjonal_forvaltningsinteresse):
+    def test_legg_til_arter_av_nasjonal_forvaltningsinteresse_anf_mtm_013():
+        """ANF-MTM-013: Verdi M1941 bruker ANF/Mdir først, deretter rødlistefallback."""
+        test_df = pl.DataFrame(
+            {
+                "validScientificNameId": [3478, 999999],
+                "validScientificName": ["Anser erythropus", "Nonexistent species"],
+                "verdi_rodliste_artskart": ["Noe verdi", "Middels verdi"],
+            }
+        )
+
+        result = legg_til_arter_av_nasjonal_forvaltningsinteresse(test_df)
+        rows_by_id = {row["validScientificNameId"]: row for row in result.iter_rows(named=True)}
+
+        assert result.height == 2, "ANF-MTM-013 skal bevare begge inputrader"
+
+        dverggaas = rows_by_id[3478]
+        assert dverggaas["verdi_rodliste_artskart"] == "Noe verdi", "ANF-MTM-013 original rødlisteverdi skal beholdes"
+        assert dverggaas["verdi_m1941_nasjonal"] == "Svært stor verdi", "ANF-MTM-013 dverggås skal få ANF/Mdir-verdi"
+        assert dverggaas["Verdi M1941"] == "Svært stor verdi", (
+            "ANF-MTM-013 ANF/Mdir-verdi skal prioriteres over rødlisteverdi når ANF-treff finnes"
+        )
+
+        ukjent_art = rows_by_id[999999]
+        assert ukjent_art["verdi_m1941_nasjonal"] is None, "ANF-MTM-013 ukjent art skal mangle ANF/Mdir-verdi"
+        assert ukjent_art["Verdi M1941"] == "Middels verdi", (
+            "ANF-MTM-013 rødlisteverdi skal brukes som fallback når ANF-treff mangler"
+        )
+
+
+    test_legg_til_arter_av_nasjonal_forvaltningsinteresse_anf_mtm_013()
+    return
+
+
+@app.cell(hide_code=True)
 def md_oppsummer_anf_kriterier():
     mo.md(r"""
     ### Lager en ny kolonne som inneholder mulige verdier av arter av nasjonal forvaltning
@@ -1512,6 +1548,35 @@ def legg_til_kolonne_arteravnasjonal(input_df: pl.DataFrame) -> pl.DataFrame:
     # You need .list.join(", ") because pl.concat_list() gives you the computer-code format (a list object), and you want the human-readable format (a single text string). Hvor du da joiner tingene i listen med ,
 
     return output_df
+
+
+@app.cell(hide_code=True)
+def md_testmatrise_legg_til_kolonne_arteravnasjonal():
+    mo.md(r"""
+    ### Testmatrise: `legg_til_kolonne_arteravnasjonal`
+
+    **Tiltenkt oppførsel:** Funksjonen skal oppsummere ANF-kriteriekolonner til én lesbar tekstkolonne. Bare verdier som er eksakt `"Ja"` tas med. Hvis ingen kriterier er `"Ja"`, blir oppsummeringen `"Nei"`.
+
+    **Kilde til sannhet:** Godkjent matrise 2026-06-05, funksjonsdocstring, godkjent ANF-kontrakt fra forrige steg og håndberegnede små eksempler.
+
+    **Inputkontrakt:** `input_df` er en `pl.DataFrame` med kriteriekolonnene `Ansvarsarter`, `Andre spesielt hensynskrevende arter`, `Hensynskrevende arter`, `Spesielle økologiske former`, `Datamangel`, `Prioriterte arter`, `Fredete arter` og `Fremmede arter`. Ordinær pipeline koder disse som `"Ja"`/`"Nei"`, men funksjonen skal bare telle eksakt `"Ja"`.
+
+    **Outputkontrakt:** Returnerer `pl.DataFrame` med samme rader, radrekkefølge og originalkolonner bevart, pluss tekstkolonnen `Art av nasjonal forvaltningsinteresse (eks. rødlista)`. Kolonnen inneholder kommaseparerte kriterinavn i fast rekkefølge, eller `"Nei"` når ingen kriterier er eksakt `"Ja"`.
+
+    **Godkjenningsstatus:** Godkjent av bruker 2026-06-05.
+
+    **Revisjonspolicy:** Hvis forventet oppførsel endres, oppdater og godkjenn denne matrisen på nytt før tester eller funksjonslogikk endres.
+
+    | ID | Scenario | Input | Forventet output/invariant | Toleranse | Hvorfor det betyr noe | Feilmodus testen beskytter mot | Testcelle |
+    |---|---|---|---|---|---|---|---|
+    | ANF-SUM-MTM-001 | Enkel og sammensatt oppsummering | Rader med 0, 1 og flere `"Ja"` i kriteriekolonnene | `0 Ja → "Nei"`, `1 Ja → kriteriets navn`, flere `Ja → "Ansvarsarter, Prioriterte arter, Fredete arter"` i fast rekkefølge | Eksakt tekstlikhet | Dekker hovedformålet med funksjonen | Feil kriterier tas med, eller `"Nei"` håndteres feil | `ANF_SUM_MTM_001` |
+    | ANF-SUM-MTM-002 | Alle kriterier er `"Ja"` | Én rad der alle 8 kriteriekolonner er `"Ja"` | Alle 8 kriterier inngår én gang, kommaseparert, i denne rekkefølgen: `Ansvarsarter`, `Andre spesielt hensynskrevende arter`, `Hensynskrevende arter`, `Spesielle økologiske former`, `Datamangel`, `Prioriterte arter`, `Fredete arter`, `Fremmede arter` | Eksakt tekstlikhet | Sikrer komplett dekning av alle kriteriekolonner | Manglende kriteriekolonne, feil rekkefølge eller feil separator | `ANF_SUM_MTM_002` |
+    | ANF-SUM-MTM-003 | Streng Ja-policy | Verdier som `"Nei"`, `None`, `"ja"`, `" JA "` og `"Treff ikke funnet i ANF tabell "` | Ingen av disse tas med; hvis ingen eksakt `"Ja"` finnes blir output `"Nei"` | Eksakt tekstlikhet | Dokumenterer at bare eksakt `"Ja"` betyr ANF-treff | Ugyldige eller uklare verdier blir feilaktig tolket som treff | `ANF_SUM_MTM_003` |
+    | ANF-SUM-MTM-004 | Rad- og kolonnekontrakt | DataFrame med ekstra kolonner og dupliserte rader | Radantall, radrekkefølge og originalkolonner beholdes uendret; ny kolonne legges til | Eksakt schema-/rekkefølgesjekk | Funksjonen skal bare legge til oppsummering, ikke endre observasjoner | Rader droppes, sorteres, dupliseres eller originaldata endres | `ANF_SUM_MTM_004` |
+    | ANF-SUM-MTM-005 | Tom input med riktig schema | Tom `pl.DataFrame` med alle påkrevde kriteriekolonner | Returnerer tom DataFrame med oppsummeringskolonnen `Art av nasjonal forvaltningsinteresse (eks. rødlista)` | Eksakt schema-/kolonnesjekk | Pipeline bør tåle tomme datasett etter filtrering | Tom input gir crash eller manglende outputkolonne | `ANF_SUM_MTM_005` |
+    | ANF-SUM-MTM-006 | Manglende obligatorisk kriteriekolonne | DataFrame som mangler én påkrevd kriteriekolonne | Feiler med exception som nevner manglende kolonne | Exception og tekstutdrag | Inputfeil skal være tydelige | Skjult feil eller utydelig kontraktsbrudd ved manglende inputkolonne | `ANF_SUM_MTM_006` |
+    """)
+    return
 
 
 @app.function(hide_code=True)
@@ -1657,7 +1722,7 @@ def rydd_navn_og_datatyper(df_input: pl.DataFrame) -> pl.DataFrame:
             [
                 pl.col("Verdi M1941"),
                 pl.col("category").alias("Kategori"),
-                pl.col("Art av nasjonal forvaltningsinteresse"),
+                pl.col("Art av nasjonal forvaltningsinteresse (eks. rødlista)"),
                 pl.col("preferredPopularName").alias("Navn"),
                 pl.col("validScientificName").alias("Art"),
                 pl.col("individualCount")
