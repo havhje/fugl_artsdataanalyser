@@ -3128,6 +3128,7 @@ def md_testmatrise_les_data_og_kjor_alle_funksjoner():
 def pipeline_testhjelpere():
     from contextlib import contextmanager
     from pathlib import Path
+    import types
 
 
     PIPELINE_KRITERIEKOLONNER = [
@@ -3221,6 +3222,59 @@ def pipeline_testhjelpere():
         return fake_anf
 
 
+    def _lag_lukkingscelle(verdi: object):
+        """Lag én closure-celle slik pipeline-tester kan bytte celleavhengigheter eksplisitt."""
+
+        def hent_verdi():
+            return verdi
+
+        return hent_verdi.__closure__[0]
+
+
+    def lag_pipeline_testfunksjon(
+        produksjonsfunksjon,
+        *,
+        process_and_enrich_data_fn=None,
+        legg_til_anf_fn=None,
+    ):
+        """Returner pipeline-funksjon med testavhengigheter bundet i closure.
+
+        Dette er en test-only seam for marimo-cellen: produksjonsfunksjonen endres
+        ikke, men testene slipper upålitelig `__globals__`-patching.
+        """
+        replacements = {}
+        if process_and_enrich_data_fn is not None:
+            replacements["process_and_enrich_data"] = process_and_enrich_data_fn
+        if legg_til_anf_fn is not None:
+            replacements["legg_til_arter_av_nasjonal_forvaltningsinteresse"] = legg_til_anf_fn
+
+        freevars = produksjonsfunksjon.__code__.co_freevars
+        closure = produksjonsfunksjon.__closure__ or ()
+        if len(freevars) != len(closure):
+            raise AssertionError("PIPE-test kunne ikke lese closure for pipeline-funksjonen")
+
+        mangler = sorted(set(replacements) - set(freevars))
+        if mangler:
+            raise AssertionError(
+                "PIPE-test prøver å erstatte avhengigheter som ikke finnes i pipeline-closure: " + ", ".join(mangler)
+            )
+
+        ny_closure = tuple(
+            _lag_lukkingscelle(replacements[navn]) if navn in replacements else celle
+            for navn, celle in zip(freevars, closure)
+        )
+        testfunksjon = types.FunctionType(
+            produksjonsfunksjon.__code__,
+            produksjonsfunksjon.__globals__,
+            name=produksjonsfunksjon.__name__,
+            argdefs=produksjonsfunksjon.__defaults__,
+            closure=ny_closure,
+        )
+        testfunksjon.__kwdefaults__ = produksjonsfunksjon.__kwdefaults__
+        testfunksjon.__annotations__ = dict(getattr(produksjonsfunksjon, "__annotations__", {}))
+        return testfunksjon
+
+
     @contextmanager
     def pipeline_fake_status(*_args, **_kwargs):
         """No-op context manager for å dempe Rich status i pipeline-tester."""
@@ -3230,6 +3284,7 @@ def pipeline_testhjelpere():
         lag_pipeline_artskart_df,
         lag_pipeline_fake_anf,
         lag_pipeline_fake_process,
+        lag_pipeline_testfunksjon,
         pipeline_fake_status,
         skriv_pipeline_artskart_csv,
     )
@@ -3241,6 +3296,7 @@ def PIPE_MTM_001(
     lag_pipeline_artskart_df,
     lag_pipeline_fake_anf,
     lag_pipeline_fake_process,
+    lag_pipeline_testfunksjon,
     les_data_og_kjør_alle_funksjoner,
     pipeline_fake_status,
     rydd_navn_og_datatyper_forventede_kolonner,
@@ -3276,21 +3332,19 @@ def PIPE_MTM_001(
                 },
             ]
         )
+        test_pipeline = lag_pipeline_testfunksjon(
+            les_data_og_kjør_alle_funksjoner,
+            process_and_enrich_data_fn=lag_pipeline_fake_process(calls),
+            legg_til_anf_fn=lag_pipeline_fake_anf(calls),
+        )
 
         with tempfile.TemporaryDirectory() as tmpdir:
             csv_sti = skriv_pipeline_artskart_csv(tmpdir, test_df)
             with (
-                patch.dict(
-                    les_data_og_kjør_alle_funksjoner.__globals__,
-                    {
-                        "process_and_enrich_data": lag_pipeline_fake_process(calls),
-                        "legg_til_arter_av_nasjonal_forvaltningsinteresse": lag_pipeline_fake_anf(calls),
-                    },
-                ),
                 patch.object(console, "status", pipeline_fake_status),
                 patch.object(console, "print", fake_print),
             ):
-                result = les_data_og_kjør_alle_funksjoner(csv_sti, filter_year=2020)
+                result = test_pipeline(csv_sti, filter_year=2020)
 
         assert isinstance(result, pl.DataFrame), "PIPE-MTM-001 skal returnere Polars DataFrame"
         assert result.columns == rydd_navn_og_datatyper_forventede_kolonner(), (
@@ -3329,6 +3383,7 @@ def PIPE_MTM_002(
     lag_pipeline_artskart_df,
     lag_pipeline_fake_anf,
     lag_pipeline_fake_process,
+    lag_pipeline_testfunksjon,
     les_data_og_kjør_alle_funksjoner,
     pipeline_fake_status,
     skriv_pipeline_artskart_csv,
@@ -3368,21 +3423,19 @@ def PIPE_MTM_002(
                 },
             ]
         )
+        test_pipeline = lag_pipeline_testfunksjon(
+            les_data_og_kjør_alle_funksjoner,
+            process_and_enrich_data_fn=lag_pipeline_fake_process(calls),
+            legg_til_anf_fn=lag_pipeline_fake_anf(calls),
+        )
 
         with tempfile.TemporaryDirectory() as tmpdir:
             csv_sti = skriv_pipeline_artskart_csv(tmpdir, test_df)
             with (
-                patch.dict(
-                    les_data_og_kjør_alle_funksjoner.__globals__,
-                    {
-                        "process_and_enrich_data": lag_pipeline_fake_process(calls),
-                        "legg_til_arter_av_nasjonal_forvaltningsinteresse": lag_pipeline_fake_anf(calls),
-                    },
-                ),
                 patch.object(console, "status", pipeline_fake_status),
                 patch.object(console, "print", fake_print),
             ):
-                result = les_data_og_kjør_alle_funksjoner(csv_sti, filter_year=1990)
+                result = test_pipeline(csv_sti, filter_year=1990)
 
         assert result.height == 1, "PIPE-MTM-002 bare én rad skal overleve årfilteret"
         assert result.get_column("Artens ID").to_list() == [2002], (
@@ -3411,6 +3464,7 @@ def PIPE_MTM_002(
 def PIPE_MTM_003(
     console,
     lag_pipeline_artskart_df,
+    lag_pipeline_testfunksjon,
     les_data_og_kjør_alle_funksjoner,
     pipeline_fake_status,
     skriv_pipeline_artskart_csv,
@@ -3419,19 +3473,35 @@ def PIPE_MTM_003(
         """PIPE-MTM-003: manglende obligatorisk Artskart-kolonne feiler tidlig."""
         import tempfile
 
+        calls: list[str] = []
+
+        def fail_process(df: pl.DataFrame) -> pl.DataFrame:
+            calls.append("process_and_enrich_data")
+            raise AssertionError("PIPE-MTM-003 process_and_enrich_data skal ikke kalles ved ugyldig input")
+
+        def fail_anf(df: pl.DataFrame) -> pl.DataFrame:
+            calls.append("legg_til_arter_av_nasjonal_forvaltningsinteresse")
+            raise AssertionError("PIPE-MTM-003 ANF-steg skal ikke kalles ved ugyldig input")
+
         test_df = lag_pipeline_artskart_df().drop("category")
+        test_pipeline = lag_pipeline_testfunksjon(
+            les_data_og_kjør_alle_funksjoner,
+            process_and_enrich_data_fn=fail_process,
+            legg_til_anf_fn=fail_anf,
+        )
 
         with tempfile.TemporaryDirectory() as tmpdir:
             csv_sti = skriv_pipeline_artskart_csv(tmpdir, test_df)
             with patch.object(console, "status", pipeline_fake_status):
                 with pytest.raises(ValueError) as exc_info:
-                    les_data_og_kjør_alle_funksjoner(csv_sti, filter_year=2020)
+                    test_pipeline(csv_sti, filter_year=2020)
 
         feilmelding = str(exc_info.value)
         assert "Mangler obligatoriske Artskart-kolonner" in feilmelding, (
             "PIPE-MTM-003 skal feile med tydelig kontraktsmelding"
         )
         assert "category" in feilmelding, "PIPE-MTM-003 feilmeldingen skal nevne manglende category-kolonne"
+        assert calls == [], "PIPE-MTM-003 skal stoppe før downstream-steg ved manglende inputkolonne"
 
 
     test_les_data_og_kjør_alle_funksjoner_pipe_mtm_003()
@@ -3442,6 +3512,7 @@ def PIPE_MTM_003(
 def PIPE_MTM_004(
     console,
     lag_pipeline_artskart_df,
+    lag_pipeline_testfunksjon,
     les_data_og_kjør_alle_funksjoner,
     pipeline_fake_status,
     skriv_pipeline_artskart_csv,
@@ -3450,17 +3521,33 @@ def PIPE_MTM_004(
         """PIPE-MTM-004: ugyldig category stoppes av inputvalidering."""
         import tempfile
 
+        calls: list[str] = []
+
+        def fail_process(df: pl.DataFrame) -> pl.DataFrame:
+            calls.append("process_and_enrich_data")
+            raise AssertionError("PIPE-MTM-004 process_and_enrich_data skal ikke kalles ved ugyldig category")
+
+        def fail_anf(df: pl.DataFrame) -> pl.DataFrame:
+            calls.append("legg_til_arter_av_nasjonal_forvaltningsinteresse")
+            raise AssertionError("PIPE-MTM-004 ANF-steg skal ikke kalles ved ugyldig category")
+
         test_df = lag_pipeline_artskart_df([{"category": "XYZ"}])
+        test_pipeline = lag_pipeline_testfunksjon(
+            les_data_og_kjør_alle_funksjoner,
+            process_and_enrich_data_fn=fail_process,
+            legg_til_anf_fn=fail_anf,
+        )
 
         with tempfile.TemporaryDirectory() as tmpdir:
             csv_sti = skriv_pipeline_artskart_csv(tmpdir, test_df)
             with patch.object(console, "status", pipeline_fake_status):
                 with pytest.raises(ValueError) as exc_info:
-                    les_data_og_kjør_alle_funksjoner(csv_sti, filter_year=2020)
+                    test_pipeline(csv_sti, filter_year=2020)
 
         feilmelding = str(exc_info.value)
         assert "Ukjente category-verdier" in feilmelding, "PIPE-MTM-004 skal feile på category-domenet"
         assert "XYZ" in feilmelding, "PIPE-MTM-004 feilmeldingen skal nevne ugyldig category-verdi"
+        assert calls == [], "PIPE-MTM-004 skal stoppe før downstream-steg ved ugyldig category"
 
 
     test_les_data_og_kjør_alle_funksjoner_pipe_mtm_004()
@@ -3471,6 +3558,7 @@ def PIPE_MTM_004(
 def PIPE_MTM_005(
     console,
     lag_pipeline_artskart_df,
+    lag_pipeline_testfunksjon,
     les_data_og_kjør_alle_funksjoner,
     pipeline_fake_status,
     skriv_pipeline_artskart_csv,
@@ -3479,7 +3567,17 @@ def PIPE_MTM_005(
         """PIPE-MTM-005: ingen gyldige ID-er etter filtrering feiler tydelig."""
         import tempfile
 
+        calls: list[str] = []
+
+        def fail_anf(df: pl.DataFrame) -> pl.DataFrame:
+            calls.append("legg_til_arter_av_nasjonal_forvaltningsinteresse")
+            raise AssertionError("PIPE-MTM-005 ANF-steg skal ikke kalles når NorTaxa-beriking feiler")
+
         test_df = lag_pipeline_artskart_df([{"validScientificNameId": "ikke-id"}])
+        test_pipeline = lag_pipeline_testfunksjon(
+            les_data_og_kjør_alle_funksjoner,
+            legg_til_anf_fn=fail_anf,
+        )
 
         with tempfile.TemporaryDirectory() as tmpdir:
             csv_sti = skriv_pipeline_artskart_csv(tmpdir, test_df)
@@ -3488,12 +3586,13 @@ def PIPE_MTM_005(
                 patch.object(console, "print", lambda *args, **kwargs: None),
             ):
                 with pytest.raises(ValueError) as exc_info:
-                    les_data_og_kjør_alle_funksjoner(csv_sti, filter_year=2020)
+                    test_pipeline(csv_sti, filter_year=2020)
 
         feilmelding = str(exc_info.value)
         assert "Ingen gyldige validScientificNameId-verdier" in feilmelding, (
             "PIPE-MTM-005 skal feile når filtrert input ikke har gyldige art-ID-er"
         )
+        assert calls == [], "PIPE-MTM-005 skal stoppe før ANF når beriking feiler"
 
 
     test_les_data_og_kjør_alle_funksjoner_pipe_mtm_005()
@@ -3504,6 +3603,7 @@ def PIPE_MTM_005(
 def PIPE_MTM_006(
     console,
     lag_pipeline_artskart_df,
+    lag_pipeline_testfunksjon,
     les_data_og_kjør_alle_funksjoner,
     pipeline_fake_status,
     rydd_navn_og_datatyper_forventede_kolonner,
@@ -3513,13 +3613,19 @@ def PIPE_MTM_006(
         """PIPE-MTM-006: tomt datasett etter årfilter gir tom slutt-DataFrame."""
         import tempfile
 
+        calls: list[str] = []
         utskrifter: list[str] = []
 
         def fake_print(*args, **kwargs):
             utskrifter.append(" ".join(str(arg) for arg in args))
 
         def fail_process(df: pl.DataFrame) -> pl.DataFrame:
+            calls.append("process_and_enrich_data")
             raise AssertionError("PIPE-MTM-006 process_and_enrich_data skal ikke kalles når årfilteret gir 0 rader")
+
+        def fail_anf(df: pl.DataFrame) -> pl.DataFrame:
+            calls.append("legg_til_arter_av_nasjonal_forvaltningsinteresse")
+            raise AssertionError("PIPE-MTM-006 ANF-steg skal ikke kalles når årfilteret gir 0 rader")
 
         test_df = lag_pipeline_artskart_df(
             [
@@ -3527,24 +3633,26 @@ def PIPE_MTM_006(
                 {"validScientificNameId": 3002, "dateTimeCollected": datetime(1989, 12, 31, 23, 59, 0)},
             ]
         )
+        test_pipeline = lag_pipeline_testfunksjon(
+            les_data_og_kjør_alle_funksjoner,
+            process_and_enrich_data_fn=fail_process,
+            legg_til_anf_fn=fail_anf,
+        )
 
         with tempfile.TemporaryDirectory() as tmpdir:
             csv_sti = skriv_pipeline_artskart_csv(tmpdir, test_df)
             with (
-                patch.dict(
-                    les_data_og_kjør_alle_funksjoner.__globals__,
-                    {"process_and_enrich_data": fail_process},
-                ),
                 patch.object(console, "status", pipeline_fake_status),
                 patch.object(console, "print", fake_print),
             ):
-                result = les_data_og_kjør_alle_funksjoner(csv_sti, filter_year=1990)
+                result = test_pipeline(csv_sti, filter_year=1990)
 
         assert isinstance(result, pl.DataFrame), "PIPE-MTM-006 skal returnere Polars DataFrame"
         assert result.height == 0, "PIPE-MTM-006 årfilter uten treff skal gi tom DataFrame"
         assert result.columns == rydd_navn_og_datatyper_forventede_kolonner(), (
             "PIPE-MTM-006 tomt resultat skal ha godkjente sluttkolonner"
         )
+        assert calls == [], "PIPE-MTM-006 skal ikke kalle NorTaxa- eller ANF-steg når årfilteret gir 0 rader"
         assert any("Filtrert til 0 rader" in tekst for tekst in utskrifter), (
             "PIPE-MTM-006 konsollen skal melde at filteret ga 0 rader"
         )
