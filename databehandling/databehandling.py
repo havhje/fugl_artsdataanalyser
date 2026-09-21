@@ -49,6 +49,11 @@ def opprett_console():
 def md_artskart_inputkontrakt():
     mo.md(r"""
     ### Henter tillatte kolonner fra artskart
+
+    `proxyId` er kildens observasjons-ID og bevares uendret som `obs_id`
+    gjennom årfilter, beriking og eksport. ID-en må være utfylt og unik.
+    Observasjoner ved samme koordinat beholdes som separate poster.
+    Dette følger godkjent trinn 2 i QGIS–marimo-planen (7. september 2026).
     """)
     return
 
@@ -57,6 +62,7 @@ def md_artskart_inputkontrakt():
 def get_required_artskart_columns() -> set[str]:
     """Returner Artskart-kolonnene som inngår i input-kontrakten."""
     return {
+        "proxyId",
         "category",
         "validScientificNameId",
         "validScientificName",
@@ -75,6 +81,19 @@ def get_required_artskart_columns() -> set[str]:
         "scientificNameRank",
         "behavior",
     }
+
+
+@app.function(hide_code=True)
+def legg_til_observasjons_id(df: pl.DataFrame) -> pl.DataFrame:
+    """Preserve Artskart's source record identity independently of row order."""
+    if "proxyId" not in df.columns:
+        raise ValueError("Mangler proxyId fra Artskart; observasjons-ID kan ikke utledes fra art eller koordinat.")
+    ids = df["proxyId"].cast(pl.String)
+    if ids.null_count() or ids.str.strip_chars().eq("").any():
+        raise ValueError("proxyId må være utfylt for hver observasjon.")
+    if ids.n_unique() != df.height:
+        raise ValueError("Dupliserte proxyId-verdier må avklares før eksport.")
+    return df.with_columns(ids.alias("obs_id"))
 
 
 @app.function(hide_code=True)
@@ -175,18 +194,18 @@ def definer_nortaxa_hjelpefunksjoner(DESIRED_RANKS, NORTAXA_API_BASE_URL):
 
     def extract_hierarchy_and_ids(
         api_data: dict[str, Any] | None,
-    ) -> tuple[dict[str, str], int | None, int | None]:
-        """Trekk ut taksonomisk hierarki og familie-/orden-ID-er fra NorTaxa.
+    ) -> tuple[dict[str, str | None], int | None, int | None, int | None]:
+        """Trekk ut hierarki og vitenskapelige navne-ID-er fra NorTaxa.
 
         Args:
             api_data: Dekodet JSON-respons fra NorTaxa, eller None.
 
         Returns:
-            Tuple med hierarki per rang, familie-ID og orden-ID. Manglende verdier
-            settes til None.
+            Tuple med hierarki per rang, familie-ID, orden-ID og arts-ID.
+            Arts-ID er foreldrearten for underarter. Manglende ranger gir None.
         """
         hierarchy = {}
-        family_id = order_id = None
+        family_id = order_id = parent_species_id = None
 
         if api_data and "higherClassification" in api_data:
             for level in api_data["higherClassification"]:
@@ -198,8 +217,10 @@ def definer_nortaxa_hjelpefunksjoner(DESIRED_RANKS, NORTAXA_API_BASE_URL):
                     family_id = level.get("scientificNameId")
                 elif rank == "Order":
                     order_id = level.get("scientificNameId")
+                elif rank == "Species":
+                    parent_species_id = level.get("scientificNameId")
 
-        return hierarchy, family_id, order_id
+        return hierarchy, family_id, order_id, parent_species_id
 
 
     def get_norwegian_name(api_data: dict[str, Any] | None) -> str | None:
@@ -245,7 +266,8 @@ def definer_process_and_enrich_data(
 
         Returns:
             DataFrame med originalradene, taksonomikolonner for ønskede ranger,
-            `FamilieNavn` og `OrdenNavn`.
+            `FamilieNavn`, `OrdenNavn`, `ArtNavnId`, `FamilieNavnId` og
+            `OrdenNavnId`. Underarter får foreldreartens ID i `ArtNavnId`.
 
         Raises:
             ValueError: Når ID-kolonnen mangler eller ingen gyldige ID-er finnes.
@@ -272,6 +294,7 @@ def definer_process_and_enrich_data(
         lookup_id_dtype = df_work["validScientificNameId"].dtype
 
         taxonomy_data: dict[int, dict[str, str | None]] = {}
+        taxonomy_ids: dict[int, dict[str, int | None]] = {}
         family_names: dict[int, str | None] = {}
         order_names: dict[int, str | None] = {}
         valid_species_ids: list[int] = []
@@ -325,8 +348,13 @@ def definer_process_and_enrich_data(
                 if not species_data:
                     failed_api_ids.append(str(species_id))
                 else:
-                    hierarchy, family_id, order_id = extract_hierarchy_and_ids(species_data)
+                    hierarchy, family_id, order_id, parent_species_id = extract_hierarchy_and_ids(species_data)
                     taxonomy_data[species_id] = hierarchy
+                    taxonomy_ids[species_id] = {
+                        "ArtNavnId": parent_species_id,
+                        "FamilieNavnId": family_id,
+                        "OrdenNavnId": order_id,
+                    }
 
                     # Hent norsk familienavn hvis API-et oppgir familie-ID
                     if family_id:
@@ -370,14 +398,20 @@ def definer_process_and_enrich_data(
             )
 
         taxonomy_rows = [
-            {"validScientificNameId": sid, **{rank: hierarchy.get(rank) for rank in DESIRED_RANKS}}
+            {"validScientificNameId": sid, **{rank: hierarchy.get(rank) for rank in DESIRED_RANKS}, **taxonomy_ids[sid]}
             for sid, hierarchy in taxonomy_data.items()
         ]
-        taxonomy_schema = {"validScientificNameId": lookup_id_dtype, **{rank: pl.Utf8 for rank in DESIRED_RANKS}}
+        id_columns = ["ArtNavnId", "FamilieNavnId", "OrdenNavnId"]
+        taxonomy_schema = {
+            "validScientificNameId": lookup_id_dtype,
+            **{rank: pl.Utf8 for rank in DESIRED_RANKS},
+            **{column: pl.Int64 for column in id_columns},
+        }
         taxonomy_lookup = pl.DataFrame(taxonomy_rows) if taxonomy_rows else pl.DataFrame(schema=taxonomy_schema)
         taxonomy_lookup = taxonomy_lookup.with_columns(
             pl.col("validScientificNameId").cast(lookup_id_dtype),
             *[pl.col(rank).cast(pl.Utf8) for rank in DESIRED_RANKS],
+            *[pl.col(column).cast(pl.Int64) for column in id_columns],
         )
 
         name_rows = [
@@ -396,9 +430,9 @@ def definer_process_and_enrich_data(
             pl.col("OrdenNavn").cast(pl.Utf8),
         )
 
-        df_work = df_work.join(taxonomy_lookup, on="validScientificNameId", how="left").join(
-            name_lookup, on="validScientificNameId", how="left"
-        )
+        df_work = df_work.join(
+            taxonomy_lookup, on="validScientificNameId", how="left", validate="m:1", maintain_order="left"
+        ).join(name_lookup, on="validScientificNameId", how="left", validate="m:1", maintain_order="left")
 
         return df_work
 
@@ -414,13 +448,13 @@ def md_testmatrise_process_and_enrich_data():
 
     **Kilde til sannhet:** Brukergodkjent matrise 2026-06-05, funksjonskontrakt/docstring og ekte NorTaxa API for kjente arts-ID-er.
 
-    **Kjøringstype:** Integrasjonstest mot ekte NorTaxa API. Testen er mer realistisk, men kan feile ved nettverksproblemer eller endringer i ekstern taksonomidata. Live-testcellene som krever eksakte NorTaxa-verdier hopper over kjøring dersom `NORTAXA_API_BASE_URL` peker på `mock://...`.
+    **Kjøringstype:** Integrasjonstester mot ekte NorTaxa API, med unntak av MTM-006 som bruker deterministiske API-fixtures uten nettverk. Live-testene kan feile ved nettverksproblemer eller endringer i ekstern taksonomidata. Live-testcellene som krever eksakte NorTaxa-verdier hopper over kjøring dersom `NORTAXA_API_BASE_URL` peker på `mock://...`.
 
     **Inputkontrakt:** `source_df` er en Polars- eller pandas-DataFrame med kolonnen `validScientificNameId`. Gyldige ID-er må kunne konverteres til `int`; `None`/ugyldige ID-er skal hoppes over, men radene beholdes hvis minst én gyldig ID finnes.
 
-    **Outputkontrakt:** Returnerer `pl.DataFrame` med alle originalrader og originalkolonner bevart, pluss `Kingdom`, `Phylum`, `Class`, `Order`, `Family`, `Genus`, `FamilieNavn` og `OrdenNavn`. Radantallet skal være likt input. Berikingskolonner for rader med null/ugyldig ID skal være null.
+    **Outputkontrakt:** Returnerer `pl.DataFrame` med alle originalrader og originalkolonner bevart, pluss `Kingdom`, `Phylum`, `Class`, `Order`, `Family`, `Genus`, `FamilieNavn`, `OrdenNavn` og heltallskolonnene `ArtNavnId`, `FamilieNavnId`, `OrdenNavnId`. ID-ene hentes fra `higherClassification` i det samme NorTaxa-svaret. For underarter er `ArtNavnId` foreldreartens vitenskapelige navne-ID, ikke underartens ID. Manglende ranger gir null; ingen navn parses eller ekstra API-kall gjøres for disse ID-ene. Radantallet skal være likt input. Berikingskolonner for rader med null/ugyldig ID skal være null.
 
-    **Godkjenningsstatus:** Godkjent av bruker 2026-06-05.
+    **Godkjenningsstatus:** Godkjent av bruker 2026-06-05. Utvidelsen med navne-ID-er for Fuglegruppe er godkjent i avklaringsrundene 2026-09-21.
 
     **Revisjonspolicy:** Hvis forventet oppførsel endres, oppdater og godkjenn denne matrisen på nytt før testene endres.
 
@@ -431,6 +465,8 @@ def md_testmatrise_process_and_enrich_data():
     | MTM-003 | Null-ID blandet med gyldig ID | Én gyldig ID og én `None` | Gyldig rad berikes; nullrad beholdes med null i alle berikingskolonner | Eksakt null-/radantallssjekk | Reelle data kan ha manglende ID-er | Nullrader droppes eller gir uønsket API-kall/join-feil | `test_process_and_enrich_data_mtm_003` |
     | MTM-004 | Manglende ID-kolonne | DataFrame uten `validScientificNameId` | `ValueError` med melding om manglende kolonne | Exception-type og tekstutdrag | Inputkontrakten skal feile tidlig og tydelig | Utydelige `ColumnNotFoundError` senere i løpet | `test_process_and_enrich_data_mtm_004` |
     | MTM-005 | NorTaxa-oppslag feiler/tomt svar | En gyldig tallverdi som ikke finnes i NorTaxa, brukt som integrasjonssjekk | `RuntimeError` som inkluderer ID-en som feilet | Exception-type og tekstutdrag | Pipeline skal ikke silently levere ufullstendig taksonomi | Tomme API-svar gir manglende kolonner eller skjulte hull i data | `test_process_and_enrich_data_mtm_005` |
+    | MTM-006 | Navne-ID-er fra hierarkiet | Deterministiske API-svar for art, underart og høyere takson | Art-, familie- og orden-ID leses fra riktig rang; underart arver arts-ID; manglende ranger gir null | Eksakte ID-er | Gruppetildeling må følge taksonomien, ikke navnetekst | Underarts-ID brukes som arts-ID eller høyere takson behandles som art | `test_process_and_enrich_data_mtm_006` |
+    | MTM-007 | Underart gjennom reell beriking | Tundragåsunderart 3469 og klassen Aves 252 | 3469 beholder kilde-ID og får ArtNavnId=3468, FamilieNavnId=3424, OrdenNavnId=253; Aves får null i alle tre | Eksakte ID-er, Int64 og radantall | Bekrefter at ID-ene overlever oppslag og join | Navne-ID-er mistes før gruppesteget | `test_process_and_enrich_data_mtm_007` |
     """)
     return
 
@@ -454,6 +490,9 @@ def test_process_and_enrich_data_mtm_001(
             "Genus",
             "FamilieNavn",
             "OrdenNavn",
+            "ArtNavnId",
+            "FamilieNavnId",
+            "OrdenNavnId",
         ]
         expected_enrichment = {
             4382: {
@@ -465,6 +504,9 @@ def test_process_and_enrich_data_mtm_001(
                 "Genus": "Poecile",
                 "FamilieNavn": "meisefamilien",
                 "OrdenNavn": "spurvefugler",
+                "ArtNavnId": 4382,
+                "FamilieNavnId": 4362,
+                "OrdenNavnId": 266,
             },
             204586: {
                 "Kingdom": "Animalia",
@@ -475,6 +517,9 @@ def test_process_and_enrich_data_mtm_001(
                 "Genus": "Spatula",
                 "FamilieNavn": "andefamilien",
                 "OrdenNavn": "andefugler",
+                "ArtNavnId": 204586,
+                "FamilieNavnId": 3424,
+                "OrdenNavnId": 253,
             },
             3677: {
                 "Kingdom": "Animalia",
@@ -485,6 +530,9 @@ def test_process_and_enrich_data_mtm_001(
                 "Genus": "Larus",
                 "FamilieNavn": "måkefamilien",
                 "OrdenNavn": "vade-, måke- og alkefugler",
+                "ArtNavnId": 3677,
+                "FamilieNavnId": 3666,
+                "OrdenNavnId": 161320,
             },
             295741: {
                 "Kingdom": "Animalia",
@@ -495,6 +543,9 @@ def test_process_and_enrich_data_mtm_001(
                 "Genus": "Astur",
                 "FamilieNavn": "haukefamilien",
                 "OrdenNavn": "haukefugler",
+                "ArtNavnId": 295741,
+                "FamilieNavnId": 3851,
+                "OrdenNavnId": 128031,
             },
         }
 
@@ -537,7 +588,10 @@ def test_process_and_enrich_data_mtm_002(
         if NORTAXA_API_BASE_URL.startswith("mock://"):
             return
 
-        enrichment_columns = ["Kingdom", "Phylum", "Class", "Order", "Family", "Genus", "FamilieNavn", "OrdenNavn"]
+        enrichment_columns = [
+            "Kingdom", "Phylum", "Class", "Order", "Family", "Genus", "FamilieNavn", "OrdenNavn",
+            "ArtNavnId", "FamilieNavnId", "OrdenNavnId",
+        ]
         expected_granmeis = {
             "Kingdom": "Animalia",
             "Phylum": "Chordata",
@@ -547,6 +601,9 @@ def test_process_and_enrich_data_mtm_002(
             "Genus": "Poecile",
             "FamilieNavn": "meisefamilien",
             "OrdenNavn": "spurvefugler",
+            "ArtNavnId": 4382,
+            "FamilieNavnId": 4362,
+            "OrdenNavnId": 266,
         }
 
         duplicate_df = pl.DataFrame(
@@ -580,7 +637,10 @@ def test_process_and_enrich_data_mtm_002(
 def test_process_and_enrich_data_mtm_003(process_and_enrich_data):
     def test_process_and_enrich_data_mtm_003():
         """MTM-003: null-ID blandet med gyldig ID beholdes uten beriking."""
-        enrichment_columns = ["Kingdom", "Phylum", "Class", "Order", "Family", "Genus", "FamilieNavn", "OrdenNavn"]
+        enrichment_columns = [
+            "Kingdom", "Phylum", "Class", "Order", "Family", "Genus", "FamilieNavn", "OrdenNavn",
+            "ArtNavnId", "FamilieNavnId", "OrdenNavnId",
+        ]
 
         nullable_df = pl.DataFrame(
             {
@@ -635,6 +695,514 @@ def test_process_and_enrich_data_mtm_005(
 
 
     test_process_and_enrich_data_mtm_005()
+    return
+
+
+@app.cell(hide_code=True)
+def test_process_and_enrich_data_mtm_006(extract_hierarchy_and_ids):
+    def test_process_and_enrich_data_mtm_006():
+        """MTM-006: foreldreartens ID leses fra hierarkiet, ikke fra navnet."""
+        hierarki = [
+            {"taxonRank": "Order", "scientificNameId": 253, "scientificName": "Anseriformes"},
+            {"taxonRank": "Family", "scientificNameId": 3424, "scientificName": "Anatidae"},
+            {"taxonRank": "Species", "scientificNameId": 3468, "scientificName": "albifrons"},
+        ]
+        for ekstra in ([], [{"taxonRank": "Subspecies", "scientificNameId": 3469, "scientificName": "albifrons"}]):
+            navn, familie, orden, art = extract_hierarchy_and_ids({"higherClassification": hierarki + ekstra})
+            assert (familie, orden, art) == (3424, 253, 3468)
+            assert navn["Family"] == "Anatidae"
+        assert extract_hierarchy_and_ids(None) == ({}, None, None, None)
+        assert extract_hierarchy_and_ids({"higherClassification": hierarki[:1]}) == (
+            {"Order": "Anseriformes"}, None, 253, None
+        )
+
+    test_process_and_enrich_data_mtm_006()
+    return
+
+
+@app.cell(hide_code=True)
+def test_process_and_enrich_data_mtm_007(NORTAXA_API_BASE_URL, process_and_enrich_data):
+    def test_process_and_enrich_data_mtm_007():
+        """MTM-007: underart og klasse beholder riktig taksonomisk identitet."""
+        if NORTAXA_API_BASE_URL.startswith("mock://"):
+            return
+        df = pl.DataFrame({"obs_id": ["underart", "klasse"], "validScientificNameId": [3469, 252]})
+        resultat = process_and_enrich_data(df)
+        assert resultat.select(df.columns).equals(df)
+        assert resultat["ArtNavnId"].to_list() == [3468, None]
+        assert resultat["FamilieNavnId"].to_list() == [3424, None]
+        assert resultat["OrdenNavnId"].to_list() == [253, None]
+        assert all(resultat.schema[k] == pl.Int64 for k in ["ArtNavnId", "FamilieNavnId", "OrdenNavnId"])
+
+    test_process_and_enrich_data_mtm_007()
+    return
+
+
+@app.cell(hide_code=True)
+def md_testmatrise_fuglegruppe():
+    mo.md(r"""
+    ### Fuglegruppe: artsbasert sortering fra DuckDB
+
+    Gruppene er **Rovfugler, Ugler, Sjøfugler, Joer, Vadefugler, Våtmarksfugler,
+    Skoglevende arter, Kulturlandskapsarter og Andre spurvefugler**.
+    Dette er ikke en vurdering av observasjonens funksjonsområde, habitat eller sesong.
+    Alle matchende fugler omfattes, uavhengig av rødliste- og ANF-status.
+
+    `fuglegruppe_regler` i `databehandling/fugl_atributt_data` inneholder kun
+    `taksonomisk_nivaa` (`species`, `family`, `order`), `vitenskapelig_navn_id`
+    og `fuglegruppe`. Tabellen vedlikeholdes manuelt; notebooken leser bare.
+    Artsregler overstyrer familieregler, som overstyrer ordensregler.
+    Åkerrikse blir derfor Kulturlandskapsarter, ikke Våtmarksfugler.
+    Lavskrike er eksplisitt lagt til Skoglevende arter, uten å inkludere resten av kråkefamilien.
+    Kulturlandskapsarter omfatter gulspurv, sanglerke, stær, gråspurv, vaktel og åkerrikse.
+    Andre spurvefugler omfatter bare kornkråke, dvergspurv, vierspurv, lappsanger,
+    lappspurv, trelerke, hauksanger, svartstrupe og lappiplerke; ingen av gruppene er restkategorier.
+    Våtmarksfugler følger dykkere, lomfugler, andefugler og riksefamilien, ikke hele ordenen tranefugler.
+
+    ### Testmatrise: `legg_til_fuglegruppe`, `hent_fuglegruppe_regler` og `valider_fuglegruppe_regler`
+
+    **Tiltenkt oppførsel:** Legg til én tekstkolonne `Fuglegruppe` uten å miste, duplisere eller omorganisere observasjoner. Bruk navne-ID-er fra NorTaxa, ikke norske navn eller teksttolking av artsnavn.
+
+    **Kilde til sannhet:** Brukergodkjente avklaringsrunder og implementeringsbestilling 2026-09-21. De 39 opprinnelige reglene er kontrollert mot NorTaxa; testen av den manuelle tabellen har eksplisitte forventninger.
+
+    **Kjøringstype:** FG-testene bruker små deterministiske observasjoner og den lokale DuckDB-tabellen eller eksplisitte testregler. Ingen nettverkskall eller skriving til produksjonsdatabasen.
+
+    **Inputkontrakt:** `df` er en Polars-DataFrame med `Class`, `scientificNameRank`, `ArtNavnId`, `FamilieNavnId` og `OrdenNavnId`. ID-feltene er heltall eller null. `Class` og rang er tekst eller null. Valgfrie `regler` kan gis eksplisitt i tester; ellers leses DuckDB-tabellen. En regel har positiv heltalls-ID, gyldig rang og et ikke-tomt gruppenavn. Nøkkelen (rang, ID) er unik. Tom, manglende eller ugyldig regeltabell er en feil, ikke et manglende artstreff.
+
+    **Outputkontrakt:** Fugler på arts- og underartsnivå får første treff i rekkefølgen art → familie → orden. Underarter bruker foreldreartens `ArtNavnId`. Andre taksonomiske nivåer, andre klasser og arter uten treff får `Ikke gruppert`. Ufullstendig taksonomi gir konsolladvarsel. Ingen grovere regel brukes dersom en nødvendig overstyrende rang mangler: ukjent arts-ID hindrer familie-/ordenstildeling, og ukjent familie hindrer ordenstildeling. Et kjent artstreff kan brukes selv om familie/orden mangler. Originalkolonner, radrekkefølge og `obs_id` bevares; eksisterende `Fuglegruppe` beregnes på nytt. Tom input gir tom output med `Fuglegruppe` som String.
+
+    **Godkjenningsstatus:** Atferd og testomfang godkjent av bruker i avklaringsrundene 2026-09-21; direkte opprettelse av DuckDB-tabell og notebook-funksjoner/tester bestilt samme dato. Ingen oppdateringsautomatikk.
+
+    **Revisjonspolicy:** Ved endret gruppemedlemskap eller forventet oppførsel oppdateres og godkjennes matrisen før testene endres.
+
+    | ID | Scenario | Input | Forventet output/invariant | Toleranse | Hvorfor det betyr noe | Feilmodus testen beskytter mot | Testcelle |
+    |---|---|---|---|---|---|---|---|
+    | FG-MTM-001 | Manuell DuckDB-tabell | Produksjonstabellen | Alle 39 godkjente regler, ni grupper, unike nøkler og gyldige typer | Eksakte rader | Tabellen er eneste produksjonskilde for medlemskap | Manglende eller feil takson-ID/gruppe | `test_fuglegruppe_mtm_001` |
+    | FG-MTM-002 | Familie- og ordensregler | Ett artsnivå-eksempel per taksonregel | Alle 20 familie-/ordensregler virker; LC og fremmedkategori påvirker ikke gruppen | Eksakte etiketter | Alle medlemmer av de oppgitte taksa skal omfattes | Bare ANF-arter inkluderes eller én familie glemmes | `test_fuglegruppe_mtm_002` |
+    | FG-MTM-003 | Eksplisitte artsregler | Alle 19 navngitte arter, inkludert lavskrike og åkerrikse | Riktig gruppe for hver arts-ID | Eksakte etiketter | Eksempler er gjort til avgrensede artslister | Arter glemmes eller kråkefamilien inkluderes samlet | `test_fuglegruppe_mtm_003` |
+    | FG-MTM-004 | Prioritet og underarter | Overlappende art/familie/orden; syntetisk underart med foreldreart 4094 | Art over familie over orden; underarten arver Kulturlandskapsarter | Eksakte etiketter | Ett stabilt svar uten sesong-/habitatgjetting | Underart faller tilbake til feil familiegruppe | `test_fuglegruppe_mtm_004` |
+    | FG-MTM-005 | Ingen regel og høyere taksa | Gråhegre, trane, ulistet spurvefugl, genus/family/order/class, ikke-fugl | Ikke gruppert; ingen restkategori eller gjetting | Eksakt tekst | Bevarer skillet mellom ingen regel og positivt treff | Alle spurvefugler/våtmarksarter eller høyere taksa klassifiseres ukritisk | `test_fuglegruppe_mtm_005` |
+    | FG-MTM-006 | Ufullstendig taksonomi | Null i art, familie, orden, klasse eller rang | Advarsel; kun sikkert treff brukes, ellers Ikke gruppert | Eksakt etikett og melding | Datamangler skal ikke skjules som ordinært manglende treff | Manglende foreldreart omgår artsunntak | `test_fuglegruppe_mtm_006` |
+    | FG-MTM-007 | Inputkontrakt | Manglende kolonne eller feil datatype | ValueError med forklaring | Type og tekstutdrag | Tidlig og tydelig feil | Utydelig Polars-feil eller feil konvertering | `test_fuglegruppe_mtm_007` |
+    | FG-MTM-008 | Ugyldige regler | Manglende/tom tabell, manglende kolonne, null, ugyldig rang/ID/navn, duplikat/konflikt | Tydelig feil, også ved tom observasjonstabell | Type og tekstutdrag | En ødelagt regelkilde må ikke gi falsk suksess | Alle blir Ikke gruppert eller konflikt avgjøres tilfeldig | `test_fuglegruppe_mtm_008` |
+    | FG-MTM-009 | Bevaring, gjentatt kjøring og tom input | Flere observasjoner av samme art og koordinat, eksisterende Fuglegruppe, tomt schema | Samme rader/rekkefølge/obs_id/data, idempotent tildeling, String også for tom output | Eksakt frame/schema | Ingen tap av observasjonsidentitet | Join multipliserer rader eller etterlater hjelpekolonner | `test_fuglegruppe_mtm_009` |
+
+    Sluttkolonnen, sortering og Parquet-rundtur kontrolleres også i RYDD-MTM-001/005/006 og PIPE-MTM-001/006.
+    """)
+    return
+
+
+@app.function(hide_code=True)
+def valider_fuglegruppe_regler(regler: pl.DataFrame) -> None:
+    """Valider ikke-tomme regler med unike (rang, navne-ID)-nøkler."""
+    kolonner = {"taksonomisk_nivaa", "vitenskapelig_navn_id", "fuglegruppe"}
+    mangler = sorted(kolonner - set(regler.columns))
+    if mangler:
+        raise ValueError("fuglegruppe_regler mangler kolonner: " + ", ".join(mangler))
+    if regler.is_empty():
+        raise ValueError("fuglegruppe_regler er tom; kan ikke tildele Fuglegruppe.")
+    if (
+        regler.schema["taksonomisk_nivaa"] != pl.String
+        or regler.schema["fuglegruppe"] != pl.String
+        or not regler.schema["vitenskapelig_navn_id"].is_integer()
+    ):
+        raise ValueError("fuglegruppe_regler må ha tekst for rang/gruppe og heltall for vitenskapelig_navn_id.")
+    if regler.select(pl.any_horizontal(pl.col(kolonne).is_null() for kolonne in kolonner).any()).item():
+        raise ValueError("fuglegruppe_regler kan ikke inneholde nullverdier.")
+    if regler.filter(~pl.col("taksonomisk_nivaa").is_in(["species", "family", "order"])).height:
+        raise ValueError("fuglegruppe_regler har ugyldig taksonomisk_nivaa; bruk species, family eller order.")
+    if regler.filter(pl.col("vitenskapelig_navn_id") <= 0).height:
+        raise ValueError("fuglegruppe_regler krever positiv vitenskapelig_navn_id.")
+    if regler.filter(pl.col("fuglegruppe").str.strip_chars() == "").height:
+        raise ValueError("fuglegruppe_regler har tomt gruppenavn.")
+    if regler.select("taksonomisk_nivaa", "vitenskapelig_navn_id").is_duplicated().any():
+        raise ValueError("Dupliserte eller motstridende fuglegrupperegler på samme taksonomiske nivå og navne-ID.")
+
+
+@app.function(hide_code=True)
+def hent_fuglegruppe_regler(database: duckdb.DuckDBPyConnection) -> pl.DataFrame:
+    """Les og valider den manuelt vedlikeholdte DuckDB-tabellen uten å skrive."""
+    try:
+        regler = database.execute(
+            "SELECT taksonomisk_nivaa, vitenskapelig_navn_id, fuglegruppe FROM fuglegruppe_regler"
+        ).pl()
+    except duckdb.Error as exc:
+        raise RuntimeError(
+            "Kan ikke lese fuglegruppe_regler fra DuckDB. Kontroller at tabellen og de tre regelkolonnene finnes."
+        ) from exc
+    valider_fuglegruppe_regler(regler)
+    return regler
+
+
+@app.cell(hide_code=True)
+def definer_legg_til_fuglegruppe(bird_data, console):
+    def legg_til_fuglegruppe(df: pl.DataFrame, regler: pl.DataFrame | None = None) -> pl.DataFrame:
+        """Legg til én artsbasert Fuglegruppe uten å endre observasjonsradene.
+
+        Args:
+            df: NorTaxa-beriket input med Class, scientificNameRank og
+                ArtNavnId/FamilieNavnId/OrdenNavnId. ArtNavnId er foreldrearten
+                for underarter, ikke underartens egen navne-ID.
+            regler: Valgfrie eksplisitte regler, primært for isolerte tester.
+                Hvis utelatt, leses fuglegruppe_regler fra bird_data.
+
+        Returns:
+            Input med Fuglegruppe som String. Artsregler overstyrer familie,
+            som overstyrer orden. Høyere taksa og manglende treff får
+            'Ikke gruppert'. En eksisterende Fuglegruppe beregnes på nytt.
+
+        Raises:
+            ValueError: Ugyldig input eller tomme/ugyldige/motstridende regler.
+            RuntimeError: DuckDB-tabellen kan ikke leses.
+
+        Notes:
+            Ufullstendig taksonomi varsles til konsollen. Ingen grovere regel
+            brukes hvis en nødvendig overstyrende rang er ukjent. Funksjonen
+            gjør ingen API-kall, vurderer ikke sesong/habitat/ANF og skriver
+            ikke til databasen.
+        """
+        if regler is None:
+            regler = hent_fuglegruppe_regler(bird_data)
+        else:
+            valider_fuglegruppe_regler(regler)
+
+        id_kolonner = {"species": "ArtNavnId", "family": "FamilieNavnId", "order": "OrdenNavnId"}
+        paakrevde = {"Class", "scientificNameRank", *id_kolonner.values()}
+        mangler = sorted(paakrevde - set(df.columns))
+        if mangler:
+            raise ValueError("Fuglegruppe mangler inputkolonner: " + ", ".join(mangler))
+        for kolonne in ("Class", "scientificNameRank"):
+            if df.schema[kolonne] not in (pl.String, pl.Null):
+                raise ValueError(f"Fuglegruppe: {kolonne} må være tekst eller null.")
+        for kolonne in id_kolonner.values():
+            if df.schema[kolonne] != pl.Null and not df.schema[kolonne].is_integer():
+                raise ValueError(f"Fuglegruppe: {kolonne} må være heltall eller null.")
+
+        rang = pl.col("scientificNameRank").cast(pl.String).str.strip_chars().str.to_lowercase()
+        artsnivaa = rang.is_in(["species", "subspecies"]).fill_null(False)
+        fugl = (pl.col("Class").cast(pl.String) == "Aves").fill_null(False)
+        ukjent_id = pl.any_horizontal(pl.col(kolonne).is_null() for kolonne in id_kolonner.values())
+        ufullstendig = (
+            (fugl & (rang.is_null() | (artsnivaa & ukjent_id)))
+            | (pl.col("Class").is_null() & (artsnivaa | rang.is_null()))
+        )
+        antall_ufullstendige = df.filter(ufullstendig).height
+        if antall_ufullstendige:
+            console.print(
+                f"  [yellow]Advarsel:[/yellow] {antall_ufullstendige} observasjoner har ufullstendig taksonomi "
+                "for Fuglegruppe; kun sikre treff brukes, ellers Ikke gruppert."
+            )
+
+        treff = {}
+        for nivaa, kolonne in id_kolonner.items():
+            oppslag = regler.filter(pl.col("taksonomisk_nivaa") == nivaa)
+            treff[nivaa] = pl.col(kolonne).cast(pl.Int64).replace_strict(
+                oppslag["vitenskapelig_navn_id"], oppslag["fuglegruppe"], default=None, return_dtype=pl.String
+            )
+        # Uten arts-ID kan vi ikke utelukke et artsunntak. Uten familie-ID
+        # kan vi ikke utelukke en familieregel som overstyrer ordensregelen.
+        gruppe = (
+            pl.when(fugl & artsnivaa & pl.col("ArtNavnId").is_not_null())
+            .then(pl.coalesce(
+                treff["species"],
+                treff["family"],
+                pl.when(pl.col("FamilieNavnId").is_not_null()).then(treff["order"]),
+            ))
+            .otherwise(None)
+            .fill_null("Ikke gruppert")
+            .alias("Fuglegruppe")
+        )
+        return df.with_columns(gruppe)
+
+    return (legg_til_fuglegruppe,)
+
+
+@app.cell(hide_code=True)
+def fuglegruppe_testhjelpere():
+    def lag_forventede_fuglegruppe_regler() -> pl.DataFrame:
+        """Eksplisitte forventninger til de 39 brukergodkjente reglene, ikke produksjonsdata."""
+        familier = {
+            "Rovfugler": [3916, 3851, 3900],  # fiskeørn-, hauke- og falkefamilien
+            "Ugler": [4599],  # uglefamilien
+            "Sjøfugler": [3597, 3931, 3666, 3938, 3985, 3975],  # alke-, skarve-, måke-, sule-, stormfugl-, stormsvale-
+            "Joer": [3807],  # jofamilien
+            "Vadefugler": [3662, 3628, 3716],  # tjeld-, lo- og snipefamilien
+            "Våtmarksfugler": [4092],  # riksefamilien, ikke hele ordenen tranefugler
+            "Skoglevende arter": [4572, 4362],  # spette- og meisefamilien
+        }
+        ordener = {"Våtmarksfugler": [173685, 173684, 253]}  # dykkere, lomfugler og andefugler
+        arter = {
+            "Skoglevende arter": [4064, 4077, 4078, 4180],  # jerpe, orrfugl, storfugl og lavskrike
+            "Kulturlandskapsarter": [4198, 4120, 4426, 4397, 4052, 4094],  # gulspurv, sanglerke, stær, gråspurv, vaktel, åkerrikse
+            "Andre spurvefugler": [4168, 4204, 4205, 4456, 4188, 4132, 215473, 157405, 4314],
+            # kornkråke, dvergspurv, vierspurv, lappsanger, lappspurv, trelerke, hauksanger, svartstrupe, lappiplerke
+        }
+        return pl.DataFrame(
+            [
+                {"taksonomisk_nivaa": rang, "vitenskapelig_navn_id": navne_id, "fuglegruppe": gruppe}
+                for rang, grupper in [("family", familier), ("order", ordener), ("species", arter)]
+                for gruppe, ider in grupper.items()
+                for navne_id in ider
+            ],
+            schema={"taksonomisk_nivaa": pl.String, "vitenskapelig_navn_id": pl.Int64, "fuglegruppe": pl.String},
+        )
+
+    def lag_fuglegruppe_input(rad_overrides: list[dict[str, object]] | None = None) -> pl.DataFrame:
+        """Lag små observasjonsfixtures; ukjente standard-ID-er er bevisst syntetiske."""
+        if rad_overrides is None:
+            rad_overrides = [{}]
+        grunnrad = {
+            "Class": "Aves",
+            "scientificNameRank": "species",
+            "validScientificNameId": 999999999,
+            "ArtNavnId": 999999999,
+            "FamilieNavnId": 999999998,
+            "OrdenNavnId": 999999997,
+            "category": "LC",
+            "geometry": "POINT (10 60)",
+        }
+        return pl.DataFrame(
+            [{**grunnrad, "obs_id": f"kilde/{i}", **overrides} for i, overrides in enumerate(rad_overrides)],
+            schema_overrides={
+                "Class": pl.String, "scientificNameRank": pl.String,
+                "ArtNavnId": pl.Int64, "FamilieNavnId": pl.Int64, "OrdenNavnId": pl.Int64,
+            },
+        )
+
+    return lag_forventede_fuglegruppe_regler, lag_fuglegruppe_input
+
+
+@app.cell(hide_code=True)
+def test_fuglegruppe_mtm_001(bird_data, lag_forventede_fuglegruppe_regler):
+    def test_fuglegruppe_mtm_001():
+        """FG-MTM-001: DuckDB inneholder akkurat de godkjente reglene."""
+        forventet = lag_forventede_fuglegruppe_regler()
+        regler = hent_fuglegruppe_regler(bird_data)
+        assert regler.height == 39
+        assert regler["fuglegruppe"].n_unique() == 9
+        assert regler.sort("taksonomisk_nivaa", "vitenskapelig_navn_id").equals(
+            forventet.sort("taksonomisk_nivaa", "vitenskapelig_navn_id")
+        )
+
+    test_fuglegruppe_mtm_001()
+    return
+
+
+@app.cell(hide_code=True)
+def test_fuglegruppe_mtm_002(lag_forventede_fuglegruppe_regler, lag_fuglegruppe_input, legg_til_fuglegruppe):
+    def test_fuglegruppe_mtm_002():
+        """FG-MTM-002: alle familie-/ordensregler virker uavhengig av status."""
+        forventet = lag_forventede_fuglegruppe_regler().filter(pl.col("taksonomisk_nivaa") != "species")
+        kolonne = {"family": "FamilieNavnId", "order": "OrdenNavnId"}
+        df = lag_fuglegruppe_input([
+            {kolonne[rad["taksonomisk_nivaa"]]: rad["vitenskapelig_navn_id"], "category": "SE" if i % 2 else "LC"}
+            for i, rad in enumerate(forventet.iter_rows(named=True))
+        ])
+        resultat = legg_til_fuglegruppe(df)
+        assert resultat["Fuglegruppe"].to_list() == forventet["fuglegruppe"].to_list()
+        assert resultat.select(df.columns).equals(df)
+
+    test_fuglegruppe_mtm_002()
+    return
+
+
+@app.cell(hide_code=True)
+def test_fuglegruppe_mtm_003(lag_forventede_fuglegruppe_regler, lag_fuglegruppe_input, legg_til_fuglegruppe):
+    def test_fuglegruppe_mtm_003():
+        """FG-MTM-003: alle eksplisitte artsregler, inkludert lavskrike og åkerrikse."""
+        forventet = lag_forventede_fuglegruppe_regler().filter(pl.col("taksonomisk_nivaa") == "species")
+        df = lag_fuglegruppe_input([
+            {
+                "ArtNavnId": rad["vitenskapelig_navn_id"],
+                "validScientificNameId": rad["vitenskapelig_navn_id"],
+                "FamilieNavnId": 4092 if rad["vitenskapelig_navn_id"] == 4094 else 999999998,
+            }
+            for rad in forventet.iter_rows(named=True)
+        ])
+        resultat = legg_til_fuglegruppe(df)
+        assert resultat["Fuglegruppe"].to_list() == forventet["fuglegruppe"].to_list()
+        assert resultat.select(df.columns).equals(df)
+
+    test_fuglegruppe_mtm_003()
+    return
+
+
+@app.cell(hide_code=True)
+def test_fuglegruppe_mtm_004(lag_forventede_fuglegruppe_regler, lag_fuglegruppe_input, legg_til_fuglegruppe):
+    def test_fuglegruppe_mtm_004():
+        """FG-MTM-004: art over familie over orden; underarter arver foreldreart."""
+        regler = pl.concat([
+            lag_forventede_fuglegruppe_regler(),
+            pl.DataFrame({
+                "taksonomisk_nivaa": ["family", "order"],
+                "vitenskapelig_navn_id": [900000001, 900000002],
+                "fuglegruppe": ["Rovfugler", "Våtmarksfugler"],
+            }),
+        ])
+        df = lag_fuglegruppe_input([
+            {"ArtNavnId": 4180, "FamilieNavnId": 900000001, "OrdenNavnId": 900000002},
+            {"FamilieNavnId": 900000001, "OrdenNavnId": 900000002},
+            {"FamilieNavnId": 4160, "OrdenNavnId": 900000002},
+            # Syntetisk underart: den egne kilde-ID-en må ikke brukes som foreldreart.
+            {"scientificNameRank": "Subspecies", "validScientificNameId": 900000003,
+             "ArtNavnId": 4094, "FamilieNavnId": 4092, "OrdenNavnId": 264},
+            {"scientificNameRank": "subspecies", "validScientificNameId": 3469,
+             "ArtNavnId": 3468, "FamilieNavnId": 3424, "OrdenNavnId": 253},
+            {"scientificNameRank": "Species", "ArtNavnId": 4094, "FamilieNavnId": 4092},
+        ])
+        resultat = legg_til_fuglegruppe(df, regler=regler)
+        assert resultat["Fuglegruppe"].to_list() == [
+            "Skoglevende arter", "Rovfugler", "Våtmarksfugler",
+            "Kulturlandskapsarter", "Våtmarksfugler", "Kulturlandskapsarter",
+        ]
+        assert resultat.select(df.columns).equals(df)
+
+    test_fuglegruppe_mtm_004()
+    return
+
+
+@app.cell(hide_code=True)
+def test_fuglegruppe_mtm_005(console, lag_fuglegruppe_input, legg_til_fuglegruppe):
+    def test_fuglegruppe_mtm_005():
+        """FG-MTM-005: ukjente arter, høyere taksa og andre klasser blir ikke gjettet."""
+        df = lag_fuglegruppe_input([
+            {"ArtNavnId": 3559, "FamilieNavnId": 3551, "OrdenNavnId": 157430},  # gråhegre
+            {"ArtNavnId": 4084, "FamilieNavnId": 4080, "OrdenNavnId": 264},  # trane
+            {"FamilieNavnId": 4160, "OrdenNavnId": 266},  # ulistet kråkefugl
+            *[{"scientificNameRank": rang, "FamilieNavnId": 4362} for rang in ["genus", "family", "order", "class"]],
+            {"Class": "Mammalia", "FamilieNavnId": 4362},  # syntetisk sikkerhetssjekk
+        ])
+        with patch.object(console, "print") as utskrift:
+            resultat = legg_til_fuglegruppe(df)
+        assert resultat["Fuglegruppe"].to_list() == ["Ikke gruppert"] * df.height
+        assert resultat.select(df.columns).equals(df)
+        utskrift.assert_not_called()
+
+    test_fuglegruppe_mtm_005()
+    return
+
+
+@app.cell(hide_code=True)
+def test_fuglegruppe_mtm_006(console, lag_fuglegruppe_input, legg_til_fuglegruppe):
+    def test_fuglegruppe_mtm_006():
+        """FG-MTM-006: manglende taksonomi varsles og omgår ikke overstyrende regler."""
+        df = lag_fuglegruppe_input([
+            {"ArtNavnId": None, "FamilieNavnId": 4092, "OrdenNavnId": 264},
+            {"FamilieNavnId": None, "OrdenNavnId": 253},
+            {"ArtNavnId": 4094, "FamilieNavnId": None, "OrdenNavnId": None},
+            {"FamilieNavnId": 3851, "OrdenNavnId": None},
+            {"Class": None, "ArtNavnId": 4180},
+            {"scientificNameRank": None, "ArtNavnId": 4180},
+        ])
+        with patch.object(console, "print") as utskrift:
+            resultat = legg_til_fuglegruppe(df)
+        assert resultat["Fuglegruppe"].to_list() == [
+            "Ikke gruppert", "Ikke gruppert", "Kulturlandskapsarter", "Rovfugler", "Ikke gruppert", "Ikke gruppert",
+        ]
+        utskrift.assert_called_once()
+        melding = " ".join(str(arg) for arg in utskrift.call_args.args)
+        assert "6 observasjoner" in melding and "ufullstendig taksonomi" in melding
+        assert "Fuglegruppe" in melding
+        assert resultat.select(df.columns).equals(df)
+        null_df = lag_fuglegruppe_input().with_columns(pl.lit(None).alias("ArtNavnId"))
+        with patch.object(console, "print"):
+            assert legg_til_fuglegruppe(null_df)["Fuglegruppe"].item() == "Ikke gruppert"
+
+    test_fuglegruppe_mtm_006()
+    return
+
+
+@app.cell(hide_code=True)
+def test_fuglegruppe_mtm_007(lag_fuglegruppe_input, legg_til_fuglegruppe):
+    def test_fuglegruppe_mtm_007():
+        """FG-MTM-007: tydelige feil ved brudd på inputkontrakten."""
+        df = lag_fuglegruppe_input()
+        kolonner = ["Class", "scientificNameRank", "ArtNavnId", "FamilieNavnId", "OrdenNavnId"]
+        for kolonne in kolonner:
+            with pytest.raises(ValueError, match=kolonne):
+                legg_til_fuglegruppe(df.drop(kolonne))
+        for kolonne in kolonner[2:]:
+            for dtype in [pl.String, pl.Float64]:
+                with pytest.raises(ValueError, match=kolonne):
+                    legg_til_fuglegruppe(df.with_columns(pl.col(kolonne).cast(dtype)))
+        for kolonne in kolonner[:2]:
+            with pytest.raises(ValueError, match=kolonne):
+                legg_til_fuglegruppe(df.with_columns(pl.lit(123).alias(kolonne)))
+
+    test_fuglegruppe_mtm_007()
+    return
+
+
+@app.cell(hide_code=True)
+def test_fuglegruppe_mtm_008(lag_forventede_fuglegruppe_regler, lag_fuglegruppe_input, legg_til_fuglegruppe):
+    def test_fuglegruppe_mtm_008():
+        """FG-MTM-008: manglende, tomme og ugyldige regler er feil, ikke manglende artstreff."""
+        regler = lag_forventede_fuglegruppe_regler()
+        ugyldige = [
+            regler.head(0),
+            regler.drop("fuglegruppe"),
+            regler.with_columns(pl.lit(None, dtype=pl.Int64).alias("vitenskapelig_navn_id")),
+            regler.with_columns(pl.lit(None, dtype=pl.String).alias("fuglegruppe")),
+            regler.with_columns(pl.lit(None, dtype=pl.String).alias("taksonomisk_nivaa")),
+            regler.with_columns(pl.lit("genus").alias("taksonomisk_nivaa")),
+            regler.with_columns(pl.lit(0, dtype=pl.Int64).alias("vitenskapelig_navn_id")),
+            regler.with_columns(pl.col("vitenskapelig_navn_id").cast(pl.String)),
+            regler.with_columns(pl.col("vitenskapelig_navn_id").cast(pl.Float64)),
+            regler.with_columns(pl.lit("  ").alias("fuglegruppe")),
+            pl.concat([regler, regler.head(1)]),
+            pl.concat([regler, regler.head(1).with_columns(pl.lit("Ugler").alias("fuglegruppe"))]),
+        ]
+        for feil_regler in ugyldige:
+            with pytest.raises(ValueError):
+                legg_til_fuglegruppe(lag_fuglegruppe_input(), regler=feil_regler)
+            with pytest.raises(ValueError):
+                legg_til_fuglegruppe(lag_fuglegruppe_input().head(0), regler=feil_regler)
+
+        # Kun midlertidig database: produksjonstabellen skal aldri muteres av testene.
+        with duckdb.connect(":memory:") as database:
+            with pytest.raises(RuntimeError, match="fuglegruppe_regler"):
+                hent_fuglegruppe_regler(database)
+            database.execute("CREATE TABLE fuglegruppe_regler (feil_kolonne INTEGER)")
+            with pytest.raises(RuntimeError, match="fuglegruppe_regler"):
+                hent_fuglegruppe_regler(database)
+            database.execute("DROP TABLE fuglegruppe_regler")
+            database.register("testregler", regler)
+            database.execute("CREATE TABLE fuglegruppe_regler AS SELECT * FROM testregler WHERE FALSE")
+            with pytest.raises(ValueError, match="tom"):
+                hent_fuglegruppe_regler(database)
+            database.execute("INSERT INTO fuglegruppe_regler SELECT * FROM testregler")
+            assert hent_fuglegruppe_regler(database).equals(regler)
+            database.execute("INSERT INTO fuglegruppe_regler SELECT * FROM testregler LIMIT 1")
+            with pytest.raises(ValueError, match="Dupliserte eller motstridende"):
+                hent_fuglegruppe_regler(database)
+
+    test_fuglegruppe_mtm_008()
+    return
+
+
+@app.cell(hide_code=True)
+def test_fuglegruppe_mtm_009(lag_fuglegruppe_input, legg_til_fuglegruppe):
+    def test_fuglegruppe_mtm_009():
+        """FG-MTM-009: ingen radtap/-duplisering, idempotens og tomt sluttschema."""
+        df = lag_fuglegruppe_input([
+            {"obs_id": "kilde/b", "ArtNavnId": 4180, "validScientificNameId": 4180},
+            {"obs_id": "kilde/a", "ArtNavnId": 4180, "validScientificNameId": 4180},
+            {"obs_id": "kilde/c", "ArtNavnId": 4094, "validScientificNameId": 4094, "FamilieNavnId": 4092},
+        ])
+        original = df.clone()
+        resultat = legg_til_fuglegruppe(df)
+        assert df.equals(original), "FG-MTM-009 input må ikke muteres"
+        assert resultat.columns == [*df.columns, "Fuglegruppe"]
+        assert resultat.select(df.columns).equals(original)
+        assert resultat["Fuglegruppe"].to_list() == ["Skoglevende arter", "Skoglevende arter", "Kulturlandskapsarter"]
+        assert legg_til_fuglegruppe(resultat).equals(resultat)
+        assert legg_til_fuglegruppe(resultat.with_columns(pl.lit("utdatert").alias("Fuglegruppe"))).equals(resultat)
+        tomt = legg_til_fuglegruppe(df.head(0))
+        assert tomt.height == 0
+        assert tomt.schema == resultat.schema
+        assert tomt.schema["Fuglegruppe"] == pl.String
+
+    test_fuglegruppe_mtm_009()
     return
 
 
@@ -1773,15 +2341,15 @@ def md_testmatrise_rydd_navn_og_datatyper():
 
     **Inputkontrakt:** `df_input` er en `pl.DataFrame` etter ANF-beriking, med kolonnene `Verdi M1941`, `category`, `Art av nasjonal forvaltningsinteresse (eks. rødlista)`, `preferredPopularName`, `validScientificName`, `individualCount`, `behavior`, `dateTimeCollected`, `coordinateUncertaintyInMeters`, taksonomi-, lokalitets-, koordinat- og ANF-kriteriekolonner.
 
-    **Outputkontrakt:** Returnerer `pl.DataFrame` med kun sluttbrukerrettede kolonner i fast rekkefølge. Radantall beholdes, men rader sorteres. Ekstra inputkolonner droppes. `Verdi M1941` sorteres slik: `Svært stor verdi`, `Stor verdi`, `Middels verdi`, `Noe verdi`, `Ingen`, der ukjente/default-verdier kommer sist.
+    **Outputkontrakt:** Returnerer `pl.DataFrame` med kun sluttbrukerrettede kolonner i fast rekkefølge. Radantall beholdes, men rader sorteres. Ekstra inputkolonner droppes, med unntak av `obs_id`, som bevares først når den finnes (godkjent QGIS–marimo-trinn 2, 7. september 2026). `Fuglegruppe` er påkrevd input og bevares som String rett etter `Orden`, før `Artsgruppe`; navne-ID-hjelpekolonnene eksporteres ikke. `Verdi M1941` sorteres slik: `Svært stor verdi`, `Stor verdi`, `Middels verdi`, `Noe verdi`, `Ingen`, der ukjente/default-verdier kommer sist.
 
-    **Godkjenningsstatus:** Godkjent av bruker 2026-06-05.
+    **Godkjenningsstatus:** Godkjent av bruker 2026-06-05. Fuglegruppe og plasseringen i sluttabellen er godkjent av bruker 2026-09-21.
 
     **Revisjonspolicy:** Hvis forventet oppførsel endres, oppdater og godkjenn denne matrisen på nytt før tester eller funksjonslogikk endres.
 
     | ID | Scenario | Input | Forventet output/invariant | Toleranse | Hvorfor det betyr noe | Feilmodus testen beskytter mot | Testcelle |
     |---|---|---|---|---|---|---|---|
-    | RYDD-MTM-001 | Sluttschema og kolonnerekkefølge | Liten komplett DataFrame med alle påkrevde kolonner + én ekstra kolonne | Kun sluttkolonner beholdes, i godkjent rekkefølge. ANF-kolonnen heter `Art av nasjonal forvaltningsinteresse (eks. rødlista)` | Eksakt kolonneliste | Sluttskjemaet er kontrakten mot eksport/analyse | Gammelt ANF-kolonnenavn, feil kolonnerekkefølge eller lekkasje av hjelpekolonner | `RYDD_MTM_001` |
+    | RYDD-MTM-001 | Sluttschema og kolonnerekkefølge | Liten komplett DataFrame med alle påkrevde kolonner + ekstra kolonne og navne-ID-hjelpekolonner | Kun sluttkolonner beholdes. Fuglegruppe er String rett etter Orden; navne-ID-hjelpekolonnene droppes. ANF-kolonnen heter `Art av nasjonal forvaltningsinteresse (eks. rødlista)` | Eksakt kolonneliste | Sluttskjemaet er kontrakten mot eksport/analyse | Gammelt ANF-kolonnenavn, feil kolonnerekkefølge eller lekkasje av hjelpekolonner | `RYDD_MTM_001` |
     | RYDD-MTM-002 | Sortering etter M1941 og kategori | Rader i usortert rekkefølge med `Svært stor verdi`, `Stor verdi`, `Middels verdi`, `Noe verdi`, `Ingen` og ukjent verdi | Sortert etter M1941-prioritet først: 0–4, ukjente verdier sist; deretter kategori-prioritet. Like sorteringsnøkler beholder inputrekkefølge | Eksakt radrekkefølge | Riktig prioritering er viktig for sluttpresentasjon | Feil sorteringsrekkefølge, `Ingen` feilplassert eller ustabil sortering | `RYDD_MTM_002` |
     | RYDD-MTM-003 | `individualCount` → `Antall` | Verdier `"6"`, `None`, `"3/1"` | `"6" → 6`, `None → 1`, `"3/1" → 3`; dtype `Int64` | Eksakt verdi og dtype | Antall brukes i summeringer og må være numerisk | Null tolkes feil, brøkformat håndteres feil eller dtype blir tekst | `RYDD_MTM_003` |
     | RYDD-MTM-004 | Dato, usikkerhet og koordinater | Datetime, null/usikkerhet, latitude/longitude med komma og punktum | `dateTimeCollected → Observert dato` som `pl.Date`; `coordinateUncertaintyInMeters → Int64`; koordinater → `Float64` | Eksakt dtype, dato og numerisk toleranse `1e-6` | Sluttdata må ha riktige typer for kart og filtrering | Koordinater forblir tekst, dato beholder tid eller usikkerhet får feil type | `RYDD_MTM_004` |
@@ -1797,8 +2365,8 @@ def rydd_navn_og_datatyper(df_input: pl.DataFrame) -> pl.DataFrame:
     """Lag sluttabellen med norske kolonnenavn, riktige typer og sortering.
 
     Args:
-        df_input: Beriket Artskart-data etter taksonomi-, M1941- og
-            ANF-beriking.
+        df_input: Beriket Artskart-data etter taksonomi-, fuglegruppe-, M1941-
+            og ANF-beriking.
 
     Returns:
         DataFrame med sluttkolonner, norske kolonnenavn og sortering etter
@@ -1841,6 +2409,7 @@ def rydd_navn_og_datatyper(df_input: pl.DataFrame) -> pl.DataFrame:
     df_alle_funksjoner_ferdig_kjørt = (
         df_input.select(
             [
+                *([pl.col("obs_id")] if "obs_id" in df_input.columns else []),
                 pl.col("Verdi M1941"),
                 pl.col("category").alias("Kategori"),
                 pl.col("Art av nasjonal forvaltningsinteresse (eks. rødlista)"),
@@ -1858,6 +2427,7 @@ def rydd_navn_og_datatyper(df_input: pl.DataFrame) -> pl.DataFrame:
                 pl.col("coordinateUncertaintyInMeters").alias("Usikkerhet meter").cast(pl.Int64),
                 pl.col("FamilieNavn").alias("Familie"),
                 pl.col("OrdenNavn").alias("Orden"),
+                pl.col("Fuglegruppe").cast(pl.String),
                 pl.col("taxonGroupName").alias("Artsgruppe"),
                 pl.col("collector").alias("Observatør"),
                 pl.col("locality").alias("Lokalitet"),
@@ -1913,6 +2483,7 @@ def rydd_navn_og_datatyper_testhjelpere():
             "Usikkerhet meter",
             "Familie",
             "Orden",
+            "Fuglegruppe",
             "Artsgruppe",
             "Observatør",
             "Lokalitet",
@@ -1951,6 +2522,7 @@ def rydd_navn_og_datatyper_testhjelpere():
             "coordinateUncertaintyInMeters": None,
             "FamilieNavn": "Standardfamilie",
             "OrdenNavn": "Standardorden",
+            "Fuglegruppe": "Ikke gruppert",
             "taxonGroupName": "Fugler",
             "collector": "Standard observatør",
             "locality": "Standardlokalitet",
@@ -1999,6 +2571,7 @@ def rydd_navn_og_datatyper_testhjelpere():
             "behavior",
             "FamilieNavn",
             "OrdenNavn",
+            "Fuglegruppe",
             "taxonGroupName",
             "collector",
             "locality",
@@ -2044,6 +2617,9 @@ def RYDD_MTM_001(
                     "preferredPopularName": "dompap",
                     "validScientificName": "Pyrrhula pyrrhula",
                     "Art av nasjonal forvaltningsinteresse (eks. rødlista)": "Ansvarsarter",
+                    "ArtNavnId": 4263,
+                    "FamilieNavnId": 4222,
+                    "OrdenNavnId": 266,
                 }
             ]
         )
@@ -2056,6 +2632,9 @@ def RYDD_MTM_001(
             f"RYDD-MTM-001 forventet sluttkolonner i fast rekkefølge; fikk {result.columns}"
         )
         assert "ekstra_inputkolonne" not in result.columns, "RYDD-MTM-001 ekstra inputkolonner skal droppes"
+        assert not {"ArtNavnId", "FamilieNavnId", "OrdenNavnId"} & set(result.columns)
+        assert result.columns[result.columns.index("Orden") + 1] == "Fuglegruppe"
+        assert result.schema["Fuglegruppe"] == pl.String
         assert "Art av nasjonal forvaltningsinteresse" not in result.columns, (
             "RYDD-MTM-001 gammelt ANF-kolonnenavn uten '(eks. rødlista)' skal ikke være i output"
         )
@@ -2241,6 +2820,7 @@ def RYDD_MTM_005(lag_rydd_navn_og_datatyper_input):
                     "behavior": "singing",
                     "FamilieNavn": "Fringillidae",
                     "OrdenNavn": "Passeriformes",
+                    "Fuglegruppe": "Ikke gruppert",
                     "taxonGroupName": "Fugler",
                     "collector": "Ola Nordmann",
                     "locality": "Sommarøyveien 21",
@@ -2267,6 +2847,7 @@ def RYDD_MTM_005(lag_rydd_navn_og_datatyper_input):
                     "behavior": "flying",
                     "FamilieNavn": "Haematopodidae",
                     "OrdenNavn": "Charadriiformes",
+                    "Fuglegruppe": "Vadefugler",
                     "taxonGroupName": "Fugler",
                     "collector": "Kari Nordmann",
                     "locality": "Strengelvågfjorden",
@@ -2302,6 +2883,9 @@ def RYDD_MTM_005(lag_rydd_navn_og_datatyper_input):
         )
         assert result.get_column("Orden").to_list() == ["Charadriiformes", "Passeriformes"], (
             "RYDD-MTM-005 OrdenNavn skal bli Orden"
+        )
+        assert result["Fuglegruppe"].to_list() == ["Vadefugler", "Ikke gruppert"], (
+            "RYDD-MTM-005 Fuglegruppe skal følge riktig observasjon etter sortering"
         )
         assert result.get_column("Artsgruppe").to_list() == ["Fugler", "Fugler"], (
             "RYDD-MTM-005 taxonGroupName skal bli Artsgruppe"
@@ -2365,6 +2949,7 @@ def RYDD_MTM_006(
             "Atferd": pl.Utf8,
             "Observert dato": pl.Date,
             "Usikkerhet meter": pl.Int64,
+            "Fuglegruppe": pl.String,
             "latitude": pl.Float64,
             "longitude": pl.Float64,
             "Artens ID": pl.Int64,
@@ -2399,6 +2984,7 @@ def RYDD_MTM_007(lag_rydd_navn_og_datatyper_input):
         assert_missing_column_raises("Art av nasjonal forvaltningsinteresse (eks. rødlista)")
         assert_missing_column_raises("Hensynskrevende arter")
         assert_missing_column_raises("validScientificNameId")
+        assert_missing_column_raises("Fuglegruppe")
 
 
     test_rydd_navn_og_datatyper_rydd_mtm_007()
@@ -3193,6 +3779,7 @@ def definer_les_data_cli(
 def definer_les_data_og_kjor_alle_funksjoner(
     console,
     legg_til_arter_av_nasjonal_forvaltningsinteresse,
+    legg_til_fuglegruppe,
     legg_til_månedsnavn,
     process_and_enrich_data,
 ):
@@ -3205,12 +3792,13 @@ def definer_les_data_og_kjor_alle_funksjoner(
 
         Returns:
             Ferdig behandlet DataFrame klar for eksport, med `Månedsnavn` rett
-            etter `Observert dato`.
+            etter `Observert dato` og `Fuglegruppe` rett etter `Orden`.
 
         Raises:
-            ValueError: Når input ikke følger Artskart-kontrakten eller mangler
-                gyldige ID-er.
-            RuntimeError: Når NorTaxa-oppslag feiler.
+            ValueError: Når input ikke følger Artskart-kontrakten, mangler
+                gyldige ID-er eller fuglegruppereglene er ugyldige.
+            RuntimeError: Når NorTaxa-oppslag feiler eller fuglegruppereglene
+                ikke kan leses fra DuckDB.
 
         Notes:
             Observasjoner uten dato fjernes av årfilteret. Funksjonen skriver
@@ -3221,6 +3809,7 @@ def definer_les_data_og_kjor_alle_funksjoner(
         with console.status("[bold blue]Leser CSV-fil med DuckDB..."):
             input_df = duckdb.sql(f"SELECT * FROM read_csv('{input_fil_sti}', sample_size=-1)").pl()
         validate_artskart_input_contract(input_df)
+        input_df = legg_til_observasjons_id(input_df)
 
         with console.status("[bold blue]Filtrerer observasjoner på år..."):
             # OBS: Observasjoner uten dato (null) filtreres også bort her.
@@ -3237,6 +3826,7 @@ def definer_les_data_og_kjor_alle_funksjoner(
             console.print("  [yellow]Advarsel:[/yellow] Ingen observasjoner etter årfilter; returnerer tomt resultat")
             tomt_mellomresultat = pl.DataFrame(
                 schema={
+                    "obs_id": pl.String,
                     "Verdi M1941": pl.Utf8,
                     "category": pl.Utf8,
                     "Art av nasjonal forvaltningsinteresse (eks. rødlista)": pl.Utf8,
@@ -3248,6 +3838,10 @@ def definer_les_data_og_kjor_alle_funksjoner(
                     "coordinateUncertaintyInMeters": pl.Int64,
                     "FamilieNavn": pl.Utf8,
                     "OrdenNavn": pl.Utf8,
+                    "Class": pl.String,
+                    "ArtNavnId": pl.Int64,
+                    "FamilieNavnId": pl.Int64,
+                    "OrdenNavnId": pl.Int64,
                     "taxonGroupName": pl.Utf8,
                     "collector": pl.Utf8,
                     "locality": pl.Utf8,
@@ -3268,13 +3862,17 @@ def definer_les_data_og_kjor_alle_funksjoner(
                     "validScientificNameId": pl.Int64,
                 }
             )
-            return rydd_navn_og_datatyper(tomt_mellomresultat).pipe(legg_til_månedsnavn)
+            return tomt_mellomresultat.pipe(legg_til_fuglegruppe).pipe(rydd_navn_og_datatyper).pipe(legg_til_månedsnavn)
 
         # Kjører alle berikingsfunksjonene — progress_bar håndteres inne i process_and_enrich_data
         df_artsdatabanken = process_and_enrich_data(input_filtrert_df)
 
+        with console.status("[bold blue]Tildeler fuglegrupper fra DuckDB..."):
+            df_gruppert = df_artsdatabanken.pipe(legg_til_fuglegruppe)
+        console.print("  [green]✓[/green] Lagt til Fuglegruppe fra taksonomiske regler")
+
         with console.status("[bold blue]Beregner M1941-verdi fra rødlistekategori..."):
-            df_steg0 = df_artsdatabanken.pipe(legg_til_verdi_m1941)
+            df_steg0 = df_gruppert.pipe(legg_til_verdi_m1941)
         console.print("  [green]✓[/green] Beregnet M1941-verdi fra rødlistekategori")
 
         with console.status("[bold blue]Legger til kriterier for nasjonal interesse..."):
@@ -3322,7 +3920,7 @@ def md_testmatrise_les_data_og_kjor_alle_funksjoner():
 
     **Inputkontrakt:** `input_fil_sti` peker til en CSV-fil som DuckDB kan lese. CSV-en må inneholde alle obligatoriske Artskart-kolonner fra `get_required_artskart_columns()`. `category` må være ikke-null og i tillatt domene fra `get_allowed_categories()`. `dateTimeCollected` må kunne tolkes som dato/datetime. `filter_year` er første observasjonsår som beholdes.
 
-    **Outputkontrakt:** Returnerer `pl.DataFrame` med sluttkolonnene fra `rydd_navn_og_datatyper`, pluss `Månedsnavn` rett etter `Observert dato`. Bare observasjoner med dato fra og med `filter_year` skal inngå. Observasjoner med null dato fjernes av årfilteret. Hvis årfilteret gir null rader, returneres en tom slutt-DataFrame med riktig sluttkolonneliste.
+    **Outputkontrakt:** Returnerer `pl.DataFrame` med sluttkolonnene fra `rydd_navn_og_datatyper`, pluss `Månedsnavn` rett etter `Observert dato`. `Fuglegruppe` beregnes fra DuckDB-reglene og NorTaxa-ID-ene før opprydding og bevares rett etter `Orden`, også ved Parquet-eksport. Bare observasjoner med dato fra og med `filter_year` skal inngå. Observasjoner med null dato fjernes av årfilteret. Hvis årfilteret gir null rader, returneres en tom slutt-DataFrame med riktig sluttkolonneliste og Fuglegruppe som String, uten NorTaxa-kall. Regeltabellen må likevel være gyldig. Fuglegruppe-utvidelsen og testomfanget er godkjent av bruker 2026-09-21.
 
     **Godkjenningsstatus:** Godkjent av bruker 2026-06-05. PIPE-MTM-006 er avklart av bruker samme dato: tomt datasett etter årfilter skal returnere tom DataFrame, og konsollmeldingen skal vise at 0 rader/observasjoner ble inkludert.
 
@@ -3330,12 +3928,12 @@ def md_testmatrise_les_data_og_kjor_alle_funksjoner():
 
     | ID | Scenario | Input | Forventet output/invariant | Toleranse | Hvorfor det betyr noe | Feilmodus testen beskytter mot | Testcelle |
     |---|---|---|---|---|---|---|---|
-    | PIPE-MTM-001 | Happy path mini-integrasjon | Liten gyldig Artskart-CSV med to observasjoner på/etter `filter_year`; NorTaxa og ANF erstattes med deterministiske fakes | Returnerer `pl.DataFrame` med godkjente sluttkolonner; begge rader inngår; pipe-kjeden får bare filtrert input; sluttverdier kommer fra de reelle lokale stegene for M1941, ANF-oppsummering, opprydding og månedsnavn | Eksakt radantall, kolonneliste og utvalgte verdier | Bekrefter at hele pipeline-løpet henger sammen uten live API | Steg kobles feil, sluttformat endres, CSV-lesing eller pipe-kjede brekker | `PIPE_MTM_001` |
+    | PIPE-MTM-001 | Happy path mini-integrasjon | Liten gyldig Artskart-CSV med to observasjoner på/etter `filter_year`; NorTaxa og ANF erstattes med deterministiske fakes | Returnerer godkjente sluttkolonner og beholder obs_id; reell Fuglegruppe beregnes fra de falske taksonomi-ID-ene og DuckDB. M1941, ANF-oppsummering, opprydding og månedsnavn er reelle steg; hele sluttabellen bevares ved Parquet-rundtur | Eksakt radantall, kolonneliste og utvalgte verdier | Bekrefter at hele pipeline-løpet henger sammen uten live API | Steg kobles feil, sluttformat endres, CSV-lesing eller pipe-kjede brekker | `PIPE_MTM_001` |
     | PIPE-MTM-002 | Årfilter fjerner eldre og null dato | CSV med én observasjon før `filter_year`, én på grensen/etter `filter_year`, og én med null dato; NorTaxa og ANF erstattes med fakes | Bare raden på/etter `filter_year` behandles og finnes i output; konsollen melder om null-dato og filtrert radantall | Eksakt art-ID/radantall og tekstutdrag | Dokumenterer sentral filtreringsregel | Gamle observasjoner eller null-datoer slipper gjennom | `PIPE_MTM_002` |
     | PIPE-MTM-003 | Manglende obligatorisk Artskart-kolonne | CSV uten f.eks. `category` | `ValueError` med tekst som nevner manglende obligatoriske kolonner og den manglende kolonnen | Exception-type og tekstutdrag | Inputfeil skal stoppe tidlig, før API/oppslag | Utydelig feil senere i pipeline | `PIPE_MTM_003` |
     | PIPE-MTM-004 | Ugyldig `category` | CSV med `category="XYZ"` | `ValueError` med tekst om ukjente `category`-verdier og verdien `XYZ` | Exception-type og tekstutdrag | Kategorien styrer M1941 og må være validert | Feil kategori gir stille feilklassifisering | `PIPE_MTM_004` |
     | PIPE-MTM-005 | Ingen gyldige ID-er etter filtrering | Gyldig CSV der gjenværende rad etter årfilter har ugyldig `validScientificNameId`, f.eks. tekst som ikke kan konverteres til `int` | `ValueError` fra berikingssteget om ingen gyldige `validScientificNameId`-verdier | Exception-type og tekstutdrag | Pipeline skal ikke produsere ufullstendig taksonomi | Tomt/ugyldig grunnlag går videre som falsk suksess | `PIPE_MTM_005` |
-    | PIPE-MTM-006 | Tomt datasett etter årfilter | Gyldig CSV der alle observasjoner er før `filter_year` | Returnerer tom `pl.DataFrame` med godkjente sluttkolonner; NorTaxa/API-beriking kjøres ikke; konsollmeldingen sier semantisk at filteret ga `0 rader`/`0 observasjoner` | Eksakt radantall/kolonner og tekstutdrag | Viktig edge case når bruker filtrerer bort alt | Tomt filtrert datasett feiler unødvendig eller prøver API-oppslag uten rader | `PIPE_MTM_006` |
+    | PIPE-MTM-006 | Tomt datasett etter årfilter | Gyldig CSV der alle observasjoner er før `filter_year` | Returnerer tom `pl.DataFrame` med godkjente sluttkolonner, inkludert Fuglegruppe som String; Parquet-rundtur bevarer schema. NorTaxa/API-beriking kjøres ikke; konsollmeldingen sier semantisk at filteret ga `0 rader`/`0 observasjoner` | Eksakt radantall/kolonner og tekstutdrag | Viktig edge case når bruker filtrerer bort alt | Tomt filtrert datasett feiler unødvendig eller prøver API-oppslag uten rader | `PIPE_MTM_006` |
     """)
     return
 
@@ -3381,7 +3979,10 @@ def pipeline_testhjelpere():
             "scientificNameRank": "Species",
             "behavior": "sett",
         }
-        return pl.DataFrame([{**grunnrad, **overrides} for overrides in rad_overrides])
+        return pl.DataFrame([
+            {**grunnrad, "proxyId": f"test-observasjon-{index}", **overrides}
+            for index, overrides in enumerate(rad_overrides)
+        ])
 
     def skriv_pipeline_artskart_csv(tmpdir: str, df: pl.DataFrame, filnavn: str = "artskart.csv") -> str:
         """Skriv pipeline-fixture til CSV og returner filsti."""
@@ -3400,6 +4001,9 @@ def pipeline_testhjelpere():
             pl.lit("Poecile").alias("Genus"),
             pl.lit("testfamilien").alias("FamilieNavn"),
             pl.lit("testordenen").alias("OrdenNavn"),
+            pl.col("validScientificNameId").cast(pl.Int64).alias("ArtNavnId"),
+            pl.lit(4362, dtype=pl.Int64).alias("FamilieNavnId"),
+            pl.lit(266, dtype=pl.Int64).alias("OrdenNavnId"),
         )
 
     def legg_til_pipeline_fake_anf(df: pl.DataFrame) -> pl.DataFrame:
@@ -3555,12 +4159,19 @@ def PIPE_MTM_001(
                 patch.object(console, "print", fake_print),
             ):
                 result = test_pipeline(csv_sti, filter_year=2020)
+            result.write_parquet(f"{tmpdir}/resultat.parquet")
+            assert pl.read_parquet(f"{tmpdir}/resultat.parquet").equals(result), (
+                "PIPE-MTM-001 Fuglegruppe, obs_id og øvrige verdier skal overleve Parquet-rundtur"
+            )
 
         assert isinstance(result, pl.DataFrame), "PIPE-MTM-001 skal returnere Polars DataFrame"
-        assert result.columns == legg_til_månedsnavn_forventede_kolonner(), (
+        assert result.columns == ["obs_id", *legg_til_månedsnavn_forventede_kolonner()], (
             "PIPE-MTM-001 skal returnere godkjent sluttkolonneliste"
         )
         assert result.height == 2, "PIPE-MTM-001 begge rader etter filter_year skal inngå"
+        assert result["Fuglegruppe"].to_list() == ["Skoglevende arter", "Skoglevende arter"]
+        assert result["obs_id"].to_list() == ["test-observasjon-1", "test-observasjon-0"]
+        assert not {"ArtNavnId", "FamilieNavnId", "OrdenNavnId"} & set(result.columns)
         assert calls == [
             ("process_and_enrich_data", [1001, 1002]),
             ("legg_til_arter_av_nasjonal_forvaltningsinteresse", [1001, 1002]),
@@ -3862,13 +4473,16 @@ def PIPE_MTM_006(
                 patch.object(console, "print", fake_print),
             ):
                 result = test_pipeline(csv_sti, filter_year=1990)
+            result.write_parquet(f"{tmpdir}/tomt_resultat.parquet")
+            assert pl.read_parquet(f"{tmpdir}/tomt_resultat.parquet").equals(result)
 
         assert isinstance(result, pl.DataFrame), "PIPE-MTM-006 skal returnere Polars DataFrame"
         assert result.height == 0, "PIPE-MTM-006 årfilter uten treff skal gi tom DataFrame"
-        assert result.columns == legg_til_månedsnavn_forventede_kolonner(), (
+        assert result.columns == ["obs_id", *legg_til_månedsnavn_forventede_kolonner()], (
             "PIPE-MTM-006 tomt resultat skal ha godkjente sluttkolonner"
         )
         assert result.schema["Månedsnavn"] == pl.Utf8, "PIPE-MTM-006 tomt resultat skal ha Månedsnavn som tekstkolonne"
+        assert result.schema["Fuglegruppe"] == pl.String, "PIPE-MTM-006 tomt resultat skal ha Fuglegruppe som tekst"
         assert calls == [], "PIPE-MTM-006 skal ikke kalle NorTaxa- eller ANF-steg når årfilteret gir 0 rader"
         assert any("Filtrert til 0 rader" in tekst for tekst in utskrifter), (
             "PIPE-MTM-006 konsollen skal melde at filteret ga 0 rader"
