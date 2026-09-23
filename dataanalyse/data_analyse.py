@@ -20,111 +20,6 @@ with app.setup(hide_code=True):
     import polars as pl
     from holoviews.element.tiles import EsriImagery
 
-
-@app.cell(hide_code=True)
-def _():
-    valgt_fil = mo.ui.file_browser(
-        filetypes=[".parquet"],
-        multiple=False,
-        label="Velg ferdig behandlet Parquet-fil",
-    )
-    valgt_fil
-    return (valgt_fil,)
-
-
-@app.cell(hide_code=True)
-def artsstatistikk_dokumentasjon(
-    artsstatistikk_forventede_kolonner,
-    hent_påkrevde_artsstatistikk_kolonner,
-    lag_artsstatistikk,
-    lag_artsstatistikk_tabell,
-    lag_artsstatistikk_testinput,
-    lag_tom_artsstatistikk_testinput,
-    test_artsstatistikk_mtm_001,
-    test_artsstatistikk_mtm_002,
-    test_artsstatistikk_mtm_003,
-    test_artsstatistikk_mtm_004,
-    test_artsstatistikk_mtm_005,
-    test_artsstatistikk_mtm_006,
-    test_artsstatistikk_mtm_007,
-    test_artsstatistikk_mtm_008,
-    valider_artsstatistikk_input,
-):
-    def _vis_kildekode(_funksjon):
-        _kildekode = textwrap.dedent(inspect.getsource(_funksjon)).strip()
-        return mo.md(f"#### `{_funksjon.__name__}`\n\n```python\n{_kildekode}\n```")
-
-    _funksjoner = [
-        hent_påkrevde_artsstatistikk_kolonner,
-        valider_artsstatistikk_input,
-        lag_artsstatistikk,
-        lag_artsstatistikk_tabell,
-    ]
-    _testhjelpere = [
-        lag_artsstatistikk_testinput,
-        lag_tom_artsstatistikk_testinput,
-        artsstatistikk_forventede_kolonner,
-    ]
-    _tester = [
-        test_artsstatistikk_mtm_001,
-        test_artsstatistikk_mtm_002,
-        test_artsstatistikk_mtm_003,
-        test_artsstatistikk_mtm_004,
-        test_artsstatistikk_mtm_005,
-        test_artsstatistikk_mtm_006,
-        test_artsstatistikk_mtm_007,
-        test_artsstatistikk_mtm_008,
-    ]
-    _innhold = mo.vstack(
-        [
-            mo.md(r"""
-    ### Funksjonsstruktur
-
-    1. `hent_påkrevde_artsstatistikk_kolonner` beskriver inputkontrakten.
-    2. `valider_artsstatistikk_input` validerer kolonner, typer, kategorier og metadata.
-    3. `lag_artsstatistikk` aggregerer observasjoner til én rad per takson.
-    4. `lag_artsstatistikk_tabell` formaterer resultatet som en Great Table.
-
-    ### Funksjoner
-    """),
-            *[_vis_kildekode(_funksjon) for _funksjon in _funksjoner],
-            mo.md(r"""
-    ### Testbeskrivelse og testmatrise
-
-    Testene kjøres reaktivt og dekker inputkontrakt, aggregering, sortering,
-    rendering og nanoplot.
-
-    | ID | Scenario | Forventet resultat |
-    |---|---|---|
-    | ARTSTABELL-MTM-001 | To observasjoner av samme art | Korrekte summer, gjennomsnitt, tidsrom, måneder og aktiviteter |
-    | ARTSTABELL-MTM-002 | To taksa med samme norske navn | Taksa holdes atskilt med `Artens ID` og `Art` |
-    | ARTSTABELL-MTM-003 | Blandet kategori og observasjonsmengde | Full kategoriorden og flest observasjoner først innen kategori |
-    | ARTSTABELL-MTM-004 | Motstridende artsmetadata | Tydelig `ValueError` i stedet for vilkårlig `.first()` |
-    | ARTSTABELL-MTM-005 | Tom input med riktig schema | Tom output med fast kolonnerekkefølge og riktige typer |
-    | ARTSTABELL-MTM-006 | Manglende obligatorisk kolonne | Tidlig feil som nevner kolonnen |
-    | ARTSTABELL-MTM-007 | Feil datatype eller ukjent kategori | Tidlig og forklarende feil |
-    | ARTSTABELL-MTM-008 | Great Tables-rendering | Verdi M1941 vises først uten tom ekstrakolonne, Source Sans 3 og offisielle Artsdatabanken/M-1941-fargeprofiler brukes, og tabell, nanoplot, tittel og fotnoter renderes |
-
-    ### Testgrunnlag
-    """),
-            *[_vis_kildekode(_funksjon) for _funksjon in _testhjelpere],
-            mo.md("### Tester"),
-            *[_vis_kildekode(_funksjon) for _funksjon in _tester],
-        ],
-        gap=1,
-    )
-    mo.accordion({"Artsstatistikk – funksjoner og tester": _innhold})
-    return
-
-
-@app.cell(hide_code=True)
-def _(arter_df, lag_artsstatistikk):
-    artsstatistikk_df = lag_artsstatistikk(arter_df)
-    return (artsstatistikk_df,)
-
-
-@app.cell(hide_code=True)
-def _():
     ARTSSTATISTIKK_INPUTKOLONNER = {
         "Artens ID",
         "Art",
@@ -224,10 +119,16 @@ def _():
                 "Stor verdi",
                 "Middels verdi",
                 "Noe verdi",
-                "Ingen",
+                "Uten betydning for KU",
             ]
         )
     }
+
+    ARTSANTALL_ETIKETT = "Arter (inkl. underarter)"
+    ARTSANTALL_MERKNAD = (
+        "Tellingen følger kildens ID og navn; også høyere taksonomiske nivåer "
+        "og navnevarianter kan inngå."
+    )
 
     # Gjeldende risikokategorifarger fra Artsdatabanken.
     ARTSSTATISTIKK_KATEGORIFARGER = {
@@ -254,389 +155,526 @@ def _():
         "Stor verdi": "#FD7032",
         "Middels verdi": "#FEC02D",
         "Noe verdi": "#FFFF00",
-        "Ingen": "#D9D9D9",
+        "Uten betydning for KU": "#D9D9D9",
     }
+
+
+@app.cell(hide_code=True)
+def _():
+    valgt_fil = mo.ui.file_browser(
+        filetypes=[".parquet"],
+        multiple=False,
+        label="Velg ferdig behandlet Parquet-fil",
+    )
+    valgt_fil
+    return (valgt_fil,)
+
+
+@app.cell(hide_code=True)
+def artsstatistikk_dokumentasjon(
+    artsstatistikk_forventede_kolonner,
+    hent_påkrevde_artsstatistikk_kolonner,
+    lag_artsstatistikk,
+    lag_artsstatistikk_tabell,
+    lag_artsstatistikk_testinput,
+    lag_tom_artsstatistikk_testinput,
+    test_artsstatistikk_mtm_001,
+    test_artsstatistikk_mtm_002,
+    test_artsstatistikk_mtm_003,
+    test_artsstatistikk_mtm_004,
+    test_artsstatistikk_mtm_005,
+    test_artsstatistikk_mtm_006,
+    test_artsstatistikk_mtm_007,
+    test_artsstatistikk_mtm_008,
+    valider_artsstatistikk_input,
+):
+    def _vis_kildekode(_funksjon):
+        _kildekode = textwrap.dedent(inspect.getsource(_funksjon)).strip()
+        return mo.md(f"#### `{_funksjon.__name__}`\n\n```python\n{_kildekode}\n```")
+
+    _funksjoner = [
+        hent_påkrevde_artsstatistikk_kolonner,
+        valider_artsstatistikk_input,
+        lag_artsstatistikk,
+        lag_artsstatistikk_tabell,
+    ]
+    _testhjelpere = [
+        lag_artsstatistikk_testinput,
+        lag_tom_artsstatistikk_testinput,
+        artsstatistikk_forventede_kolonner,
+    ]
+    _tester = [
+        test_artsstatistikk_mtm_001,
+        test_artsstatistikk_mtm_002,
+        test_artsstatistikk_mtm_003,
+        test_artsstatistikk_mtm_004,
+        test_artsstatistikk_mtm_005,
+        test_artsstatistikk_mtm_006,
+        test_artsstatistikk_mtm_007,
+        test_artsstatistikk_mtm_008,
+    ]
+    _innhold = mo.vstack(
+        [
+            mo.md(r"""
+    ### Funksjonsstruktur
+
+    1. `hent_påkrevde_artsstatistikk_kolonner` beskriver inputkontrakten.
+    2. `valider_artsstatistikk_input` validerer kolonner, typer, kategorier og metadata.
+    3. `lag_artsstatistikk` aggregerer observasjoner til én rad per kildepar `(Artens ID, Art)`.
+    4. `lag_artsstatistikk_tabell` formaterer resultatet som en Great Table.
+
+    ### Funksjoner
+    """),
+            *[_vis_kildekode(_funksjon) for _funksjon in _funksjoner],
+            mo.md(r"""
+    ### Testbeskrivelse og testmatrise
+
+    Testene kjøres reaktivt og dekker inputkontrakt, aggregering, sortering,
+    rendering og månedsprofil. Alle tre aggregatorer krever ikke-negative heltall
+    med eksakt totalsum innen Int64, heltalls-ID, utfylt vitenskapelig navn og
+    kalenderdato (`Date`, aldri tidsstempel). Udaterte rader beholdes i antall,
+    individtall og gjennomsnitt, men ikke i tidsaggregatene. Navnepar bevares
+    uten normalisering; dette er ikke et rent mål på artsrikdom.
+
+    | ID | Scenario | Forventet resultat |
+    |---|---|---|
+    | ARTSTABELL-MTM-001 | To observasjoner av samme art | Korrekte summer, gjennomsnitt, tidsrom, måneder og aktiviteter |
+    | ARTSTABELL-MTM-002 | To taksa med samme norske navn | Taksa holdes atskilt med `Artens ID` og `Art` |
+    | ARTSTABELL-MTM-003 | Blandet kategori og observasjonsmengde | Full kategoriorden og flest observasjoner først innen kategori |
+    | ARTSTABELL-MTM-004 | Motstridende artsmetadata | Tydelig `ValueError` i stedet for vilkårlig `.first()` |
+    | ARTSTABELL-MTM-005 | Tom input med riktig schema | Tom output med fast kolonnerekkefølge og riktige typer |
+    | ARTSTABELL-MTM-006 | Manglende obligatorisk kolonne | Tidlig feil som nevner kolonnen |
+    | ARTSTABELL-MTM-007 | Feil datatype eller ukjent kategori | Tidlig og forklarende feil |
+    | ARTSTABELL-MTM-008 | Great Tables-rendering | Verdi M1941 vises først uten tom ekstrakolonne, Source Sans 3 og offisielle Artsdatabanken/M-1941-fargeprofiler brukes, og tabell, nanoplot, tittel og fotnoter renderes |
+
+    ### Testgrunnlag
+    """),
+            *[_vis_kildekode(_funksjon) for _funksjon in _testhjelpere],
+            mo.md("### Tester"),
+            *[_vis_kildekode(_funksjon) for _funksjon in _tester],
+        ],
+        gap=1,
+    )
+    mo.accordion({"Artsstatistikk – funksjoner og tester": _innhold})
+    return
+
+
+@app.cell(hide_code=True)
+def _(arter_df, lag_artsstatistikk):
+    artsstatistikk_df = lag_artsstatistikk(arter_df)
+    return (artsstatistikk_df,)
+
+
+
+
+@app.function(hide_code=True)
+def hent_påkrevde_artsstatistikk_kolonner() -> set[str]:
+    """Returner kolonnene som kreves for å lage artsstatistikken."""
+    return set(ARTSSTATISTIKK_INPUTKOLONNER)
+
+
+@app.function(hide_code=True)
+def valider_observasjonsgrunnlag(df: pl.DataFrame, kolonner: set[str]) -> None:
+    """Valider felles beregningsgrunnlag før konvertering eller summering."""
+    if not isinstance(df, pl.DataFrame):
+        raise TypeError("Analyse krever en Polars DataFrame")
+    manglende = sorted(kolonner - set(df.columns))
+    if manglende:
+        raise ValueError("Mangler obligatoriske kolonner: " + ", ".join(manglende))
+    if not df.schema["Artens ID"].is_integer():
+        raise TypeError("Kolonnen `Artens ID` må ha heltallstype")
+    if df.get_column("Artens ID").null_count():
+        raise ValueError("Kolonnen `Artens ID` kan ikke inneholde nullverdier")
+    if df.schema["Art"] != pl.String:
+        raise TypeError("Kolonnen `Art` må ha teksttype")
+    if df.filter(pl.col("Art").is_null() | (pl.col("Art").str.strip_chars() == "")).height:
+        raise ValueError("Kolonnen `Art` må inneholde et vitenskapelig navn, ikke null eller blank tekst")
+    if df.schema["Observert dato"] != pl.Date:
+        raise TypeError("Kolonnen `Observert dato` må ha typen Date; tidsstempler støttes ikke")
+    if not df.schema["Antall"].is_integer():
+        raise TypeError("Kolonnen `Antall` må ha heltallstype")
+    antall = df.get_column("Antall")
+    if antall.null_count():
+        raise ValueError("Kolonnen `Antall` kan ikke inneholde nullverdier")
+    if (antall < 0).any():
+        raise ValueError("Kolonnen `Antall` kan ikke inneholde negative verdier")
+    # Python-heltall beskytter også totalsummen på tvers av grupper og måneder.
+    if sum(antall) > 2**63 - 1:
+        raise ValueError("Summen av `Antall` overskrider støttet Int64-område (0–2**63−1)")
+
+
+@app.function(hide_code=True)
+def valider_artsstatistikk_input(df: pl.DataFrame) -> None:
+    """Valider inputkontrakten for artsstatistikk.
+
+    Args:
+        df: Ferdig behandlet observasjonsdata.
+
+    Raises:
+        TypeError: Når input eller en obligatorisk kolonne har feil datatype.
+        ValueError: Når kolonner/nøkler mangler, individtall er null/negative
+            eller samlet overstiger Int64, kategorier er ukjente eller samme
+            kildepar har motstridende metadata. Dato må være Date, men kan være null.
+    """
+    valider_observasjonsgrunnlag(df, hent_påkrevde_artsstatistikk_kolonner())
+
+    feil_teksttyper = sorted(kolonne for kolonne in ARTSSTATISTIKK_TEKSTKOLONNER if df.schema[kolonne] != pl.String)
+    if feil_teksttyper:
+        raise TypeError("Følgende artsstatistikk-kolonner må ha teksttype: " + ", ".join(feil_teksttyper))
+
+    tillatte_kategorier = set(ARTSSTATISTIKK_KATEGORI_REKKEFOELGE)
+    ukjente_kategorier = (
+        df.filter(pl.col("Kategori").is_null() | ~pl.col("Kategori").is_in(tillatte_kategorier))
+        .get_column("Kategori")
+        .unique()
+        .to_list()
+    )
+    if ukjente_kategorier:
+        kategoritekst = ", ".join(sorted("<null>" if verdi is None else str(verdi) for verdi in ukjente_kategorier))
+        raise ValueError(f"Ukjente Kategori-verdier: {kategoritekst}")
+
+    metadata_konflikter = (
+        df.group_by(["Artens ID", "Art"])
+        .agg(
+            [pl.col(kolonne).drop_nulls().n_unique().alias(kolonne) for kolonne in ARTSSTATISTIKK_METADATAKOLONNER]
+        )
+        .filter(pl.any_horizontal([pl.col(kolonne) > 1 for kolonne in ARTSSTATISTIKK_METADATAKOLONNER]))
+    )
+    if metadata_konflikter.height > 0:
+        konfliktkolonner = [
+            kolonne
+            for kolonne in ARTSSTATISTIKK_METADATAKOLONNER
+            if metadata_konflikter.filter(pl.col(kolonne) > 1).height > 0
+        ]
+        raise ValueError("Motstridende artsmetadata for samme Artens ID/Art: " + ", ".join(konfliktkolonner))
+
+
+@app.function(hide_code=True)
+def lag_artsstatistikk(df: pl.DataFrame) -> pl.DataFrame:
+    """Aggreger observasjoner til én rad per eksakt kildepar (Artens ID, Art).
+
+    Månedsprofilen inneholder tolv heltall i rekkefølgen januar–desember.
+    Udaterte rader inngår i N, sum og snitt, ikke i tidsprofilen. Nøkkelparet
+    er ikke norsk navn, foreldreart eller en ny biologisk klassifisering.
+    """
+    valider_artsstatistikk_input(df)
+
+    maanedsaggregeringer = [
+        (pl.col("Observert dato").dt.month() == maaned).cast(pl.Int64).sum().alias(f"__maaned_{maaned}")
+        for maaned in range(1, 13)
+    ]
+
     return (
-        ARTSSTATISTIKK_INPUTKOLONNER,
-        ARTSSTATISTIKK_KATEGORIFARGER,
-        ARTSSTATISTIKK_KATEGORI_REKKEFOELGE,
-        ARTSSTATISTIKK_M1941_FARGER,
-        ARTSSTATISTIKK_M1941_REKKEFOELGE,
-        ARTSSTATISTIKK_MAANEDSNAVN,
-        ARTSSTATISTIKK_METADATAKOLONNER,
-        ARTSSTATISTIKK_OUTPUTKOLONNER,
-        ARTSSTATISTIKK_TEKSTKOLONNER,
+        df.group_by(["Artens ID", "Art"], maintain_order=True)
+        .agg(
+            [
+                pl.col("Navn").drop_nulls().first().alias("Navn"),
+                pl.col("Kategori").drop_nulls().first().alias("Kategori"),
+                pl.col("Verdi M1941").drop_nulls().first().alias("Verdi M1941"),
+                pl.col("Art av nasjonal forvaltningsinteresse (eks. rødlista)")
+                .drop_nulls()
+                .first()
+                .alias("Forvaltningsinteresse"),
+                pl.len().cast(pl.Int64).alias("Observasjoner"),
+                pl.col("Antall").cast(pl.Int64).sum().alias("Individer"),
+                (pl.col("Antall").cast(pl.Int64).sum() / pl.len()).alias("Gj.snitt individer"),
+                pl.col("Observert dato").dt.year().min().alias("__aar_fra"),
+                pl.col("Observert dato").dt.year().max().alias("__aar_til"),
+                pl.col("Observert dato").dt.month().drop_nulls().unique().sort().alias("__maaneder"),
+                pl.col("Familie").drop_nulls().first().alias("Familie"),
+                pl.col("Orden").drop_nulls().first().alias("Orden"),
+                (pl.col("Atferd") == "reproductive").cast(pl.Int64).sum().alias("Reproduksjon"),
+                (pl.col("Atferd") == "possiblereproductive").cast(pl.Int64).sum().alias("Mulig reproduksjon"),
+                *maanedsaggregeringer,
+            ]
+        )
+        .with_columns(
+            [
+                pl.coalesce(
+                    [
+                        pl.col("Navn").str.strip_chars().replace("", None),
+                        pl.col("Art"),
+                        pl.lit("Ukjent art"),
+                    ]
+                ).alias("Navn"),
+                pl.when(pl.col("__aar_fra").is_null())
+                .then(pl.lit(None, dtype=pl.String))
+                .when(pl.col("__aar_fra") == pl.col("__aar_til"))
+                .then(pl.col("__aar_fra").cast(pl.String))
+                .otherwise(pl.concat_str([pl.col("__aar_fra"), pl.lit("–"), pl.col("__aar_til")]))
+                .alias("År-periode"),
+                pl.col("__maaneder")
+                .list.eval(
+                    pl.element().replace_strict(
+                        ARTSSTATISTIKK_MAANEDSNAVN,
+                        return_dtype=pl.String,
+                    )
+                )
+                .list.join(", ")
+                .alias("Måneder"),
+                pl.concat_list([pl.col(f"__maaned_{maaned}") for maaned in range(1, 13)]).alias("Månedsprofil"),
+            ]
+        )
+        .with_columns(
+            [
+                pl.col("Verdi M1941")
+                .replace_strict(
+                    ARTSSTATISTIKK_M1941_REKKEFOELGE,
+                    default=999,
+                )
+                .alias("__verdi_sortering"),
+                pl.col("Kategori")
+                .replace_strict(
+                    ARTSSTATISTIKK_KATEGORI_REKKEFOELGE,
+                    default=999,
+                )
+                .alias("__kategori_sortering"),
+            ]
+        )
+        .sort(
+            ["__verdi_sortering", "__kategori_sortering", "Observasjoner"],
+            descending=[False, False, True],
+            maintain_order=True,
+        )
+        .select(ARTSSTATISTIKK_OUTPUTKOLONNER)
     )
 
 
-@app.cell(hide_code=True)
-def _(ARTSSTATISTIKK_INPUTKOLONNER):
-    def hent_påkrevde_artsstatistikk_kolonner() -> set[str]:
-        """Returner kolonnene som kreves for å lage artsstatistikken."""
-        return set(ARTSSTATISTIKK_INPUTKOLONNER)
+@app.function(hide_code=True)
+def lag_artsstatistikk_tabell(artsstatistikk_df: pl.DataFrame) -> gt.GT:
+    """Bygg sikker HTML fra rå aggregert statistikk; kalleren skal ikke escape.
 
-    return (hent_påkrevde_artsstatistikk_kolonner,)
+    Heltall formateres uten flyttall. Dateringsandel vises som stripe/prosent,
+    eller bare «Ingen daterte observasjoner» når hele kildeparet er udatert.
+    """
+    manglende_kolonner = sorted(set(ARTSSTATISTIKK_OUTPUTKOLONNER) - set(artsstatistikk_df.columns))
+    if manglende_kolonner:
+        raise ValueError("Mangler kolonner for Great Tables-rendering: " + ", ".join(manglende_kolonner))
 
+    antall_arter = artsstatistikk_df.height
+    antall_observasjoner = sum(artsstatistikk_df["Observasjoner"])
+    antall_individer = sum(artsstatistikk_df["Individer"])
 
-@app.cell(hide_code=True)
-def _(
-    ARTSSTATISTIKK_KATEGORI_REKKEFOELGE,
-    ARTSSTATISTIKK_METADATAKOLONNER,
-    ARTSSTATISTIKK_TEKSTKOLONNER,
-    hent_påkrevde_artsstatistikk_kolonner,
-):
-    def valider_artsstatistikk_input(df: pl.DataFrame) -> None:
-        """Valider inputkontrakten for artsstatistikk.
+    def velg_tekstfarge(bakgrunn: str) -> str:
+        """Velg svart eller hvit tekst med best kontrast mot bakgrunnen."""
+        heks = bakgrunn.removeprefix("#")
+        rgb = [int(heks[indeks : indeks + 2], 16) / 255 for indeks in (0, 2, 4)]
+        lineær_rgb = [kanal / 12.92 if kanal <= 0.04045 else ((kanal + 0.055) / 1.055) ** 2.4 for kanal in rgb]
+        luminans = 0.2126 * lineær_rgb[0] + 0.7152 * lineær_rgb[1] + 0.0722 * lineær_rgb[2]
+        return "#FFFFFF" if luminans < 0.179 else "#172033"
 
-        Args:
-            df: Ferdig behandlet observasjonsdata.
-
-        Raises:
-            TypeError: Når input eller en obligatorisk kolonne har feil datatype.
-            ValueError: Når kolonner mangler, kategorier er ukjente eller samme
-                takson har motstridende metadata.
-        """
-        if not isinstance(df, pl.DataFrame):
-            raise TypeError("Artsstatistikk krever en Polars DataFrame")
-
-        manglende_kolonner = sorted(hent_påkrevde_artsstatistikk_kolonner() - set(df.columns))
-        if manglende_kolonner:
-            raise ValueError("Mangler obligatoriske kolonner for artsstatistikk: " + ", ".join(manglende_kolonner))
-
-        if not df.schema["Artens ID"].is_integer():
-            raise TypeError("Kolonnen `Artens ID` må ha heltallstype")
-        if not df.schema["Antall"].is_integer():
-            raise TypeError("Kolonnen `Antall` må ha heltallstype")
-        if df.schema["Observert dato"].base_type() not in {pl.Date, pl.Datetime}:
-            raise TypeError("Kolonnen `Observert dato` må ha typen Date eller Datetime")
-
-        feil_teksttyper = sorted(kolonne for kolonne in ARTSSTATISTIKK_TEKSTKOLONNER if df.schema[kolonne] != pl.String)
-        if feil_teksttyper:
-            raise TypeError("Følgende artsstatistikk-kolonner må ha teksttype: " + ", ".join(feil_teksttyper))
-
-        if df.get_column("Antall").null_count() > 0:
-            raise ValueError("Kolonnen `Antall` kan ikke inneholde nullverdier")
-
-        tillatte_kategorier = set(ARTSSTATISTIKK_KATEGORI_REKKEFOELGE)
-        ukjente_kategorier = (
-            df.filter(pl.col("Kategori").is_null() | ~pl.col("Kategori").is_in(tillatte_kategorier))
-            .get_column("Kategori")
-            .unique()
-            .to_list()
-        )
-        if ukjente_kategorier:
-            kategoritekst = ", ".join(sorted("<null>" if verdi is None else str(verdi) for verdi in ukjente_kategorier))
-            raise ValueError(f"Ukjente Kategori-verdier: {kategoritekst}")
-
-        metadata_konflikter = (
-            df.group_by(["Artens ID", "Art"])
-            .agg(
-                [pl.col(kolonne).drop_nulls().n_unique().alias(kolonne) for kolonne in ARTSSTATISTIKK_METADATAKOLONNER]
-            )
-            .filter(pl.any_horizontal([pl.col(kolonne) > 1 for kolonne in ARTSSTATISTIKK_METADATAKOLONNER]))
-        )
-        if metadata_konflikter.height > 0:
-            konfliktkolonner = [
-                kolonne
-                for kolonne in ARTSSTATISTIKK_METADATAKOLONNER
-                if metadata_konflikter.filter(pl.col(kolonne) > 1).height > 0
-            ]
-            raise ValueError("Motstridende artsmetadata for samme Artens ID/Art: " + ", ".join(konfliktkolonner))
-
-    return (valider_artsstatistikk_input,)
-
-
-@app.cell(hide_code=True)
-def _(
-    ARTSSTATISTIKK_KATEGORI_REKKEFOELGE,
-    ARTSSTATISTIKK_M1941_REKKEFOELGE,
-    ARTSSTATISTIKK_MAANEDSNAVN,
-    ARTSSTATISTIKK_OUTPUTKOLONNER,
-    valider_artsstatistikk_input,
-):
-    def lag_artsstatistikk(df: pl.DataFrame) -> pl.DataFrame:
-        """Aggreger observasjoner til én rad per takson.
-
-        Månedsprofilen inneholder alltid tolv heltall i rekkefølgen januar–desember.
-        Taksa identifiseres med kombinasjonen `Artens ID` og `Art`, ikke norsk navn.
-        """
-        valider_artsstatistikk_input(df)
-
-        maanedsaggregeringer = [
-            (pl.col("Observert dato").dt.month() == maaned).sum().cast(pl.Int64).alias(f"__maaned_{maaned}")
-            for maaned in range(1, 13)
-        ]
-
+    def lag_fargemerke(verdi: str | None, fargekart: dict[str, str], *, kompakt: bool = False) -> str:
+        """Velg farge på rå verdi; escape etiketten først ved HTML-grensen."""
+        uklassifisert = not kompakt and verdi not in fargekart
+        bakgrunn = "#FFFFFF" if uklassifisert else fargekart.get(verdi, "#D9D9D9")
+        tekstfarge = velg_tekstfarge(bakgrunn)
+        kantfarge = "#768083" if bakgrunn.upper() == "#FFFFFF" else bakgrunn
+        kantstil = "dashed" if uklassifisert else "solid"
+        minstebredde = "min-width:2.75em;" if kompakt else ""
+        status = '' if kompakt else f' data-m1941="{"uklassifisert" if uklassifisert else "vurdert"}"'
+        etikett = "Uklassifisert" if verdi is None else verdi
         return (
-            df.group_by(["Artens ID", "Art"], maintain_order=True)
-            .agg(
-                [
-                    pl.col("Navn").drop_nulls().first().alias("Navn"),
-                    pl.col("Kategori").drop_nulls().first().alias("Kategori"),
-                    pl.col("Verdi M1941").drop_nulls().first().alias("Verdi M1941"),
-                    pl.col("Art av nasjonal forvaltningsinteresse (eks. rødlista)")
-                    .drop_nulls()
-                    .first()
-                    .alias("Forvaltningsinteresse"),
-                    pl.len().cast(pl.Int64).alias("Observasjoner"),
-                    pl.col("Antall").sum().cast(pl.Int64).alias("Individer"),
-                    pl.col("Antall").mean().cast(pl.Float64).alias("Gj.snitt individer"),
-                    pl.col("Observert dato").dt.year().min().alias("__aar_fra"),
-                    pl.col("Observert dato").dt.year().max().alias("__aar_til"),
-                    pl.col("Observert dato").dt.month().drop_nulls().unique().sort().alias("__maaneder"),
-                    pl.col("Familie").drop_nulls().first().alias("Familie"),
-                    pl.col("Orden").drop_nulls().first().alias("Orden"),
-                    (pl.col("Atferd") == "reproductive").sum().cast(pl.Int64).alias("Reproduksjon"),
-                    (pl.col("Atferd") == "possiblereproductive").sum().cast(pl.Int64).alias("Mulig reproduksjon"),
-                    *maanedsaggregeringer,
-                ]
-            )
-            .with_columns(
-                [
-                    pl.coalesce(
-                        [
-                            pl.col("Navn").str.strip_chars().replace("", None),
-                            pl.col("Art"),
-                            pl.lit("Ukjent art"),
-                        ]
-                    ).alias("Navn"),
-                    pl.when(pl.col("__aar_fra").is_null())
-                    .then(pl.lit(None, dtype=pl.String))
-                    .when(pl.col("__aar_fra") == pl.col("__aar_til"))
-                    .then(pl.col("__aar_fra").cast(pl.String))
-                    .otherwise(pl.concat_str([pl.col("__aar_fra"), pl.lit("–"), pl.col("__aar_til")]))
-                    .alias("År-periode"),
-                    pl.col("__maaneder")
-                    .list.eval(
-                        pl.element().replace_strict(
-                            ARTSSTATISTIKK_MAANEDSNAVN,
-                            return_dtype=pl.String,
-                        )
-                    )
-                    .list.join(", ")
-                    .alias("Måneder"),
-                    pl.concat_list([pl.col(f"__maaned_{maaned}") for maaned in range(1, 13)]).alias("Månedsprofil"),
-                ]
-            )
-            .with_columns(
-                [
-                    pl.col("Verdi M1941")
-                    .replace_strict(
-                        ARTSSTATISTIKK_M1941_REKKEFOELGE,
-                        default=999,
-                    )
-                    .alias("__verdi_sortering"),
-                    pl.col("Kategori")
-                    .replace_strict(
-                        ARTSSTATISTIKK_KATEGORI_REKKEFOELGE,
-                        default=999,
-                    )
-                    .alias("__kategori_sortering"),
-                ]
-            )
-            .sort(
-                ["__verdi_sortering", "__kategori_sortering", "Observasjoner"],
-                descending=[False, False, True],
-                maintain_order=True,
-            )
-            .select(ARTSSTATISTIKK_OUTPUTKOLONNER)
+            f'<span{status} style="display:inline-flex;align-items:center;justify-content:center;'
+            f"{minstebredde}box-sizing:border-box;padding:0.24em 0.58em;"
+            f"background-color:{bakgrunn};color:{tekstfarge};"
+            f"border:1px {kantstil} {kantfarge};border-radius:999px;font-weight:600;"
+            f'line-height:1.2;white-space:nowrap;">{escape(str(etikett))}</span>'
         )
 
-    return (lag_artsstatistikk,)
-
-
-@app.cell(hide_code=True)
-def _(
-    ARTSSTATISTIKK_KATEGORIFARGER,
-    ARTSSTATISTIKK_M1941_FARGER,
-    ARTSSTATISTIKK_OUTPUTKOLONNER,
-):
-    def lag_artsstatistikk_tabell(artsstatistikk_df: pl.DataFrame) -> gt.GT:
-        """Bygg en formatert Great Tables-tabell fra aggregert artsstatistikk."""
-        manglende_kolonner = sorted(set(ARTSSTATISTIKK_OUTPUTKOLONNER) - set(artsstatistikk_df.columns))
-        if manglende_kolonner:
-            raise ValueError("Mangler kolonner for Great Tables-rendering: " + ", ".join(manglende_kolonner))
-
-        antall_arter = artsstatistikk_df.height
-        antall_observasjoner = int(artsstatistikk_df["Observasjoner"].sum() or 0)
-        antall_individer = int(artsstatistikk_df["Individer"].sum() or 0)
-
-        def velg_tekstfarge(bakgrunn: str) -> str:
-            """Velg svart eller hvit tekst med best kontrast mot bakgrunnen."""
-            heks = bakgrunn.removeprefix("#")
-            rgb = [int(heks[indeks : indeks + 2], 16) / 255 for indeks in (0, 2, 4)]
-            lineær_rgb = [kanal / 12.92 if kanal <= 0.04045 else ((kanal + 0.055) / 1.055) ** 2.4 for kanal in rgb]
-            luminans = 0.2126 * lineær_rgb[0] + 0.7152 * lineær_rgb[1] + 0.0722 * lineær_rgb[2]
-            return "#FFFFFF" if luminans < 0.179 else "#172033"
-
-        def lag_fargemerke(verdi: str, fargekart: dict[str, str], *, kompakt: bool = False) -> str:
-            """Vis en tabellverdi som et avrundet merke med offisiell farge."""
-            bakgrunn = fargekart.get(verdi, "#D9D9D9")
-            tekstfarge = velg_tekstfarge(bakgrunn)
-            kantfarge = "#768083" if bakgrunn.upper() == "#FFFFFF" else bakgrunn
-            minstebredde = "min-width:2.75em;" if kompakt else ""
-            return (
-                '<span style="display:inline-flex;align-items:center;justify-content:center;'
-                f"{minstebredde}box-sizing:border-box;padding:0.24em 0.58em;"
-                f"background-color:{bakgrunn};color:{tekstfarge};"
-                f"border:1px solid {kantfarge};border-radius:999px;font-weight:600;"
-                f'line-height:1.2;white-space:nowrap;">{escape(str(verdi))}</span>'
-            )
-
-        tabell = (
-            gt.GT(artsstatistikk_df, id="artsstatistikk", locale="nb")
-            .opt_table_font(font=gt.google_font("Source Sans 3"))
-            .tab_header(
-                title="Artsstatistikk for valgte observasjoner",
-                subtitle=(
-                    f"{antall_arter} arter · {antall_observasjoner} observasjoner · {antall_individer} individer"
-                ),
-            )
-            .cols_merge(
-                columns=["Navn", "Art"],
-                hide_columns=["Art"],
-                pattern="<strong>{0}</strong><br><em>{1}</em>",
-            )
-            .cols_hide(columns="Artens ID")
-            .cols_label(
-                cases={
-                    "Navn": "Art",
-                    "Forvaltningsinteresse": gt.html("Art av nasjonal<br>forvaltningsinteresse"),
-                    "Gj.snitt individer": "Gj.snitt",
-                    "År-periode": "År",
-                }
-            )
-            .tab_style(
-                style=gt.style.text(align="center"),
-                locations=gt.loc.column_labels(),
-            )
-            .cols_align(
-                align="center",
-                columns=[
-                    "Verdi M1941",
-                    "Kategori",
-                    "Observasjoner",
-                    "Individer",
-                    "Gj.snitt individer",
-                    "Reproduksjon",
-                    "Mulig reproduksjon",
-                ],
-            )
-            .fmt_integer(
-                columns=[
-                    "Observasjoner",
-                    "Individer",
-                    "Reproduksjon",
-                    "Mulig reproduksjon",
-                ],
-                locale="nb",
-            )
-            .fmt_number(
-                columns="Gj.snitt individer",
-                decimals=1,
-                locale="nb",
-            )
-            .fmt_nanoplot(
-                columns="Månedsprofil",
-                plot_type="bar",
-                plot_height="2.2em",
-                autoscale=False,
-                options=gt.nanoplot_options(
-                    data_bar_fill_color="#3B82F6",
-                    data_bar_stroke_color="#1D4ED8",
-                    data_bar_stroke_width=1,
-                    interactive_data_values=True,
-                ),
-            )
-            .sub_missing(missing_text="–")
-            .text_transform(
-                locations=gt.loc.body(columns="Verdi M1941"),
-                fn=lambda verdi: lag_fargemerke(verdi, ARTSSTATISTIKK_M1941_FARGER),
-            )
-            .text_transform(
-                locations=gt.loc.body(columns="Kategori"),
-                fn=lambda verdi: lag_fargemerke(verdi, ARTSSTATISTIKK_KATEGORIFARGER, kompakt=True),
-            )
-            .tab_spanner(
-                label="Art og forvaltning",
-                columns=["Verdi M1941", "Kategori", "Forvaltningsinteresse", "Navn"],
-            )
-            .tab_spanner(
-                label="Omfang",
-                columns=["Observasjoner", "Individer", "Gj.snitt individer"],
-            )
-            .tab_spanner(
-                label="Tidsrom",
-                columns=["År-periode", "Måneder", "Månedsprofil"],
-            )
-            .tab_spanner(label="Taksonomi", columns=["Familie", "Orden"])
-            .tab_spanner(
-                label="Aktivitet",
-                columns=["Reproduksjon", "Mulig reproduksjon"],
-            )
-            .tab_footnote(
-                footnote=(
-                    "Tolv søyler viser antall observasjoner fra januar til desember. "
-                    "Skalaen tilpasses hver art for å fremheve sesongmønsteret."
-                ),
-                locations=gt.loc.column_labels(columns="Månedsprofil"),
-            )
-            .tab_footnote(
-                footnote="Antall observasjoner registrert med atferden «reproductive».",
-                locations=gt.loc.column_labels(columns="Reproduksjon"),
-            )
-            .tab_footnote(
-                footnote="Antall observasjoner registrert med atferden «possiblereproductive».",
-                locations=gt.loc.column_labels(columns="Mulig reproduksjon"),
-            )
-            .tab_footnote(
-                footnote=(
-                    "Oppsummering av nasjonale forvaltningskriterier; «Nei» betyr "
-                    "ingen treff utover eventuell rødlistestatus."
-                ),
-                locations=gt.loc.column_labels(columns="Forvaltningsinteresse"),
-            )
-            .tab_source_note(source_note="Datagrunnlag: valgte rader i observasjonstabellen.")
-            .opt_row_striping()
-            .cols_width(
-                cases={
-                    "Kategori": "70px",
-                    "Verdi M1941": "120px",
-                    "Forvaltningsinteresse": "190px",
-                    "Navn": "180px",
-                    "Observasjoner": "85px",
-                    "Individer": "80px",
-                    "Gj.snitt individer": "75px",
-                    "År-periode": "90px",
-                    "Måneder": "150px",
-                    "Månedsprofil": "170px",
-                    "Familie": "130px",
-                    "Orden": "150px",
-                    "Reproduksjon": "95px",
-                    "Mulig reproduksjon": "115px",
-                }
-            )
-            .tab_options(
-                container_width="1800px",
-                container_height="1200px",
-                container_overflow_x="auto",
-                container_overflow_y="auto",
-                table_width="1800px",
-                table_layout="fixed",
-                table_font_size="12px",
-                heading_title_font_size="18px",
-                heading_subtitle_font_size="12px",
-                column_labels_font_size="12px",
-                data_row_padding="5px",
-                row_striping_background_color="#F7F9FC",
-                grand_summary_row_background_color="#EAF2F8",
-                footnotes_marks="letters",
-            )
+    tekstkolonner = [navn for navn, dtype in artsstatistikk_df.schema.items()
+                    if dtype == pl.String and navn not in {"Kategori", "Verdi M1941"}]
+    visning = artsstatistikk_df.with_columns(
+        pl.col(tekstkolonner).map_elements(escape, return_dtype=pl.String),
+        pl.col("Verdi M1941").map_elements(
+            lambda verdi: lag_fargemerke(verdi, ARTSSTATISTIKK_M1941_FARGER),
+            return_dtype=pl.String, skip_nulls=False,
+        ),
+        pl.col("Kategori").map_elements(
+            lambda verdi: lag_fargemerke(verdi, ARTSSTATISTIKK_KATEGORIFARGER, kompakt=True),
+            return_dtype=pl.String, skip_nulls=False,
+        ),
+    )
+    tabell = (
+        gt.GT(visning, id="artsstatistikk", locale="nb")
+        .opt_table_font(font=["Source Sans 3", "sans-serif"])
+        .tab_header(
+            title="Artsstatistikk for valgte observasjoner",
+            subtitle=(
+                f"{ARTSANTALL_ETIKETT}: {antall_arter} · {antall_observasjoner} observasjoner · "
+                f"{antall_individer} summerte, behandlede individtall"
+            ),
         )
+        .cols_merge(
+            columns=["Navn", "Art"],
+            hide_columns=["Art"],
+            pattern="<strong>{0}</strong><br><em>{1}</em>",
+        )
+        .cols_hide(columns="Artens ID")
+        .cols_label(
+            cases={
+                "Navn": "Art",
+                "Forvaltningsinteresse": gt.html("Art av nasjonal<br>forvaltningsinteresse"),
+                "Gj.snitt individer": "Gj.snitt",
+                "År-periode": "År",
+            }
+        )
+        .tab_style(
+            style=gt.style.text(align="center"),
+            locations=gt.loc.column_labels(),
+        )
+        .cols_align(
+            align="center",
+            columns=[
+                "Verdi M1941",
+                "Kategori",
+                "Observasjoner",
+                "Individer",
+                "Gj.snitt individer",
+                "Reproduksjon",
+                "Mulig reproduksjon",
+            ],
+        )
+        .fmt(
+            fns=lambda verdi: format(verdi, ",").replace(",", "\u00a0"),
+            columns=[
+                "Observasjoner",
+                "Individer",
+                "Reproduksjon",
+                "Mulig reproduksjon",
+            ],
+        )
+        .fmt_number(
+            columns="Gj.snitt individer",
+            decimals=1,
+            locale="nb",
+        )
+        .fmt_nanoplot(
+            columns="Månedsprofil",
+            rows=[indeks for indeks, profil in enumerate(artsstatistikk_df["Månedsprofil"]) if sum(profil)],
+            plot_type="bar",
+            plot_height="2.2em",
+            autoscale=False,
+            options=gt.nanoplot_options(
+                data_bar_fill_color="#3B82F6",
+                data_bar_stroke_color="#1D4ED8",
+                data_bar_stroke_width=1,
+                interactive_data_values=True,
+            ),
+        )
+        .sub_missing(missing_text="–")
+        .tab_spanner(
+            label="Art og forvaltning",
+            columns=["Verdi M1941", "Kategori", "Forvaltningsinteresse", "Navn"],
+        )
+        .tab_spanner(
+            label="Omfang",
+            columns=["Observasjoner", "Individer", "Gj.snitt individer"],
+        )
+        .tab_spanner(
+            label="Tidsrom",
+            columns=["År-periode", "Måneder", "Månedsprofil"],
+        )
+        .tab_spanner(label="Taksonomi", columns=["Familie", "Orden"])
+        .tab_spanner(
+            label="Aktivitet",
+            columns=["Reproduksjon", "Mulig reproduksjon"],
+        )
+        .tab_footnote(
+            footnote=(
+                "Tolv søyler viser antall observasjoner fra januar til desember. "
+                "Skalaen tilpasses hver rad for å fremheve sesongmønsteret. "
+                "Stripen og prosenten viser andelen observasjoner med dato. "
+                "Udaterte observasjoner inngår fortsatt i antall, individtall og gjennomsnitt."
+            ),
+            locations=gt.loc.column_labels(columns="Månedsprofil"),
+        )
+        .tab_footnote(
+            footnote="Antall observasjoner registrert med atferden «reproductive».",
+            locations=gt.loc.column_labels(columns="Reproduksjon"),
+        )
+        .tab_footnote(
+            footnote="Antall observasjoner registrert med atferden «possiblereproductive».",
+            locations=gt.loc.column_labels(columns="Mulig reproduksjon"),
+        )
+        .tab_footnote(
+            footnote=(
+                "Oppsummering av nasjonale forvaltningskriterier; «Nei» betyr "
+                "ingen treff utover eventuell rødlistestatus."
+            ),
+            locations=gt.loc.column_labels(columns="Forvaltningsinteresse"),
+        )
+        .tab_source_note(source_note="Datagrunnlag: valgte rader i observasjonstabellen.")
+        .tab_source_note(source_note=ARTSANTALL_MERKNAD)
+        .tab_source_note(source_note="Summerte, behandlede individtall er ikke nødvendigvis forskjellige individer.")
+        .opt_row_striping()
+        .cols_width(
+            cases={
+                "Kategori": "70px",
+                "Verdi M1941": "120px",
+                "Forvaltningsinteresse": "190px",
+                "Navn": "180px",
+                "Observasjoner": "85px",
+                "Individer": "80px",
+                "Gj.snitt individer": "75px",
+                "År-periode": "90px",
+                "Måneder": "150px",
+                "Månedsprofil": "170px",
+                "Familie": "130px",
+                "Orden": "150px",
+                "Reproduksjon": "95px",
+                "Mulig reproduksjon": "115px",
+            }
+        )
+        .tab_options(
+            container_width="1800px",
+            container_height="1200px",
+            container_overflow_x="auto",
+            container_overflow_y="auto",
+            table_width="1800px",
+            table_layout="fixed",
+            table_font_size="12px",
+            heading_title_font_size="18px",
+            heading_subtitle_font_size="12px",
+            column_labels_font_size="12px",
+            data_row_padding="5px",
+            row_striping_background_color="#F7F9FC",
+            grand_summary_row_background_color="#EAF2F8",
+            footnotes_marks="letters",
+        )
+    )
 
-        return tabell
-
-    return (lag_artsstatistikk_tabell,)
+    for indeks, rad in enumerate(artsstatistikk_df.iter_rows(named=True)):
+        daterte = sum(rad["Månedsprofil"])
+        if not daterte:
+            tabell = tabell.text_transform(
+                locations=gt.loc.body(columns="Månedsprofil", rows=[indeks]),
+                fn=lambda _: "Ingen daterte observasjoner",
+            )
+            continue
+        totalt = rad["Observasjoner"]
+        tiendeler = daterte * 1000 // totalt
+        if daterte == totalt:
+            prosent = "100 %"
+        elif daterte * 1000 < totalt:
+            prosent = "<0,1 %"
+        elif daterte * 1000 > totalt * 999:
+            prosent = ">99,9 %"
+        else:
+            prosent = (str(tiendeler // 10) if tiendeler % 10 == 0
+                       else f"{tiendeler // 10},{tiendeler % 10}") + " %"
+        bredde = 100 if daterte == totalt else max(0.1, min(99.9, tiendeler / 10))
+        dekning = (
+            f'<div class="datodekning" aria-label="Datodekning: {escape(prosent)}" '
+            'style="display:flex;align-items:center;gap:6px;margin-top:4px;">'
+            '<span aria-hidden="true" style="display:block;flex:1;height:6px;background:#E2E8F0;">'
+            f'<span style="display:block;height:100%;width:{bredde}%;background:#475569;"></span>'
+            f'</span><span style="white-space:nowrap;">{escape(prosent)}</span></div>'
+        )
+        tabell = tabell.text_transform(
+            locations=gt.loc.body(columns="Månedsprofil", rows=[indeks]),
+            fn=lambda figur, stripe=dekning: figur + stripe,
+        )
+    return tabell
 
 
 @app.cell(hide_code=True)
@@ -912,7 +950,7 @@ def _(
             "Stor verdi": "#FD7032",
             "Middels verdi": "#FEC02D",
             "Noe verdi": "#FFFF00",
-            "Ingen": "#D9D9D9",
+            "Uten betydning for KU": "#D9D9D9",
         }
         statistikk = lag_artsstatistikk(lag_artsstatistikk_testinput())
         tabell = lag_artsstatistikk_tabell(statistikk)
@@ -1015,7 +1053,7 @@ def dekningsmatrise_funksjonsvisning(
 
 
 @app.cell(hide_code=True)
-def dekningsmatrise_konstanter_validering():
+def dekningsmatrise_konstanter_validering(valider_observasjonsgrunnlag):
     DEKNINGSMATRISE_MAANEDSNAVN = {
         1: "Jan",
         2: "Feb",
@@ -1037,6 +1075,7 @@ def dekningsmatrise_konstanter_validering():
         "Observert dato",
         "Antall",
         "Artens ID",
+        "Art",
         "Observatør",
         "Lokalitet",
     }
@@ -1076,21 +1115,7 @@ def dekningsmatrise_konstanter_validering():
 
     def valider_dekningsmatrise_input(df: pl.DataFrame) -> None:
         """Valider ferdig behandlet observasjonsdata for dekningsmatrisen."""
-        if not isinstance(df, pl.DataFrame):
-            raise TypeError("Dekningsmatrisen krever en Polars DataFrame")
-        manglende = sorted(DEKNINGSMATRISE_INPUTKOLONNER - set(df.columns))
-        if manglende:
-            raise ValueError("Mangler obligatoriske kolonner for dekningsmatrisen: " + ", ".join(manglende))
-        if df.schema["Observert dato"].base_type() not in {pl.Date, pl.Datetime}:
-            raise TypeError("Kolonnen `Observert dato` må ha typen Date eller Datetime")
-        if not df.schema["Antall"].is_integer():
-            raise TypeError("Kolonnen `Antall` må ha heltallstype")
-        if df.get_column("Observert dato").null_count() > 0:
-            raise ValueError("Kolonnen `Observert dato` kan ikke inneholde nullverdier")
-        if df.get_column("Antall").null_count() > 0:
-            raise ValueError("Kolonnen `Antall` kan ikke inneholde nullverdier")
-        if df.filter(pl.col("Antall") < 0).height > 0:
-            raise ValueError("Kolonnen `Antall` kan ikke inneholde negative verdier")
+        valider_observasjonsgrunnlag(df, DEKNINGSMATRISE_INPUTKOLONNER)
 
     return (
         DEKNINGSMATRISE_MAAL,
@@ -1111,20 +1136,21 @@ def dekningsmatrise_aggregering(
     valider_dekningsmatrise_input,
 ):
     def lag_dekningsmatrise(df: pl.DataFrame) -> pl.DataFrame:
-        """Aggreger absolutte datamål til et komplett år–måned-rutenett."""
+        """Aggreger daterte rader til år–måned; helt udatert gir tom matrise."""
         valider_dekningsmatrise_input(df)
-        if df.is_empty():
+        datert = df.filter(pl.col("Observert dato").is_not_null())
+        if datert.is_empty():
             return pl.DataFrame(schema=DEKNINGSMATRISE_OUTPUTTYPER)
 
-        datert = df.with_columns(
-            pl.col("Observert dato").cast(pl.Date).dt.year().alias("År"),
-            pl.col("Observert dato").cast(pl.Date).dt.month().cast(pl.Int8).alias("Måned"),
+        datert = datert.with_columns(
+            pl.col("Observert dato").dt.year().alias("År"),
+            pl.col("Observert dato").dt.month().cast(pl.Int8).alias("Måned"),
         )
         aggregert = datert.group_by("År", "Måned").agg(
             pl.len().cast(pl.Int64).alias("Registreringer"),
-            pl.col("Antall").sum().cast(pl.Int64).alias("Individer"),
+            pl.col("Antall").cast(pl.Int64).sum().alias("Individer"),
             pl.col("Observert dato").n_unique().cast(pl.Int64).alias("Aktive datoer"),
-            pl.col("Artens ID").drop_nulls().n_unique().cast(pl.Int64).alias("Arter"),
+            pl.struct("Artens ID", "Art").n_unique().cast(pl.Int64).alias("Arter"),
             pl.col("Observatør").drop_nulls().n_unique().cast(pl.Int64).alias("Observatører"),
             pl.col("Lokalitet").drop_nulls().n_unique().cast(pl.Int64).alias("Lokaliteter"),
         )
@@ -1171,12 +1197,20 @@ def dekningsmatrise_figurfunksjon(
         if maal not in DEKNINGSMATRISE_MAAL:
             raise ValueError(f"Ukjent mål for dekningsmatrisen: {maal}")
 
-        antall_aar = max(
-            1,
-            dekningsmatrise_df.get_column("År").n_unique(),
-        )
+        if dekningsmatrise_df.is_empty():
+            return alt.Chart(pl.DataFrame({"Melding": ["Ingen daterte observasjoner"]})).mark_text(
+                fontSize=14,
+            ).encode(text="Melding:N").properties(width=900, height=80)
+        etikett = ARTSANTALL_ETIKETT if maal == "Arter" else maal
+        antall_aar = dekningsmatrise_df.get_column("År").n_unique()
+        # Nettlesertall er flyttall; tooltip-tekst bevarer også store heltall eksakt.
+        visning = dekningsmatrise_df.with_columns([
+            pl.col(kolonne).map_elements(
+                lambda verdi: format(verdi, ",").replace(",", "\u00a0"), return_dtype=pl.String,
+            ).alias(f"__tekst_{kolonne}") for kolonne in DEKNINGSMATRISE_MAAL
+        ])
         return (
-            alt.Chart(dekningsmatrise_df)
+            alt.Chart(visning)
             .mark_rect(stroke="white", strokeWidth=1)
             .encode(
                 x=alt.X(
@@ -1196,41 +1230,22 @@ def dekningsmatrise_figurfunksjon(
                     alt.Color(
                         field=maal,
                         type="quantitative",
-                        title=maal,
+                        title=etikett,
                         scale=alt.Scale(scheme="blues"),
                     ),
                 ),
                 tooltip=[
                     alt.Tooltip("År:O", title="År"),
                     alt.Tooltip("Månedsnavn:N", title="Måned"),
-                    alt.Tooltip(
-                        "Registreringer:Q",
-                        title="Registreringer",
-                        format=",",
-                    ),
-                    alt.Tooltip("Individer:Q", title="Individer", format=","),
-                    alt.Tooltip(
-                        "Aktive datoer:Q",
-                        title="Aktive datoer",
-                        format=",",
-                    ),
-                    alt.Tooltip("Arter:Q", title="Arter", format=","),
-                    alt.Tooltip(
-                        "Observatører:Q",
-                        title="Observatører",
-                        format=",",
-                    ),
-                    alt.Tooltip(
-                        "Lokaliteter:Q",
-                        title="Lokaliteter",
-                        format=",",
-                    ),
+                    *[alt.Tooltip(f"__tekst_{kolonne}:N", title=(
+                        ARTSANTALL_ETIKETT if kolonne == "Arter" else kolonne
+                    )) for kolonne in DEKNINGSMATRISE_MAAL],
                 ],
             )
             .properties(
                 width=900,
                 height=max(260, antall_aar * 18),
-                title=f"År × måned: {maal.lower()}",
+                title=alt.Title(f"År × måned: {etikett}", subtitle=ARTSANTALL_MERKNAD),
             )
             .configure_view(stroke=None)
         )
@@ -1250,6 +1265,7 @@ def dekningsmatrise_tester(lag_dekningsmatrise, lag_dekningsmatrisefigur):
             "Observert dato": date(2020, 1, 1),
             "Antall": 1,
             "Artens ID": 1,
+            "Art": "Species standardus",
             "Observatør": "Ola",
             "Lokalitet": "A",
         }
@@ -1259,6 +1275,7 @@ def dekningsmatrise_tester(lag_dekningsmatrise, lag_dekningsmatrisefigur):
                 "Observert dato": pl.Date,
                 "Antall": pl.Int64,
                 "Artens ID": pl.Int64,
+                "Art": pl.String,
                 "Observatør": pl.String,
                 "Lokalitet": pl.String,
             },
@@ -1366,7 +1383,7 @@ def maanedsgrunnlag_funksjonsvisning(
 
 
 @app.cell(hide_code=True)
-def maanedsgrunnlag_konstanter_validering():
+def maanedsgrunnlag_konstanter_validering(valider_observasjonsgrunnlag):
     DATAGRUNNLAG_MAANEDSNAVN = {
         1: "Jan",
         2: "Feb",
@@ -1386,6 +1403,7 @@ def maanedsgrunnlag_konstanter_validering():
         "Observert dato",
         "Antall",
         "Artens ID",
+        "Art",
         "Observatør",
         "Lokalitet",
     }
@@ -1416,21 +1434,7 @@ def maanedsgrunnlag_konstanter_validering():
 
     def valider_maanedsgrunnlag_input(df: pl.DataFrame) -> None:
         """Valider ferdig behandlet observasjonsdata for månedsgrunnlaget."""
-        if not isinstance(df, pl.DataFrame):
-            raise TypeError("Månedsgrunnlaget krever en Polars DataFrame")
-        manglende = sorted(MAANEDSGRUNNLAG_INPUTKOLONNER - set(df.columns))
-        if manglende:
-            raise ValueError("Mangler obligatoriske kolonner for månedsgrunnlaget: " + ", ".join(manglende))
-        if df.schema["Observert dato"].base_type() not in {pl.Date, pl.Datetime}:
-            raise TypeError("Kolonnen `Observert dato` må ha typen Date eller Datetime")
-        if not df.schema["Antall"].is_integer():
-            raise TypeError("Kolonnen `Antall` må ha heltallstype")
-        if df.get_column("Observert dato").null_count() > 0:
-            raise ValueError("Kolonnen `Observert dato` kan ikke inneholde nullverdier")
-        if df.get_column("Antall").null_count() > 0:
-            raise ValueError("Kolonnen `Antall` kan ikke inneholde nullverdier")
-        if df.filter(pl.col("Antall") < 0).height > 0:
-            raise ValueError("Kolonnen `Antall` kan ikke inneholde negative verdier")
+        valider_observasjonsgrunnlag(df, MAANEDSGRUNNLAG_INPUTKOLONNER)
 
     return (
         DATAGRUNNLAG_MAANEDSNAVN,
@@ -1448,8 +1452,9 @@ def maanedsgrunnlag_aggregering(
     valider_maanedsgrunnlag_input,
 ):
     def lag_maanedsgrunnlag(df: pl.DataFrame) -> pl.DataFrame:
-        """Aggreger absolutte datamål til tolv kalendermåneder."""
+        """Aggreger daterte rader til tolv måneder; tell eksakte ID/navnepar."""
         valider_maanedsgrunnlag_input(df)
+        df = df.filter(pl.col("Observert dato").is_not_null())
         maaneder = pl.DataFrame({"Måned": pl.Series(range(1, 13), dtype=pl.Int8)})
         if df.is_empty():
             aggregert = pl.DataFrame(
@@ -1459,14 +1464,14 @@ def maanedsgrunnlag_aggregering(
             )
         else:
             aggregert = (
-                df.with_columns(pl.col("Observert dato").cast(pl.Date).dt.month().cast(pl.Int8).alias("Måned"))
+                df.with_columns(pl.col("Observert dato").dt.month().cast(pl.Int8).alias("Måned"))
                 .group_by("Måned")
                 .agg(
                     pl.len().cast(pl.Int64).alias("Registreringer"),
-                    pl.col("Antall").sum().cast(pl.Int64).alias("Individer"),
+                    pl.col("Antall").cast(pl.Int64).sum().alias("Individer"),
                     pl.col("Observert dato").n_unique().cast(pl.Int64).alias("Aktive datoer"),
                     pl.col("Observert dato").dt.year().n_unique().cast(pl.Int64).alias("År med data"),
-                    pl.col("Artens ID").drop_nulls().n_unique().cast(pl.Int64).alias("Arter"),
+                    pl.struct("Artens ID", "Art").n_unique().cast(pl.Int64).alias("Arter"),
                     pl.col("Observatør").drop_nulls().n_unique().cast(pl.Int64).alias("Observatører"),
                     pl.col("Lokalitet").drop_nulls().n_unique().cast(pl.Int64).alias("Lokaliteter"),
                 )
@@ -1502,9 +1507,13 @@ def maanedsgrunnlag_tabellfunksjon(MAANEDSGRUNNLAG_OUTPUTKOLONNER):
         if manglende:
             raise ValueError("Mangler kolonner for månedsgrunnlagstabellen: " + ", ".join(manglende))
 
-        antall_registreringer = int(maanedsgrunnlag_df["Registreringer"].sum() or 0)
-        antall_individer = int(maanedsgrunnlag_df["Individer"].sum() or 0)
-        antall_aktive_datoer = int(maanedsgrunnlag_df["Aktive datoer"].sum() or 0)
+        antall_registreringer = sum(maanedsgrunnlag_df["Registreringer"])
+        if not antall_registreringer:
+            return gt.GT(maanedsgrunnlag_df.head(0)).tab_header(
+                title="Ingen daterte observasjoner",
+            ).tab_options(column_labels_hidden=True)
+        antall_individer = sum(maanedsgrunnlag_df["Individer"])
+        antall_aktive_datoer = sum(maanedsgrunnlag_df["Aktive datoer"])
         tallkolonner = [
             "Registreringer",
             "Individer",
@@ -1525,12 +1534,12 @@ def maanedsgrunnlag_tabellfunksjon(MAANEDSGRUNNLAG_OUTPUTKOLONNER):
                 title="Datagrunnlag gjennom året",
                 subtitle=(
                     f"{antall_registreringer} registreringer · "
-                    f"{antall_individer} individer · "
+                    f"{antall_individer} summerte, behandlede individtall · "
                     f"{antall_aktive_datoer} aktive datoer"
                 ),
             )
-            .cols_label(cases={"Månedsnavn": "Måned"})
-            .fmt_integer(columns=tallkolonner, locale="nb")
+            .cols_label(cases={"Månedsnavn": "Måned", "Arter": ARTSANTALL_ETIKETT})
+            .fmt(columns=tallkolonner, fns=lambda verdi: format(verdi, ",").replace(",", "\u00a0"))
             .data_color(
                 columns=tallkolonner,
                 palette=["#EFF6FF", "#1D4ED8"],
@@ -1561,6 +1570,8 @@ def maanedsgrunnlag_tabellfunksjon(MAANEDSGRUNNLAG_OUTPUTKOLONNER):
                 locations=gt.loc.column_labels(columns="År med data"),
             )
             .tab_source_note(source_note="Datagrunnlag: aktivt utvalg i observasjonstabellen.")
+            .tab_source_note(source_note=ARTSANTALL_MERKNAD)
+            .tab_source_note(source_note="Summerte, behandlede individtall er ikke nødvendigvis forskjellige individer.")
             .opt_row_striping()
             .cols_width(
                 cases={
@@ -1596,6 +1607,7 @@ def maanedsgrunnlag_tester(lag_maanedsgrunnlag, lag_maanedsgrunnlagstabell):
             "Observert dato": date(2020, 1, 1),
             "Antall": 1,
             "Artens ID": 1,
+            "Art": "Species standardus",
             "Observatør": "Ola",
             "Lokalitet": "A",
         }
@@ -1605,6 +1617,7 @@ def maanedsgrunnlag_tester(lag_maanedsgrunnlag, lag_maanedsgrunnlagstabell):
                 "Observert dato": pl.Date,
                 "Antall": pl.Int64,
                 "Artens ID": pl.Int64,
+                "Art": pl.String,
                 "Observatør": pl.String,
                 "Lokalitet": pl.String,
             },
@@ -1675,6 +1688,7 @@ def maanedsgrunnlag_visning(
     valgt_fil,
 ):
     mo.stop(not valgt_fil.value)
+    mo.stop(arter_df.is_empty(), mo.md("Ingen observasjoner i dette utvalget."))
 
     maanedsgrunnlag_df = lag_maanedsgrunnlag(arter_df)
     maanedsgrunnlag_tabell = lag_maanedsgrunnlagstabell(maanedsgrunnlag_df)
@@ -1687,7 +1701,7 @@ def dekningsmatrise_kontroll(DEKNINGSMATRISE_MAAL, valgt_fil):
     mo.stop(not valgt_fil.value)
 
     dekningsmatrise_maal = mo.ui.dropdown(
-        options=DEKNINGSMATRISE_MAAL,
+        options={ARTSANTALL_ETIKETT if maal == "Arter" else maal: maal for maal in DEKNINGSMATRISE_MAAL},
         value="Aktive datoer",
         label="Fargelegg rutene etter",
     )
@@ -1704,6 +1718,7 @@ def dekningsmatrise_visning(
     valgt_fil,
 ):
     mo.stop(not valgt_fil.value)
+    mo.stop(arter_df.is_empty(), mo.md("Ingen observasjoner i dette utvalget."))
 
     dekningsmatrise_df = lag_dekningsmatrise(arter_df)
     dekningsmatrise_figur = mo.ui.altair_chart(
@@ -1794,7 +1809,9 @@ def plotlymap(arter_df, farge_kart_arter):
             "category_orders": {"Atferd": atferd_draw_order},
         }
 
-    plotly_arter_df = arter_df.with_row_index("__row_nr")
+    # Eldre Parquet-filer kan fortsatt åpnes, men radnummer gjelder bare denne visningen.
+    plotly_id_felt = "obs_id" if "obs_id" in arter_df.columns else "__row_nr"
+    plotly_arter_df = arter_df if plotly_id_felt == "obs_id" else arter_df.with_row_index("__row_nr")
     plotly_kartflis_lag = [
         {
             "below": "traces",
@@ -1818,7 +1835,7 @@ def plotlymap(arter_df, farge_kart_arter):
             "Verdi M1941",
             "Art",
         ],
-        custom_data=["__row_nr", "Artens ID", "Navn"],
+        custom_data=[plotly_id_felt, "Artens ID", "Navn"],
         zoom=8,
         height=650,
         map_style="white-bg",
@@ -1841,20 +1858,18 @@ def plotlymap(arter_df, farge_kart_arter):
         config={"scrollZoom": True, "displaylogo": False},
     )
     plotly_map
-    return plotly_map, plotly_map_fig
+    return plotly_arter_df, plotly_id_felt, plotly_map, plotly_map_fig
 
 
 @app.cell(hide_code=True)
-def _(arter_df, plotly_map, plotly_map_fig):
-    def get_selected_row_nrs(points, figure):
-        """For every selected map point, use its curveNumber to find the right Plotly trace, use its pointIndex to find the right point inside that trace, look in that point’s hidden customdata, take the first value, convert it to an integer, and return all those integers as a list."""
-        return [int(figure.data[point["curveNumber"]].customdata[point["pointIndex"]][0]) for point in points]
-
-    selected_row_nrs = get_selected_row_nrs(plotly_map.points, plotly_map_fig)
-
-    selected_arter_df = (
-        arter_df.with_row_index("__row_nr").filter(pl.col("__row_nr").is_in(selected_row_nrs)).drop("__row_nr")
-    )
+def _(plotly_arter_df, plotly_id_felt, plotly_map, plotly_map_fig):
+    selected_obs_ids = [
+        plotly_map_fig.data[point["curveNumber"]].customdata[point["pointIndex"]][0]
+        for point in plotly_map.points
+    ]
+    selected_arter_df = plotly_arter_df.filter(pl.col(plotly_id_felt).is_in(selected_obs_ids))
+    if plotly_id_felt == "__row_nr":
+        selected_arter_df = selected_arter_df.drop("__row_nr")
 
     mo.vstack(
         [
