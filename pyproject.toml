@@ -48,3 +48,17 @@ dev = [
     "ruff>=0.15.2",
     "websockets>=16.0",
 ]
+
+[tool.ruff]
+line-length = 88
+
+[tool.ruff.lint]
+# marimo cell idioms: bare expressions display output, every cell ends in `return`
+ignore = ["B018", "PLR1711"]
+
+[tool.marimo.formatting]
+line_length = 88  # match ruff
+
+[tool.pytest.ini_options]
+testpaths = ["tests_KI"]
+pythonpath = ["."]

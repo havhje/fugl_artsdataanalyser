@@ -1,0 +1,260 @@
+Navn,Art,Artens ID,Taksonomisk nivå,ArtNavnId,Trend,"Min bestand, par","Maks bestand, par","Gjennomsnitt, par",Index,de_grad_1_5,de_grad_tekst,de_kilderad,de_navn_tysk,de_navn_vitenskapelig,de_side,de_kildeavsnitt,de_taksonmerknad,koblingstype,merknad
+alke,Alca torda,3599,species,3599,negativ,55000,55000,55000.0,1,5,5 (sg),189,Tordalk,Alca torda,72,main,,eksakt,
+alkekonge,Alle alle,3603,species,3603,usikker,,,,,5,5 (sg),188,Krabbentaucher,Alle alle,72,main,,eksakt,
+avosett,Recurvirostra avosetta,3715,species,3715,utdødd,0,0,0.0,,2,2 (h),23,Säbelschnäbler,Recurvirostra avosetta,65,main,,eksakt,
+bergand,Aythya marila,3488,species,3488,negativ,150,320,235.0,5,2,2 (h),79,Bergente,Aythya marila,67,main,,eksakt,
+bergirisk,Linaria flavirostris,204597,species,204597,usikker,10000,25000,17500.0,1,5,5 (sg),289,Berghänfling,Carduelis flavirostris,76,main,,navnevariant,Koblet via referansens kontrollerte navnerettinger eller synonymer.
+bjørkefink,Fringilla montifringilla,4252,species,4252,negativ,1500000,2500000,2000000.0,1,5,5 (sg),286,Bergfink,Fringilla montifringilla,76,main,,eksakt,
+blåmeis,Cyanistes caeruleus,4365,species,4365,stabil,200000,350000,275000.0,1,5,5 (sg),268,Blaumeise,Parus caeruleus,75,main,,navnevariant,Koblet via referansens kontrollerte navnerettinger eller synonymer.
+blåstjert,Tarsiger cyanurus,4544,species,4544,positiv,0,5,2.5,10,,,,,,,,,ingen_treff,Ingen kontrollert kobling til Bernotat & Dierschke 2021. Manglende grad er ikke lav grad.
+blåstrupe,Luscinia svecica,183926,species,183926,negativ,250000,500000,375000.0,1,5,5 (sg),231,Blaukehlchen,Luscinia svecica,74,main,,eksakt,
+bokfink,Fringilla coelebs,4250,species,4250,stabil,2000000,4000000,3000000.0,1,5,5 (sg),283,Buchfink,Fringilla coelebs,76,main,,eksakt,
+boltit,Eudromias morinellus,204590,species,204590,stabil,4000,6750,5375.0,1,2,2 (h),34,Mornellregenpfeifer,Eudromias morinelus,65,main,,navnevariant,Boltit: stavefeil i kilden. Referansen bruker synonymet Charadrius morinellus; NorTaxa bruker Eudromias morinellus.
+brunnakke,Mareca penelope,204585,species,204585,usikker,5000,15000,10000.0,1,2,2 (h),71,Pfeifente,Anas penelope,67,main,,navnevariant,Koblet via referansens kontrollerte navnerettinger eller synonymer.
+brunsisik,Acanthis flammea subsp. cabaret,296650,subspecies,185969,usikker,,,,,5,5 (sg),292,Birkenzeisig,Carduelis flammea,76,main,,overordnet_art,"Brunsisik: foreløpig arvegrad fra gråsisik, ikke egen underartsvurdering. NorTaxa behandler denne som underart av Acanthis flammea; taksonomisk omfang i 2021-kilden kan avvike."
+brushane,Calidris pugnax,156989,species,156989,negativ,1030,1710,1370.0,2,1,1 (sh),17,Kampfläufer,Philomachus pugnax,65,main,,navnevariant,Koblet via referansens kontrollerte navnerettinger eller synonymer.
+busksanger,Acrocephalus dumetorum,4434,species,4434,positiv,1,10,5.5,10,,,,,,,,,ingen_treff,Ingen kontrollert kobling til Bernotat & Dierschke 2021. Manglende grad er ikke lav grad.
+buskskvett,Saxicola rubetra,4536,species,4536,negativ,80000,150000,115000.0,1,5,5 (sg),235,Braunkehlchen,Saxicola rubetra,74,main,,eksakt,
+bydue,Columba livia subsp. domestica,4004,subspecies,4003,usikker,10000,30000,20000.0,1,3,3 (m),336,Haustaube,Columba livia f. domestica,78,additional_species_not_in_further_matrices,Domestic pigeon form; not automatically assigned to wild Columba livia.,avgrenset_takson,"Bydue kobles til kildens tamdueform, ikke vill klippedue. Rangbetegnelsen er forskjellig."
+bøksanger,Phylloscopus sibilatrix,4469,species,4469,usikker,2000,20000,11000.0,1,5,5 (sg),255,Waldlaubsänger,Phylloscopus sibilatrix,75,main,,eksakt,
+båndkorsnebb,Loxia leucoptera,4256,species,4256,fluktuerende,0,100,50.0,10,,,,,,,,,ingen_treff,Ingen kontrollert kobling til Bernotat & Dierschke 2021. Manglende grad er ikke lav grad.
+dobbeltbekkasin,Gallinago media,3756,species,3756,negativ,5000,15000,10000.0,1,2,2 (h),29,Doppelschnepfe,Gallinago media,65,main,,eksakt,
+dompap,Pyrrhula pyrrhula,4263,species,4263,stabil,70000,165000,117500.0,1,5,5 (sg),294,Gimpel,Pyrrhula pyrrhula,76,main,,eksakt,
+duetrost,Turdus viscivorus,4565,species,4565,positiv,10000,20000,15000.0,1,3,3 (m),127,Misteldrossel,Turdus viscivorus,69,main,,eksakt,
+dvergdykker,Tachybaptus ruficollis,3964,species,3964,positiv,24,42,33.0,10,2,2 (h),85,Zwergtaucher,Podiceps ruficollis,68,main,,navnevariant,Koblet via referansens kontrollerte navnerettinger eller synonymer.
+dvergfalk,Falco columbarius,3903,species,3903,usikker,2000,5000,3500.0,2,5,5 (sg),148,Merlin,Falco columbarius,70,main,,eksakt,
+dvergfluesnapper,Ficedula parva,4350,species,4350,stabil,1,5,3.0,10,5,5 (sg),263,Zwergschnäpper,Ficedula parva,75,main,,eksakt,
+dverggås,Anser erythropus,3478,species,3478,positiv,20,25,22.5,10,2,2 (h),66,Zwerggans,Anser erythropus,67,main,,eksakt,
+dverglo,Thinornis dubius,298322,species,298322,stabil,150,275,212.5,5,2,2 (h),45,Flussregenpfeifer,Charadrius dubius,66,main,,navnevariant,Dverglo: Charadrius dubius er synonym til Thinornis dubius i NorTaxa.
+dvergmåke,Hydrocoloeus minutus,3674,species,3674,positiv,80,160,120.0,5,3,3 (m),112,Zwergmöwe,Larus minutus,69,main,,navnevariant,Koblet via referansens kontrollerte navnerettinger eller synonymer.
+dvergsnipe,Calidris minuta,3748,species,3748,fluktuerende,200,1000,600.0,3,2,2 (h),42,Zwergstrandläufer,Calidris minuta,66,main,,eksakt,
+dvergspett,Dryobates minor,204588,species,204588,stabil,2300,5500,3900.0,2,5,5 (sg),203,Kleinspecht,Dendrocopos minor,73,main,,navnevariant,Koblet via referansens kontrollerte navnerettinger eller synonymer.
+dvergspurv,Emberiza pusilla,4204,species,4204,stabil,15,50,32.5,10,,,,,,,,,ingen_treff,Ingen kontrollert kobling til Bernotat & Dierschke 2021. Manglende grad er ikke lav grad.
+dvergterne,Sternula albifrons,3842,species,3842,utdødd,0,0,0.0,,4,4 (g),164,Zwergseeschwalbe,Sterna albifrons,71,main,,navnevariant,Dvergterne: Sterna albifrons er synonym til Sternula albifrons i NorTaxa.
+enkeltbekkasin,Gallinago gallinago,3754,species,3754,negativ,50000,75000,62500.0,1,1,1 (sh),14,Bekassine,Gallinago gallinago,65,main,,eksakt,
+fiskemåke,Larus canus,3681,species,3681,negativ,90000,125000,107500.0,1,3,3 (m),108,Sturmmöwe,Larus canus,69,main,,eksakt,
+fiskeørn,Pandion haliaetus,3918,species,3918,positiv,400,600,500.0,3,3,3 (m),129,Fischadler,Pandion haliaetus,69,main,,eksakt,
+fjellerke,Eremophila alpestris,4126,species,4126,stabil,1000,1500,1250.0,2,5,5 (sg),209,Ohrenlerche,Eremophila alpestris,73,main,,eksakt,
+fjelljo,Stercorarius longicaudus,3810,species,3810,usikker,3000,7000,5000.0,2,3,3 (m),115,Falkenraubmöwe,Stercorarius longicaudus,69,main,,eksakt,
+fjellmyrløper,Calidris falcinellus,156990,species,156990,usikker,1650,1800,1725.0,2,2,2 (h),46,Sumpfläufer,Limicola falcinellus,66,main,,navnevariant,Koblet via referansens kontrollerte navnerettinger eller synonymer.
+fjellrype,Lagopus muta,4070,species,4070,negativ,100000,200000,150000.0,1,1,1 (sh),5,Alpen-/Moorschneehuhn,Lagopus muta / lagopus,64,main,Two species pooled in one source row; casualty count must not be duplicated.,samlet_takson,Kilden vurderer fjellrype og lirype samlet. Graden deles; funntall er ikke to uavhengige datasett.
+fjellvåk,Buteo lagopus,3870,species,3870,fluktuerende,2000,5000,3500.0,2,5,5 (sg),138,Raufußbussard,Buteo lagopus,70,main,,eksakt,
+fjæreplytt,Calidris maritima,3745,species,3745,usikker,1050,4250,2650.0,2,2,2 (h),44,Meerstrandläufer,Calidris maritima,66,main,,eksakt,
+flaggspett,Dendrocopos major,4576,species,4576,stabil,10000,35000,22500.0,1,5,5 (sg),198,Buntspecht,Dendrocopus major,72,main,,navnevariant,Koblet via referansens kontrollerte navnerettinger eller synonymer.
+fossekall,Cinclus cinclus,4158,species,4158,usikker,10000,40000,25000.0,1,5,5 (sg),225,Wasseramsel,Cinclus cinclus,73,main,,eksakt,
+fuglekonge,Regulus regulus,4478,species,4478,stabil,950000,1600000,1275000.0,1,5,5 (sg),259,Wintergoldhähnchen,Regulus regulus,75,main,,eksakt,
+furukorsnebb,Loxia pytyopsittacus,4258,species,4258,fluktuerende,2500,25000,13750.0,1,,,,,,,,,ingen_treff,Ingen kontrollert kobling til Bernotat & Dierschke 2021. Manglende grad er ikke lav grad.
+gjerdesmett,Troglodytes troglodytes,4498,species,4498,fluktuerende,350000,700000,525000.0,1,5,5 (sg),224,Zaunkönig,Troglodytes troglodytes,73,main,,eksakt,
+gjøk,Cuculus canorus,4040,species,4040,negativ,5000,15000,10000.0,1,5,5 (sg),195,Kuckuck,Cuculus canorus,72,main,,eksakt,
+gluttsnipe,Tringa nebularia,3794,species,3794,usikker,7300,16000,11650.0,1,2,2 (h),25,Grünschenkel,Tringa nebularia,65,main,,eksakt,
+grankorsnebb,Loxia curvirostra,4254,species,4254,fluktuerende,15000,150000,82500.0,1,5,5 (sg),288,Fichtenkreuzschnabel,Loxia curvirostra,76,main,,eksakt,
+granmeis,Poecile montanus,4382,species,4382,stabil,500000,800000,650000.0,1,5,5 (sg),272,Weidenmeise,Poecile montanus,75,main,,eksakt,
+gransanger,Phylloscopus collybita,4458,species,4458,positiv,250000,500000,375000.0,1,5,5 (sg),254,Zilpzalp,Phylloscopus collybita,75,main,,eksakt,
+gravand,Tadorna tadorna,3536,species,3536,usikker,1600,3200,2400.0,2,2,2 (h),62,Brandgans,Tadorna tadorna,67,main,,eksakt,
+gresshoppesanger,Locustella naevia,4452,species,4452,usikker,200,250,225.0,5,5,5 (sg),237,Feldschwirl,Locustella naevia,74,main,,eksakt,
+grønnfink,Chloris chloris,185920,species,185920,negativ,135000,400000,267500.0,1,5,5 (sg),284,Grünfink,Carduelis chloris,76,main,,navnevariant,Koblet via referansens kontrollerte navnerettinger eller synonymer.
+grønnsisik,Spinus spinus,185988,species,185988,negativ,150000,500000,325000.0,1,5,5 (sg),296,Erlenzeisig,Carduelis spinus,76,main,,navnevariant,Koblet via referansens kontrollerte navnerettinger eller synonymer.
+grønnspett,Picus viridis,4593,species,4593,usikker,3000,6500,4750.0,2,5,5 (sg),200,Grünspecht,Picus viridis,72,main,,eksakt,
+grønnstilk,Tringa glareola,3792,species,3792,usikker,20000,35000,27500.0,1,2,2 (h),26,Bruchwasserläufer,Tringa glareola,65,main,,eksakt,
+gråfluesnapper,Muscicapa striata,4352,species,4352,stabil,350000,600000,475000.0,1,5,5 (sg),262,Grauschnäpper,Muscicapa striata,75,main,,eksakt,
+grågås,Anser anser,3471,species,3471,positiv,18000,21000,19500.0,1,2,2 (h),63,Graugans,Anser anser,67,main,,eksakt,
+gråhegre,Ardea cinerea,3559,species,3559,stabil,5000,10000,7500.0,1,2,2 (h),49,Graureiher,Ardea cinerea,66,main,,eksakt,
+gråmåke,Larus argentatus,3677,species,3677,negativ,72000,72000,72000.0,1,3,3 (m),105,Silbermöwe,Larus argentatus,68,main,,eksakt,
+gråsisik,Acanthis flammea,185969,species,185969,negativ,900000,1750000,1325000.0,1,5,5 (sg),292,Birkenzeisig,Carduelis flammea,76,main,,navnevariant,Koblet via referansens kontrollerte navnerettinger eller synonymer.
+gråspett,Picus canus,4591,species,4591,usikker,1500,3000,2250.0,2,5,5 (sg),201,Grauspecht,Picus canus,73,main,,eksakt,
+gråspurv,Passer domesticus,4397,species,4397,usikker,130000,260000,195000.0,1,5,5 (sg),280,Haussperling,Passer domesticus,76,main,,eksakt,
+gråstrupedykker,Podiceps grisegena,3955,species,3955,positiv,1,3,2.0,10,2,2 (h),88,Rothalstaucher,Podiceps griseigena,68,main,,navnevariant,Koblet via referansens kontrollerte navnerettinger eller synonymer.
+gråtrost,Turdus pilaris,4559,species,4559,negativ,350000,900000,625000.0,1,3,3 (m),123,Wacholderdrossel,Turdus pilaris,69,main,,eksakt,
+gulerle,Motacilla flava,4340,species,4340,usikker,75000,150000,112500.0,1,5,5 (sg),222,Schafstelze,Motacilla flava,73,main,,eksakt,
+gulirisk,Serinus serinus,4266,species,4266,usikker,0,1,0.5,10,5,5 (sg),287,Girlitz,Serinus serinus,76,main,,eksakt,
+gulsanger,Hippolais icterina,4442,species,4442,usikker,20000,100000,60000.0,1,5,5 (sg),245,Gelbspötter,Hippolais icterina,74,main,,eksakt,
+gulspurv,Emberiza citrinella,4198,species,4198,negativ,100000,200000,150000.0,1,5,5 (sg),297,Goldammer,Emberiza citrinella,76,main,,eksakt,
+hagesanger,Sylvia borin,4483,species,4483,stabil,380000,890000,635000.0,1,5,5 (sg),247,Gartengrasmücke,Sylvia borin,74,main,,eksakt,
+hauksanger,Curruca nisoria,215473,species,215473,negativ,0,5,2.5,10,5,5 (sg),248,Sperbergrasmücke,Sylvia nisoria,74,main,,navnevariant,Koblet via referansens kontrollerte navnerettinger eller synonymer.
+haukugle,Surnia ulula,4629,species,4629,fluktuerende,1000,10000,5500.0,1,,,,,,,,,ingen_treff,Ingen kontrollert kobling til Bernotat & Dierschke 2021. Manglende grad er ikke lav grad.
+havelle,Clangula hyemalis,3506,species,3506,negativ,3000,7000,5000.0,2,2,2 (h),82,Eisente,Clangula hyemalis,67,main,,eksakt,
+havhest,Fulmarus glacialis,3989,species,3989,negativ,500,1000,750.0,3,4,4 (g),181,Eissturmvogel,Fulmarus glacialis,72,main,,eksakt,
+havsule,Morus bassanus,3940,species,3940,positiv,5700,5700,5700.0,1,4,4 (g),182,Basstölpel,Morus bassanus,72,main,,eksakt,
+havsvale,Hydrobates pelagicus,3977,species,3977,usikker,10000,10000,10000.0,1,,,,,,,,,ingen_treff,Ingen kontrollert kobling til Bernotat & Dierschke 2021. Manglende grad er ikke lav grad.
+havørn,Haliaeetus albicilla,3887,species,3887,positiv,2800,4200,3500.0,2,3,3 (m),130,Seeadler,Haliaeetus albicilla,69,main,,eksakt,
+heilo,Pluvialis apricaria,3646,species,3646,stabil,150000,300000,225000.0,1,1,1 (sh),15,Goldregenpfeifer,Pluvialis apricaria,65,main,,eksakt,
+heipiplerke,Anthus pratensis,4322,species,4322,negativ,3500000,4000000,3750000.0,1,4,4 (g),179,Wiesenpieper,Anthus pratensis,72,main,,eksakt,
+hettemåke,Chroicocephalus ridibundus,3671,species,3671,negativ,6750,8000,7375.0,1,1,1 (sh),104,Lachmöwe,Larus ridibundus,68,main,,navnevariant,Koblet via referansens kontrollerte navnerettinger eller synonymer.
+horndykker,Podiceps auritus,3952,species,3952,negativ,650,750,700.0,3,2,2 (h),89,Ohrentaucher,Podiceps auritus,68,main,,eksakt,
+hornugle,Asio otus,4606,species,4606,fluktuerende,1500,8000,4750.0,2,4,4 (g),152,Waldohreule,Asio otus,70,main,,eksakt,
+hortulan,Emberiza hortulana,4200,species,4200,negativ,10,20,15.0,10,5,5 (sg),299,Ortolan,Emberiza hortulana,76,main,,eksakt,
+hubro,Bubo bubo,4612,species,4612,negativ,451,681,566.0,3,4,4 (g),150,Uhu,Bubo bubo,70,main,,eksakt,
+hvitkinngås,Branta leucopsis,3499,species,3499,positiv,600,700,650.0,3,2,2 (h),61,Weißwangengans,Branta leucopsis,66,main,,eksakt,
+hvitryggspett,Dendrocopos leucotos,4574,species,4574,usikker,1100,1940,1520.0,2,5,5 (sg),205,Weißrückenspecht,Dendrocopos leucotos,73,main,,eksakt,
+hønsehauk,Astur gentilis,295741,species,295741,negativ,1384,1856,1620.0,2,5,5 (sg),141,Habicht,Accipiter gentilis,70,main,,navnevariant,Hønsehauk: Accipiter gentilis er synonym til Astur gentilis i NorTaxa.
+isfugl,Alcedo atthis,4022,species,4022,usikker,0,5,2.5,10,5,5 (sg),192,Eisvogel,Alcedo atthis,72,main,,eksakt,
+islom,Gavia immer,3925,species,3925,stabil,,,,,2,2 (h),92,Eistaucher,Gavia immer,68,main,,eksakt,
+ismåke,Pagophila eburnea,3701,species,3701,usikker,,,,,,,,,,,,,ingen_treff,Ingen kontrollert kobling til Bernotat & Dierschke 2021. Manglende grad er ikke lav grad.
+jaktfalk,Falco rusticolus,3910,species,3910,stabil,316,518,417.0,3,5,5 (sg),334,Gerfalke,Falco rusticolus,78,additional_species_not_in_further_matrices,,eksakt,
+jernspurv,Prunella modularis,4406,species,4406,stabil,180000,400000,290000.0,1,5,5 (sg),227,Heckenbraunelle,Prunella modularis,74,main,,eksakt,
+jerpe,Tetrastes bonasia,4064,species,4064,fluktuerende,12000,40000,26000.0,1,3,3 (m),8,Haselhuhn,Bonasa benasia,64,main,,navnevariant,Koblet via referansens kontrollerte navnerettinger eller synonymer.
+jordugle,Asio flammeus,4604,species,4604,fluktuerende,1000,5000,3000.0,2,5,5 (sg),153,Sumpfohreule,Asio flammea,70,main,,navnevariant,Koblet via referansens kontrollerte navnerettinger eller synonymer.
+kaie,Coloeus monedula,215498,species,215498,usikker,5000,6250,5625.0,1,4,4 (g),171,Dohle,Coloeus monedula,71,main,,eksakt,
+kanadagås,Branta canadensis,3495,species,3495,usikker,2000,4000,3000.0,2,2,2 (h),314,Kanadagans,Branta canadensis,77,additional_species_not_in_further_matrices,,eksakt,
+kattugle,Strix aluco,4622,species,4622,stabil,2500,6000,4250.0,2,5,5 (sg),155,Waldkauz,Strix aluco,71,main,,eksakt,
+kjernebiter,Coccothraustes coccothraustes,4245,species,4245,positiv,2500,10000,6250.0,1,5,5 (sg),293,Kernbeißer,Coccothraustes coccothr.,76,main,,navnevariant,Koblet via referansens kontrollerte navnerettinger eller synonymer.
+kjøttmeis,Parus major,4372,species,4372,stabil,1000000,2400000,1700000.0,1,5,5 (sg),267,Kohlmeise,Parus major,75,main,,eksakt,
+knekkand,Spatula querquedula,204587,species,204587,usikker,10,20,15.0,10,2,2 (h),72,Knäkente,Anas querquedula,67,main,,navnevariant,Koblet via referansens kontrollerte navnerettinger eller synonymer.
+knoppsvane,Cygnus olor,3511,species,3511,positiv,480,725,602.5,3,1,1 (sh),57,Höckerschwan,Cygnus olor,66,main,,eksakt,
+kongeørn,Aquila chrysaetos,3859,species,3859,stabil,1207,1537,1372.0,2,4,4 (g),131,Steinadler,Aquila chrysaetos,70,main,,eksakt,
+konglebit,Pinicola enucleator,4260,species,4260,fluktuerende,500,1000,750.0,3,,,,,,,,,ingen_treff,Ingen kontrollert kobling til Bernotat & Dierschke 2021. Manglende grad er ikke lav grad.
+kornkråke,Corvus frugilegus,4168,species,4168,negativ,267,294,280.5,3,5,5 (sg),173,Saatkrähe,Corvus frugilegus,71,main,,eksakt,
+kornspurv,Emberiza calandra,4195,species,4195,usikker,0,2,1.0,10,5,5 (sg),298,Grauammer,Emberiza calandra,76,main,,eksakt,
+kortnebbgås,Anser brachyrhynchus,3473,species,3473,positiv,1,2,1.5,10,2,2 (h),65,Kurzschnabelgans,Anser brachyrhynchus,67,main,,eksakt,
+krikkand,Anas crecca,3454,species,3454,usikker,20000,30000,25000.0,1,2,2 (h),69,Krickente,Anas crecca,67,main,,eksakt,
+krykkje,Rissa tridactyla,3705,species,3705,negativ,87000,87000,87000.0,1,3,3 (m),106,Dreizehenmöwe,Rissa tridactyla,68,main,,eksakt,
+kråke,Corvus corone,4166,species,4166,stabil,150000,300000,225000.0,1,4,4 (g),169,Aaskrähe (Raben-/Nebel-),Corvus corone,71,main,Source German name explicitly pools carrion and hooded crow.,samlet_takson,Kildens tyske navn omfatter både svartkråke og gråkråke. Navn og ID fra hekkebestandslisten beholdes.
+kvartbekkasin,Lymnocryptes minimus,3771,species,3771,usikker,500,1000,750.0,3,2,2 (h),28,Zwergschnepfe,Lymnocryptes minimus,65,main,,eksakt,
+kvinand,Bucephala clangula,3501,species,3501,usikker,15000,20000,17500.0,1,2,2 (h),84,Schellente,Bucephala clangula,67,main,,eksakt,
+laksand,Mergus merganser,3523,species,3523,usikker,3500,5000,4250.0,2,2,2 (h),94,Gänsesäger,Mergus merganser,68,main,,eksakt,
+lappfiskand,Mergellus albellus,3521,species,3521,positiv,35,65,50.0,10,2,2 (h),96,Zwergsäger,Mergellus albellus,68,main,,eksakt,
+lappiplerke,Anthus cervinus,4314,species,4314,usikker,7000,15000,11000.0,1,5,5 (sg),219,Rotkehlpieper,Anthus cervinus,73,main,,eksakt,
+lappmeis,Poecile cinctus,4379,species,4379,usikker,2000,2000,2000.0,2,,,,,,,,,ingen_treff,Ingen kontrollert kobling til Bernotat & Dierschke 2021. Manglende grad er ikke lav grad.
+lappsanger,Phylloscopus borealis,4456,species,4456,usikker,15,100,57.5,10,,,,,,,,,ingen_treff,Ingen kontrollert kobling til Bernotat & Dierschke 2021. Manglende grad er ikke lav grad.
+lappspove,Limosa lapponica,3765,species,3765,usikker,1750,2500,2125.0,2,1,1 (sh),21,Pfuhlschnepfe,Limosa lapponica,65,main,,eksakt,
+lappspurv,Calcarius lapponicus,4188,species,4188,negativ,100000,225000,162500.0,1,5,5 (sg),304,Spornammer,Calcarius lapponicus,77,main,,eksakt,
+lappugle,Strix nebulosa,4624,species,4624,positiv,70,70,70.0,10,,,,,,,,,ingen_treff,Ingen kontrollert kobling til Bernotat & Dierschke 2021. Manglende grad er ikke lav grad.
+lavskrike,Perisoreus infaustus,4180,species,4180,usikker,2500,10000,6250.0,1,,,,,,,,,ingen_treff,Ingen kontrollert kobling til Bernotat & Dierschke 2021. Manglende grad er ikke lav grad.
+lerkefalk,Falco subbuteo,3911,species,3911,usikker,145,230,187.5,5,5,5 (sg),146,Baumfalke,Falco subbuteo,70,main,,eksakt,
+linerle,Motacilla alba,4332,species,4332,stabil,400000,600000,500000.0,1,5,5 (sg),223,Bachstelze,Motacilla alba,73,main,,eksakt,
+lirype,Lagopus lagopus,4066,species,4066,negativ,150000,250000,200000.0,1,1,1 (sh),5,Alpen-/Moorschneehuhn,Lagopus muta / lagopus,64,main,Two species pooled in one source row; casualty count must not be duplicated.,samlet_takson,Kilden vurderer fjellrype og lirype samlet. Graden deles; funntall er ikke to uavhengige datasett.
+lomvi,Uria aalge,3618,species,3618,positiv,30000,30000,30000.0,1,5,5 (sg),185,Trottellumme,Uria aalge,72,main,,eksakt,
+lunde,Fratercula arctica,3611,species,3611,negativ,1465000,1465000,1465000.0,1,5,5 (sg),187,Papageitaucher,Fratercula arctica,72,main,,eksakt,
+løvmeis,Poecile palustris,4385,species,4385,usikker,15000,75000,45000.0,1,5,5 (sg),271,Sumpfmeise,Poecile palustris,75,main,,eksakt,
+løvsanger,Phylloscopus trochilus,4472,species,4472,negativ,4500000,11000000,7750000.0,1,5,5 (sg),253,Fitis,Phylloscopus trochilus,75,main,,eksakt,
+låvesvale,Hirundo rustica,4277,species,4277,stabil,30000,50000,40000.0,1,5,5 (sg),210,Rauchschwalbe,Hirundo rustica,73,main,,eksakt,
+makrellterne,Sterna hirundo,3838,species,3838,negativ,11000,11000,11000.0,1,4,4 (g),161,Flussseeschwalbe,Sterna hirundo,71,main,,eksakt,
+munk,Sylvia atricapilla,4481,species,4481,positiv,630000,1120000,875000.0,1,4,4 (g),180,Mönchsgrasmücke,Sylvia atricapilla,72,main,,eksakt,
+musvåk,Buteo buteo,3867,species,3867,usikker,1000,2000,1500.0,2,5,5 (sg),137,Mäusebussard,Buteo buteo,70,main,,eksakt,
+myrhauk,Circus cyaneus,3880,species,3880,fluktuerende,25,140,82.5,10,5,5 (sg),144,Kornweihe,Circus cyaneus,70,main,,eksakt,
+myrrikse,Porzana porzana,4109,species,4109,usikker,25,30,27.5,10,2,2 (h),101,Tüpfelsumpfhuhn,Porzana porzana,68,main,,eksakt,
+myrsanger,Acrocephalus palustris,4436,species,4436,positiv,1000,2000,1500.0,2,5,5 (sg),241,Sumpfrohrsänger,Acrocephalus palustris,74,main,,eksakt,
+myrsnipe,Calidris alpina,3732,species,3732,usikker,25000,45000,35000.0,1,2,2 (h),36,Alpenstrandläufer,Calidris alpina,65,main,,eksakt,
+sørlig myrsnipe,Calidris alpina subsp. schinzii,3736,subspecies,3732,,100,100,100.0,10,2,2 (h),36,Alpenstrandläufer,Calidris alpina,65,main,,overordnet_art,"Sørlig myrsnipe: grad fra arten Calidris alpina, ikke egen underartsvurdering."
+møller,Curruca curruca,215474,species,215474,usikker,22000,40000,31000.0,1,5,5 (sg),250,Klappergrasmücke,Sylvia curruca,74,main,,navnevariant,Koblet via referansens kontrollerte navnerettinger eller synonymer.
+måltrost,Turdus philomelos,4557,species,4557,positiv,1000000,1500000,1250000.0,1,3,3 (m),124,Singdrossel,Turdus philomelos,69,main,,eksakt,
+nattergal,Luscinia luscinia,183923,species,183923,usikker,500,1000,750.0,3,5,5 (sg),230,Sprosser,Luscinia luscinia,74,main,,eksakt,
+nattravn,Caprimulgus europaeus,4597,species,4597,usikker,715,1225,970.0,2,5,5 (sg),190,Ziegenmelker,Caprimulgus europaeus,72,main,,eksakt,
+nøttekråke,Nucifraga caryocatactes,4176,species,4176,positiv,800,2000,1400.0,2,5,5 (sg),175,Tannenhäher,Nucifraga caryocatactes,71,main,,eksakt,
+nøtteskrike,Garrulus glandarius,4173,species,4173,usikker,45000,170000,107500.0,1,5,5 (sg),174,Eichelhäher,Garrulus glandarius,71,main,,eksakt,
+orrfugl,Lyrurus tetrix,4077,species,4077,negativ,50000,100000,75000.0,1,1,1 (sh),7,Birkhuhn,Tetrao tetrix,64,main,,navnevariant,Koblet via referansens kontrollerte navnerettinger eller synonymer.
+perleugle,Aegolius funereus,4601,species,4601,usikker,2000,15000,8500.0,1,5,5 (sg),157,Raufußkauz,Aegolius funereus,71,main,,eksakt,
+pilfink,Passer montanus,4400,species,4400,usikker,60000,120000,90000.0,1,5,5 (sg),281,Feldsperling,Passer montanus,76,main,,eksakt,
+pirol,Oriolus oriolus,4356,species,4356,utdødd,0,0,0.0,,5,5 (sg),275,Pirol,Oriolus oriolus,75,main,,eksakt,
+polarjo,Stercorarius pomarinus,3814,species,3814,fluktuerende,0,10,5.0,10,3,3 (m),116,Spatelraubmöwe,Stercorarius pomarinus,69,main,,eksakt,
+polarlomvi,Uria lomvia,3622,species,3622,negativ,100,100,100.0,10,,,,,,,,,ingen_treff,Ingen kontrollert kobling til Bernotat & Dierschke 2021. Manglende grad er ikke lav grad.
+polarmåke,Larus hyperboreus,3692,species,3692,negativ,,,,,,,,,,,,,ingen_treff,Ingen kontrollert kobling til Bernotat & Dierschke 2021. Manglende grad er ikke lav grad.
+polarsisik,Acanthis flammea subsp. exilipes,296651,subspecies,185969,fluktuerende,1500,3000,2250.0,2,5,5 (sg),292,Birkenzeisig,Carduelis flammea,76,main,,overordnet_art,"Polarsisik: foreløpig arvegrad fra gråsisik, ikke egen underartsvurdering. Viderefører tidligere overføring; NorTaxa behandler nå denne som underart av Acanthis flammea."
+polarsnipe,Calidris canutus,3738,species,3738,usikker,10,10,10.0,10,2,2 (h),37,Knutt,Calidris canutus,65,main,,eksakt,
+polarsvømmesnipe,Phalaropus fulicarius,3781,species,3781,usikker,,,,,,,,,,,,,ingen_treff,Ingen kontrollert kobling til Bernotat & Dierschke 2021. Manglende grad er ikke lav grad.
+praktærfugl,Somateria spectabilis,3534,species,3534,stabil,0,5,2.5,10,,,,,,,,,ingen_treff,Ingen kontrollert kobling til Bernotat & Dierschke 2021. Manglende grad er ikke lav grad.
+ravn,Corvus corax,4162,species,4162,stabil,20000,80000,50000.0,1,4,4 (g),170,Kolkrabe,Corvus corax,71,main,,eksakt,
+ringdue,Columba palumbus,4007,species,4007,stabil,350000,700000,525000.0,1,2,2 (h),118,Ringeltaube,Columba palumbus,69,main,,eksakt,
+ringgås,Branta bernicla,3491,species,3491,usikker,1000,1000,1000.0,2,2,2 (h),67,Ringelgans,Branta bernicla,67,main,,eksakt,
+ringtrost,Turdus torquatus,4563,species,4563,usikker,10000,50000,30000.0,1,3,3 (m),128,Ringdrossel,Turdus torquatus,69,main,,eksakt,
+rosenfink,Carpodacus erythrinus,4241,species,4241,negativ,500,1250,875.0,2,5,5 (sg),295,Karmingimpel,Carpodacus erythrinus,76,main,,eksakt,
+rugde,Scolopax rusticola,3788,species,3788,usikker,50000,75000,62500.0,1,1,1 (sh),22,Waldschnepfe,Scolopax rusticola,65,main,,eksakt,
+rødnebbterne,Sterna paradisaea,3840,species,3840,stabil,29000,29000,29000.0,1,4,4 (g),163,Küstenseeschwalbe,Sterna paradisaea,71,main,,eksakt,
+rødstilk,Tringa totanus,3799,species,3799,negativ,25000,35000,30000.0,1,1,1 (sh),18,Rotschenkel,Tringa totanus,65,main,,eksakt,
+rødstjert,Phoenicurus phoenicurus,183996,species,183996,stabil,175000,375000,275000.0,1,5,5 (sg),233,Gartenrotschwanz,Phoenicurus phoenicurus,74,main,,eksakt,
+rødstrupe,Erithacus rubecula,4507,species,4507,negativ,500000,1000000,750000.0,1,5,5 (sg),228,Rotkehlchen,Erithacus rubecula,74,main,,eksakt,
+rødvingetrost,Turdus iliacus,4547,species,4547,stabil,1000000,2500000,1750000.0,1,3,3 (m),125,Rotdrossel,Turdus iliacus,69,main,,eksakt,
+rørsanger,Acrocephalus scirpaceus,4438,species,4438,usikker,1600,2400,2000.0,2,5,5 (sg),240,Teichrohrsänger,Acrocephalus scirpaceus,74,main,,eksakt,
+sabinemåke,Xema sabini,3708,species,3708,usikker,,,,,,,,,,,,,ingen_treff,Ingen kontrollert kobling til Bernotat & Dierschke 2021. Manglende grad er ikke lav grad.
+sandlo,Charadrius hiaticula,3635,species,3635,positiv,10000,15000,12500.0,1,2,2 (h),38,Sandregenpfeifer,Charadrius hiaticula,65,main,,eksakt,
+sandløper,Calidris alba,3731,species,3731,usikker,50,100,75.0,10,2,2 (h),41,Sanderling,Calidris alba,66,main,,eksakt,
+sandsvale,Riparia riparia,4280,species,4280,negativ,10000,15000,12500.0,1,5,5 (sg),212,Uferschwalbe,Riparia riparia,73,main,,eksakt,
+sanglerke,Alauda arvensis,4120,species,4120,negativ,100000,300000,200000.0,1,4,4 (g),178,Feldlerche,Alauda arvensis,72,main,,eksakt,
+sangsvane,Cygnus cygnus,3510,species,3510,positiv,350,600,475.0,3,1,1 (sh),58,Singschwan,Cygnus cygnus,66,main,,eksakt,
+sidensvans,Bombycilla garrulus,4140,species,4140,fluktuerende,100,2000,1050.0,2,5,5 (sg),260,Seidenschwanz,Bombycilla garrulus,75,main,,eksakt,
+siland,Mergus serrator,3525,species,3525,usikker,10000,30000,20000.0,1,2,2 (h),95,Mittelsäger,Mergus serrator,68,main,,eksakt,
+sildemåke u.a. fuscus,Larus fuscus subsp. fuscus,3685,subspecies,3684,negativ,2000,2000,2000.0,2,3,3 (m),109,Heringsmöwe,Larus fuscus,69,main,,overordnet_art,"Nordlig sildemåke: grad fra arten Larus fuscus, ikke egen underartsvurdering."
+sildemåke u.a. intermedius,Larus fuscus subsp. intermedius,3687,subspecies,3684,negativ,26000,26000,26000.0,1,3,3 (m),109,Heringsmöwe,Larus fuscus,69,main,,overordnet_art,"Sildemåke intermedius: grad fra arten Larus fuscus, ikke egen underartsvurdering."
+sivhauk,Circus aeruginosus,3878,species,3878,positiv,24,44,34.0,10,5,5 (sg),142,Rohrweihe,Circus aeruginosus,70,main,,eksakt,
+sivhøne,Gallinula chloropus,4099,species,4099,stabil,110,215,162.5,5,2,2 (h),98,Teichhuhn,Gallinula chloropus,68,main,,eksakt,
+sivsanger,Acrocephalus schoenobaenus,4437,species,4437,usikker,10000,30000,20000.0,1,5,5 (sg),243,Schilfrohrsänger,Acroceph. schoenobaenus,74,main,,navnevariant,Koblet via referansens kontrollerte navnerettinger eller synonymer.
+sivspurv,Emberiza schoeniclus,4208,species,4208,negativ,200000,500000,350000.0,1,5,5 (sg),300,Rohrammer,Emberiza schoeniclus,76,main,,eksakt,
+sjøorre,Melanitta fusca,3516,species,3516,negativ,400,650,525.0,3,2,2 (h),81,Samtente,Melanitta fusca,67,main,,eksakt,
+skjeand,Spatula clypeata,204586,species,204586,usikker,20,100,60.0,10,2,2 (h),70,Löffelente,Anas clypeata,67,main,,navnevariant,Koblet via referansens kontrollerte navnerettinger eller synonymer.
+skjeggmeis,Panurus biarmicus,4360,species,4360,fluktuerende,6,16,11.0,10,5,5 (sg),215,Bartmeise,Panurus biarmicus,73,main,,eksakt,
+skjære,Pica pica,4183,species,4183,stabil,100000,200000,150000.0,1,4,4 (g),172,Elster,Pica pica,71,main,,eksakt,
+skjærpiplerke,Anthus petrosus,4320,species,4320,usikker,100000,200000,150000.0,1,5,5 (sg),220,Strandpieper,Anthus petrosus,73,main,,eksakt,
+skogdue,Columba oenas,4005,species,4005,usikker,500,1000,750.0,3,3,3 (m),121,Hohltaube,Columba oenas,69,main,,eksakt,
+skogsnipe,Tringa ochropus,3795,species,3795,usikker,6000,12000,9000.0,1,2,2 (h),31,Waldwasserläufer,Tringa ochropus,65,main,,eksakt,
+slagugle,Strix uralensis,4626,species,4626,positiv,15,20,17.5,10,4,4 (g),151,Habichtskauz,Strix uralensis,70,main,,eksakt,
+smålom,Gavia stellata,3926,species,3926,usikker,2000,5000,3500.0,2,2,2 (h),90,Sterntaucher,Gavia stellata,68,main,,eksakt,
+småspove,Numenius phaeopus,3776,species,3776,negativ,2000,10000,6000.0,1,1,1 (sh),20,Regenbrachvogel,Numenius phaeopus,65,main,,eksakt,
+snadderand,Mareca strepera,204584,species,204584,positiv,12,51,31.5,10,2,2 (h),75,Schnatterente,Anas strepera,67,main,,navnevariant,Koblet via referansens kontrollerte navnerettinger eller synonymer.
+snøspurv,Plectrophenax nivalis,4217,species,4217,usikker,20000,160000,90000.0,1,5,5 (sg),301,Schneeammer,Plectrophenax nivalis,77,main,,eksakt,
+snøugle,Bubo scandiacus,4614,species,4614,fluktuerende,0,100,50.0,10,,,,,,,,,ingen_treff,Ingen kontrollert kobling til Bernotat & Dierschke 2021. Manglende grad er ikke lav grad.
+sothøne,Fulica atra,4096,species,4096,stabil,270,475,372.5,3,1,1 (sh),97,Blässhuhn,Fulica atra,68,main,,eksakt,
+sotsnipe,Tringa erythropus,3790,species,3790,usikker,6000,8650,7325.0,1,2,2 (h),30,Dunkler Wasserläufer,Tringa erythropus,65,main,,eksakt,
+spettmeis,Sitta europaea,4415,species,4415,usikker,64000,145000,104500.0,1,5,5 (sg),273,Kleiber,Sitta europaea,75,main,,eksakt,
+splitterne,Thalasseus sandvicensis,3848,species,3848,utdødd,0,0,0.0,,4,4 (g),162,Brandseeschwalbe,Sterna sandvicensis,71,main,,navnevariant,Koblet via referansens kontrollerte navnerettinger eller synonymer.
+spurvehauk,Accipiter nisus,3856,species,3856,usikker,3000,6000,4500.0,2,5,5 (sg),140,Sperber,Accipiter nisus,70,main,,eksakt,
+spurveugle,Glaucidium passerinum,4617,species,4617,usikker,5000,10000,7500.0,1,5,5 (sg),158,Sperlingskauz,Glaucidium passerinum,71,main,,eksakt,
+steinskvett,Oenanthe oenanthe,184055,species,184055,negativ,200000,500000,350000.0,1,5,5 (sg),236,Steinschmätzer,Oenanthe oenanthe,74,main,,eksakt,
+steinvender,Arenaria interpres,3724,species,3724,usikker,10000,20000,15000.0,1,2,2 (h),40,Steinwälzer,Arenaria interpres,66,main,,eksakt,
+stillits,Carduelis carduelis,4227,species,4227,positiv,5000,9000,7000.0,1,5,5 (sg),285,Stieglitz,Carduelis carduelis,76,main,,eksakt,
+stjertand,Anas acuta,3449,species,3449,usikker,215,550,382.5,3,2,2 (h),76,Spießente,Anas acuta,67,main,,eksakt,
+stjertmeis,Aegithalos caudatus,4116,species,4116,fluktuerende,24000,40000,32000.0,1,5,5 (sg),214,Schwanzmeise,Aegothalus caudatus,73,main,,navnevariant,Koblet via referansens kontrollerte navnerettinger eller synonymer.
+stokkand,Anas platyrhynchos,3461,species,3461,positiv,43000,75250,59125.0,1,1,1 (sh),68,Stockente,Anas platyrhynchos,67,main,,eksakt,
+storfugl,Tetrao urogallus,4078,species,4078,usikker,40000,50000,45000.0,1,1,1 (sh),6,Auerhuhn,Tetrao urogallus,64,main,,eksakt,
+storjo,Stercorarius skua,3815,species,3815,positiv,110,110,110.0,5,3,3 (m),117,Skua,Stercorarius skua,69,main,,eksakt,
+storlom,Gavia arctica,3923,species,3923,stabil,1250,2500,1875.0,2,2,2 (h),91,Prachttaucher,Gavia arctica,68,main,,eksakt,
+stormsvale,Hydrobates leucorhous,3982,species,3982,usikker,500,1000,750.0,3,5,5 (sg),183,Wellenläufer,Oceanodroma leucorhoa,72,main,,navnevariant,Stormsvale: viderefører tidligere synonymkobling til kildens Oceanodroma leucorhoa.
+storskarv,Phalacrocorax carbo,3935,species,3935,stabil,16500,21000,18750.0,1,5,5 (sg),177,Kormoran,Phalacrocorax carbo,71,main,,eksakt,
+storspove,Numenius arquata,3773,species,3773,negativ,2000,3000,2500.0,2,1,1 (sh),16,Großer Brachvogel,Numenius arquata,65,main,,eksakt,
+strandsnipe,Actitis hypoleucos,3719,species,3719,stabil,100000,150000,125000.0,1,2,2 (h),27,Flussuferläufer,Tringa hypoleuca,65,main,,navnevariant,Koblet via referansens kontrollerte navnerettinger eller synonymer.
+stær,Sturnus vulgaris,4426,species,4426,stabil,100000,200000,150000.0,1,2,2 (h),122,Star,Sturnus vulgaris,69,main,,eksakt,
+svartand,Melanitta nigra,3518,species,3518,negativ,635,1250,942.5,2,2,2 (h),80,Trauerente,Melanitta nigra,67,main,,eksakt,
+svartbak,Larus marinus,3694,species,3694,stabil,43000,43000,43000.0,1,3,3 (m),107,Mantelmöwe,Larus marinus,68,main,,eksakt,
+"svarthalespove, underart islandica",Limosa limosa subsp. islandica,3768,subspecies,3767,usikker,42,53,47.5,10,1,1 (sh),13,Uferschnepfe,Limosa limosa,64,main,,overordnet_art,"Svarthalespove islandica: grad fra arten Limosa limosa, ikke egen underartsvurdering."
+svarthalespove,Limosa limosa,3767,species,3767,negativ,13,30,21.5,10,1,1 (sh),13,Uferschnepfe,Limosa limosa,64,main,,eksakt,
+svarthalsdykker,Podiceps nigricollis,3958,species,3958,positiv,0,2,1.0,10,2,2 (h),86,Schwarzhalstaucher,Podiceps nigricollis,68,main,,eksakt,
+svarthvit fluesnapper,Ficedula hypoleuca,4348,species,4348,negativ,630000,1350000,990000.0,1,5,5 (sg),261,Trauerschnäpper,Ficedula hypoleuca,75,main,,eksakt,
+svartmeis,Periparus ater,4375,species,4375,usikker,50000,225000,137500.0,1,5,5 (sg),266,Tannenmeise,Parus ater,75,main,,navnevariant,Koblet via referansens kontrollerte navnerettinger eller synonymer.
+svartrødstjert,Phoenicurus ochruros,184000,species,184000,stabil,10,30,20.0,10,5,5 (sg),232,Hausrotschwanz,Phoenicurus ochruros,74,main,,eksakt,
+svartspett,Dryocopus martius,4582,species,4582,usikker,2000,4000,3000.0,2,5,5 (sg),199,Schwarzspecht,Dryocopos maritus,72,main,,navnevariant,Koblet via referansens kontrollerte navnerettinger eller synonymer.
+svartstrupe,Saxicola rubicola,157405,species,157405,fluktuerende,7,14,10.5,10,5,5 (sg),234,Schwarzkehlchen,Saxicola torquata,74,main,Source Schwarzkehlchen / Saxicola torquata treated as European stonechat for this join; not every member of former species complex.,avgrenset_takson,"Referansens kontrollerte kobling gjelder europeisk svartstrupe, ikke hele det tidligere artskomplekset."
+svarttrost,Turdus merula,4550,species,4550,stabil,250000,600000,425000.0,1,3,3 (m),126,Amsel,Turdus merula,69,main,,eksakt,
+svømmesnipe,Phalaropus lobatus,3782,species,3782,usikker,5000,10000,7500.0,1,2,2 (h),48,Odinshühnchen,Phalaropus lobatus,66,main,,eksakt,
+taffeland,Aythya ferina,3486,species,3486,fluktuerende,0,15,7.5,10,2,2 (h),73,Tafelente,Aythya ferina,67,main,,eksakt,
+taigasædgås,Anser fabalis,3479,species,3479,stabil,30,60,45.0,10,2,2 (h),64,Saatgans,Anser fabalis,67,main,Historical bean-goose scope; no automatic split to Anser serrirostris.,samlet_takson,"Kilden vurderer sædgås i gammel vid forstand, ikke taigasædgås og tundrasædgås uavhengig."
+taksvale,Delichon urbicum,4275,species,4275,negativ,30000,50000,40000.0,1,5,5 (sg),211,Mehlschwalbe,Delichon urbica,73,main,,navnevariant,Koblet via referansens kontrollerte navnerettinger eller synonymer.
+teist,Cepphus grylle,3607,species,3607,negativ,35000,35000,35000.0,1,5,5 (sg),186,Gryllteiste,Cepphus grylle,72,main,,eksakt,
+temmincksnipe,Calidris temminckii,3751,species,3751,usikker,1700,5000,3350.0,2,2,2 (h),43,Temminckstrandläufer,Calidris temminckii,66,main,,eksakt,
+tjeld,Haematopus ostralegus,3664,species,3664,stabil,50000,100000,75000.0,1,1,1 (sh),19,Austernfischer,Haematopus ostralegus,65,main,,eksakt,
+toppand,Aythya fuligula,3487,species,3487,usikker,6500,9000,7750.0,1,2,2 (h),74,Reiherente,Aythya fuligula,67,main,,eksakt,
+toppdykker,Podiceps cristatus,3953,species,3953,stabil,220,380,300.0,3,2,2 (h),87,Haubentaucher,Podiceps cristatus,68,main,,eksakt,
+toppmeis,Lophophanes cristatus,4369,species,4369,negativ,120000,145000,132500.0,1,5,5 (sg),270,Haubenmeise,Lophophanes cristatus,75,main,,eksakt,
+toppskarv,Gulosus aristotelis,204596,species,204596,stabil,28000,28000,28000.0,1,,,,,,,,,ingen_treff,Ingen kontrollert kobling til Bernotat & Dierschke 2021. Manglende grad er ikke lav grad.
+tornirisk,Linaria cannabina,204598,species,204598,usikker,10000,20000,15000.0,1,5,5 (sg),290,Bluthänfling,Carduelis cannabina,76,main,,navnevariant,Koblet via referansens kontrollerte navnerettinger eller synonymer.
+tornsanger,Curruca communis,215487,species,215487,positiv,75000,125000,100000.0,1,5,5 (sg),249,Dorngrasmücke,Sylvia communis,74,main,,navnevariant,Koblet via referansens kontrollerte navnerettinger eller synonymer.
+tornskate,Lanius collurio,4295,species,4295,usikker,3700,4700,4200.0,2,5,5 (sg),277,Neuntöter,Lanius collurio,76,main,,eksakt,
+trane,Grus grus,4084,species,4084,positiv,1500,2500,2000.0,2,1,1 (sh),4,Kranich,Grus grus,64,main,,eksakt,
+trekryper,Certhia familiaris,4154,species,4154,usikker,100000,270000,185000.0,1,5,5 (sg),252,Waldbaumläufer,Certhia familiaris,75,main,,eksakt,
+trelerke,Lullula arborea,4132,species,4132,positiv,110,240,175.0,5,5,5 (sg),207,Heidelerche,Lullula arborea,73,main,,eksakt,
+trepiplerke,Anthus trivialis,4329,species,4329,negativ,1000000,1700000,1350000.0,1,5,5 (sg),217,Baumpieper,Anthus trivalis,73,main,,navnevariant,Koblet via referansens kontrollerte navnerettinger eller synonymer.
+tretåspett,Picoides tridactylus,4588,species,4588,usikker,2150,4700,3425.0,2,5,5 (sg),204,Dreizehenspecht,Picoides tridactylus,73,main,,eksakt,
+tundrasædgås,Anser serrirostris,215437,species,215437,positiv,207,415,311.0,3,2,2 (h),64,Saatgans,Anser fabalis,67,main,Historical bean-goose scope; no automatic split to Anser serrirostris.,samlet_takson,Viderefører tidligere kobling til sædgås i gammel vid forstand. Ikke en separat vurdering av tundrasædgås.
+tyrkerdue,Streptopelia decaocto,4010,species,4010,usikker,550,1200,875.0,2,3,3 (m),120,Türkentaube,Streptopelia decaoctao,69,main,,navnevariant,Koblet via referansens kontrollerte navnerettinger eller synonymer.
+tyvjo,Stercorarius parasiticus,3813,species,3813,usikker,5000,10000,7500.0,1,3,3 (m),114,Schmarotzerraubmöwe,Stercorarius parasiticus,69,main,,eksakt,
+tårnfalk,Falco tinnunculus,3913,species,3913,usikker,3000,10000,6500.0,1,5,5 (sg),145,Turmfalke,Falco tinnunculus,70,main,,eksakt,
+tårnseiler,Apus apus,3542,species,3542,stabil,35000,75000,55000.0,1,5,5 (sg),196,Mauersegler,Apus apus,72,main,,eksakt,
+vaktel,Coturnix coturnix,4052,species,4052,fluktuerende,50,300,175.0,5,3,3 (m),9,Wachtel,Coturnix coturnix,64,main,,eksakt,
+vandrefalk,Falco peregrinus,3907,species,3907,positiv,715,1035,875.0,2,5,5 (sg),147,Wanderfalke,Falco peregrinus,70,main,,eksakt,
+vannrikse,Rallus aquaticus,4112,species,4112,stabil,70,170,120.0,5,2,2 (h),99,Wasserralle,Rallus aquaticus,68,main,,eksakt,
+varsler,Lanius excubitor,4298,species,4298,usikker,1000,5000,3000.0,2,5,5 (sg),276,Raubwürger,Lanius excubitor,76,main,,eksakt,
+vendehals,Jynx torquilla,4585,species,4585,usikker,1500,3000,2250.0,2,5,5 (sg),206,Wendehals,Jynx torquilla,73,main,,eksakt,
+vepsevåk,Pernis apivorus,3899,species,3899,usikker,500,1000,750.0,3,5,5 (sg),139,Wespenbussard,Pernis apivorus,70,main,,eksakt,
+vierspurv,Emberiza rustica,4205,species,4205,negativ,3,4,3.5,10,,,,,,,,,ingen_treff,Ingen kontrollert kobling til Bernotat & Dierschke 2021. Manglende grad er ikke lav grad.
+vintererle,Motacilla cinerea,4336,species,4336,positiv,1500,2500,2000.0,2,5,5 (sg),221,Gebirgsstelze,Motacilla cinerea,73,main,,eksakt,
+vipe,Vanellus vanellus,3654,species,3654,negativ,7500,10000,8750.0,1,1,1 (sh),12,Kiebitz,Vanellus vanellus,64,main,,eksakt,
+ærfugl,Somateria mollissima,3531,species,3531,negativ,87000,87000,87000.0,1,2,2 (h),77,Eiderente,Somateria molissima,67,main,,navnevariant,Koblet via referansens kontrollerte navnerettinger eller synonymer.
+åkerrikse,Crex crex,4094,species,4094,stabil,50,125,87.5,10,2,2 (h),100,Wachtelkönig,Crex crex,68,main,,eksakt,
