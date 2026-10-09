@@ -1430,7 +1430,9 @@ def definer_anf_kriterier_og_m1941(bird_data):
         Notes:
             Leser ANF/Mdir-tabellen fra `bird_data`. Oppslag skjer først på
             arts-ID og deretter på vitenskapelig navn. Nasjonal M1941-verdi
-            prioriteres over rødlisteverdien.
+            prioriteres over rødlisteverdien. Tabellens ID-er og navn må være
+            `Accepted` i NorTaxa; `kontroller_anf_ider_mot_nortaxa` stopper
+            pipelinen når en observert art bare finnes under utgått ID.
         """
 
         # Last inn kriterier fra ANF/Mdir-tabellen
@@ -1503,6 +1505,97 @@ def definer_anf_kriterier_og_m1941(bird_data):
     return (legg_til_arter_av_nasjonal_forvaltningsinteresse,)
 
 
+@app.function(hide_code=True)
+def valider_anf_ider_mot_nortaxa(
+    observerte_arter: dict[int, str | None],
+    anf_ider: set[int],
+    anf_navn: set[str],
+    utgåtte_ider: dict[int, set[int]],
+) -> None:
+    """Stopp når en observert art bare finnes i ANF-tabellen under utgått ID.
+
+    Args:
+        observerte_arter: Gyldig `validScientificNameId` → `validScientificName`.
+        anf_ider: Alle `vitenskapelig_navn_id` i ANF-tabellen.
+        anf_navn: Alle `vitenskapelig_navn` i ANF-tabellen.
+        utgåtte_ider: Gyldig ID → navne-ID-er som NorTaxa ikke regner som
+            `Accepted` (synonymer o.l.) for samme takson.
+
+    Raises:
+        ValueError: Når en art verken treffer på ID eller navn, men en av
+            dens utgåtte ID-er finnes i ANF-tabellen. Da ville ANF-oppslaget
+            gitt feil kriterier og feil `Verdi M1941`.
+    """
+    funn = []
+    for art_id, navn in sorted(observerte_arter.items()):
+        if art_id in anf_ider or navn in anf_navn:
+            continue
+        treff = sorted(utgåtte_ider.get(art_id, set()) & anf_ider)
+        if treff:
+            funn.append(f"{navn} (gyldig ID {art_id}, ANF-tabellen har {', '.join(map(str, treff))})")
+    if funn:
+        raise ValueError(
+            "ANF-tabellen bruker utgått NorTaxa-ID for: "
+            + "; ".join(funn)
+            + ". Oppdater ID og navn i arter_av_nasjonal_forvaltningsinteresse "
+            "(se PR #1: https://github.com/havhje/fugl_artsdataanalyser/pull/1)."
+        )
+
+
+@app.cell(hide_code=True)
+def definer_kontroller_anf_ider_mot_nortaxa(bird_data, console, fetch_taxon_data):
+    def kontroller_anf_ider_mot_nortaxa(df_enriched: pl.DataFrame) -> None:
+        """Kontroller at ANF-tabellen bruker gyldige NorTaxa-ID-er for observerte arter.
+
+        Args:
+            df_enriched: Data etter NorTaxa-beriking, med `validScientificNameId`
+                og `validScientificName`.
+
+        Raises:
+            ValueError: Når en observert art bare finnes i ANF-tabellen under
+                en utgått NorTaxa-ID. Se `valider_anf_ider_mot_nortaxa`.
+
+        Notes:
+            Gjenbruker de mellomlagrede NorTaxa-svarene fra
+            `process_and_enrich_data`, så kontrollen gir ingen nye API-kall
+            for arter som allerede er slått opp.
+        """
+        anf = bird_data.execute(
+            "SELECT vitenskapelig_navn_id, vitenskapelig_navn FROM arter_av_nasjonal_forvaltningsinteresse"
+        ).pl()
+        observerte = (
+            df_enriched.select(
+                pl.col("validScientificNameId").cast(pl.Int64, strict=False),
+                pl.col("validScientificName").cast(pl.Utf8),
+            )
+            .drop_nulls("validScientificNameId")
+            .unique("validScientificNameId", keep="first")
+        )
+        observerte_arter = dict(observerte.iter_rows())
+
+        utgåtte_ider: dict[int, set[int]] = {}
+        for art_id in observerte_arter:
+            api_data = fetch_taxon_data(art_id) or {}
+            utgåtte_ider[art_id] = {
+                navnepost["id"]
+                for navnepost in api_data.get("scientificNames", [])
+                if navnepost.get("taxonomicStatus") != "Accepted" and navnepost.get("id") is not None
+            }
+
+        try:
+            valider_anf_ider_mot_nortaxa(
+                observerte_arter,
+                set(anf["vitenskapelig_navn_id"].drop_nulls().to_list()),
+                set(anf["vitenskapelig_navn"].drop_nulls().to_list()),
+                utgåtte_ider,
+            )
+        except ValueError as feil:
+            console.print(f"[bold red]Feil:[/bold red] {feil}")
+            raise
+
+    return (kontroller_anf_ider_mot_nortaxa,)
+
+
 @app.cell(hide_code=True)
 def md_testmatrise_legg_til_arter_av_nasjonal_forvaltningsinteresse():
     mo.md(r"""
@@ -1516,7 +1609,7 @@ def md_testmatrise_legg_til_arter_av_nasjonal_forvaltningsinteresse():
 
     **Outputkontrakt:** Returnerer `pl.DataFrame` med alle originalrader og originalkolonner bevart, pluss kriteriekolonnene `Prioriterte arter`, `Fredete arter`, `Andre spesielt hensynskrevende arter`, `Spesielle økologiske former`, `Datamangel`, `Hensynskrevende arter`, `Ansvarsarter`, `Fremmede arter`, samt `verdi_m1941_nasjonal` og `Verdi M1941`. Interne join-kolonner skal ikke være med i output.
 
-    **Godkjenningsstatus:** Godkjent av bruker 2026-06-05; ANF-MTM-013 lagt til etter brukeravklaring samme dato.
+    **Godkjenningsstatus:** Godkjent av bruker 2026-06-05; ANF-MTM-013 lagt til etter brukeravklaring samme dato. Revidert og godkjent 2026-10-09 etter feilen beskrevet i PR #1: fire ANF-rader fikk gyldige NorTaxa-ID-er og navn, ANF-MTM-005/006 bruker derfor `Astur gentilis`, og ANF-MTM-014–016 er lagt til.
 
     **Revisjonspolicy:** Hvis forventet oppførsel endres, oppdater og godkjenn denne matrisen på nytt før testene endres.
 
@@ -1526,8 +1619,8 @@ def md_testmatrise_legg_til_arter_av_nasjonal_forvaltningsinteresse():
     | ANF-MTM-002 | ID-oppslag dekker alle kriterier | Kjente ID-er: dverggås, blodigle, nordlig sildemåke, pelekreps, krikkand og kanadagås | Riktig `Ja` for relevante kriterier og `Nei` for øvrige | Eksakt tekstlikhet | Bekrefter mapping av alle kriteriekolonner | Feil alias/kriteriekolonne eller feil 1/null → Ja/Nei-konvertering | `ANF_MTM_002` |
     | ANF-MTM-003 | ID prioriteres over konfliktende navn | ID `3478` + navn `Clangula hyemalis` | Output bruker dverggås fra ID: `Svært stor verdi`, `Ansvarsarter=Ja`; ikke havelleverdier fra navn | Eksakt tekstlikhet | Dokumenterer prioritet når begge nøkler finnes men peker på ulike arter | Fallback på navn overstyrer korrekt ID-treff | `ANF_MTM_003` |
     | ANF-MTM-004 | ID-oppslag fungerer med manglende input-navn | ID `3506`, `validScientificName=None` | Treffer havelle via ID; `Stor verdi`, `Andre spesielt hensynskrevende arter=Ja` | Eksakt tekst-/nullsjekk | Artskart kan ha manglende navn selv om ID finnes | Gyldige ID-treff mistes når navn mangler | `ANF_MTM_004` |
-    | ANF-MTM-005 | Navnefallback når ID er ukjent | Ukjent ID `295741`, navn `Accipiter gentilis` | Treffer via navn; `verdi_m1941_nasjonal=Stor verdi`, `Andre spesielt hensynskrevende arter=Ja` | Eksakt tekstlikhet | Arts-ID kan være ulik mellom kilder | Manglende fallback på vitenskapelig navn | `ANF_MTM_005` |
-    | ANF-MTM-006 | Navnefallback når ID er null | `validScientificNameId=None`, navn `Accipiter gentilis` | Treffer via navn og får samme forventede ANF-verdier som ANF-MTM-005 | Eksakt tekst-/radantallssjekk | Reelle rader kan mangle ID men ha navn | Null-ID-rader droppes eller berikes ikke via navn | `ANF_MTM_006` |
+    | ANF-MTM-005 | Navnefallback når ID er ukjent | Ukjent ID `999999999`, navn `Astur gentilis` | Treffer via navn; `verdi_m1941_nasjonal=Stor verdi`, `Andre spesielt hensynskrevende arter=Ja` | Eksakt tekstlikhet | Arts-ID kan være ulik mellom kilder | Manglende fallback på vitenskapelig navn | `ANF_MTM_005` |
+    | ANF-MTM-006 | Navnefallback når ID er null | `validScientificNameId=None`, navn `Astur gentilis` | Treffer via navn og får samme forventede ANF-verdier som ANF-MTM-005 | Eksakt tekst-/radantallssjekk | Reelle rader kan mangle ID men ha navn | Null-ID-rader droppes eller berikes ikke via navn | `ANF_MTM_006` |
     | ANF-MTM-007 | Null-navn skal ikke matche null-navn i kildetabell | `validScientificNameId=None`, `validScientificName=None` | Én outputrad, ingen ANF-verdi, kriterier `Nei`, `Verdi M1941` faller tilbake til rødlisteverdi | Eksakt radantall/nullsjekk | Kildetabellen har noen null-navn | Null=null-join kan gi falske treff og radduplisering | `ANF_MTM_007` |
     | ANF-MTM-008 | Ingen ANF-treff | Ukjent ID og ukjent navn med rødlisteverdi `Middels verdi` | Alle kriterier `Nei`; `verdi_m1941_nasjonal=null`; `Verdi M1941=Middels verdi` | Eksakt tekst-/nullsjekk | Ukjente arter skal beholde rødlistefallback | Ukjente arter får feil kriterietreff eller mister M1941-verdi | `ANF_MTM_008` |
     | ANF-MTM-009 | `-` i ANF-tabell normaliseres | Kanadagås `3495` med rødlisteverdi `Svært stor verdi` | `verdi_m1941_nasjonal=Ingen`; `Verdi M1941=Ingen`; `Fremmede arter=Ja` | Eksakt tekstlikhet | `-` i Mdir betyr ingen verdi og skal være lesbart | `-` lekker til output eller rødlisteverdi overstyrer ANF | `ANF_MTM_009` |
@@ -1535,6 +1628,9 @@ def md_testmatrise_legg_til_arter_av_nasjonal_forvaltningsinteresse():
     | ANF-MTM-011 | Tom input med riktig schema | Tom `pl.DataFrame` med nødvendige kolonner | Returnerer tom DataFrame med kriterie- og verdikolonner | Eksakt schema-/kolonnesjekk | Pipeline-steg bør tåle tomme datasett etter filtrering | Tom input gir crash eller manglende outputkolonner | `ANF_MTM_011` |
     | ANF-MTM-012 | Manglende obligatoriske kolonner | DataFrame mangler én av `validScientificNameId`, `validScientificName`, `verdi_rodliste_artskart` | Feiler med exception som nevner manglende kolonne | Exception og tekstutdrag | Inputfeil skal være tydelige | Skjult feil eller utydelig feilmelding ved kontraktsbrudd | `ANF_MTM_012` |
     | ANF-MTM-013 | Preferansekjede for `Verdi M1941` | To rader: dverggås `3478` med rødlisteverdi `Noe verdi`, og ukjent art med rødlisteverdi `Middels verdi` | Dverggås får `verdi_m1941_nasjonal=Svært stor verdi` og `Verdi M1941=Svært stor verdi`; ukjent art får `verdi_m1941_nasjonal=null` og `Verdi M1941=Middels verdi` | Eksakt tekst-/nullsjekk | Dokumenterer at ANF/Mdir-verdi prioriteres når den finnes, mens rødlisteverdien bare er fallback uten ANF-treff | Rødlisteverdi overstyrer ANF/Mdir-verdi, eller arter uten ANF-treff mister rødlistefallback | `ANF_MTM_013` |
+    | ANF-MTM-014 | Arter med ny NorTaxa-ID treffer ANF | Gyldige ID-er og navn fra Artskart: boltit `204590`, dverglo `298322`, hønsehauk `295741`, polarsisik `296651` | Boltit `Stor verdi` + `Ansvarsarter=Ja`; dverglo og hønsehauk `Stor verdi`; polarsisik `Noe verdi` + `Hensynskrevende arter=Ja` | Eksakt tekstlikhet | Disse fire sto i ANF-tabellen under utgått ID og navn og fikk feil verdier | ANF-tabellen faller tilbake til utgåtte ID-er/navn | `ANF_MTM_014` |
+    | ANF-MTM-015 | Kontroll av utgåtte ID-er stopper | `valider_anf_ider_mot_nortaxa` med en art som bare treffer ANF via synonym-ID, og med arter som treffer på gyldig ID, navn eller ikke i det hele tatt | `ValueError` som nevner art, gyldig ID og utgått ANF-ID; ingen feil for de øvrige tilfellene | Exception-type og tekstutdrag | Pipelinen skal stoppe heller enn å gi stille feil ANF-verdier | Nye navneendringer i NorTaxa gir igjen tapte ANF-treff | `ANF_MTM_015` |
+    | ANF-MTM-016 | ANF-tabellens fugle-ID-er er gyldige i NorTaxa (nettverk) | Alle fuglerader i `arter_av_nasjonal_forvaltningsinteresse` | Hver ID har `taxonomicStatus=Accepted` i NorTaxa | Eksakt statussjekk | Fanger navneendringer før arten dukker opp i et datasett | ANF-tabellen bruker utgåtte ID-er uten at noen merker det | `ANF_MTM_016` |
     """)
     return
 
@@ -1710,8 +1806,8 @@ def ANF_MTM_005(legg_til_arter_av_nasjonal_forvaltningsinteresse):
         """ANF-MTM-005: ukjent ID berikes via fallback på vitenskapelig navn."""
         test_df = pl.DataFrame(
             {
-                "validScientificNameId": [295741],
-                "validScientificName": ["Accipiter gentilis"],
+                "validScientificNameId": [999999999],
+                "validScientificName": ["Astur gentilis"],
                 "verdi_rodliste_artskart": ["Stor verdi"],
             }
         )
@@ -1720,7 +1816,7 @@ def ANF_MTM_005(legg_til_arter_av_nasjonal_forvaltningsinteresse):
         row = result.row(0, named=True)
 
         assert result.height == 1, "ANF-MTM-005 navnefallback skal gi én rad"
-        assert row["validScientificNameId"] == 295741, "ANF-MTM-005 original Artskart-ID skal beholdes"
+        assert row["validScientificNameId"] == 999999999, "ANF-MTM-005 original Artskart-ID skal beholdes"
         assert row["verdi_m1941_nasjonal"] == "Stor verdi", "ANF-MTM-005 hønsehauk skal treffes via navn"
         assert row["Verdi M1941"] == "Stor verdi", "ANF-MTM-005 ANF-verdi fra navnefallback skal brukes"
         assert row["Andre spesielt hensynskrevende arter"] == "Ja", (
@@ -1740,7 +1836,7 @@ def ANF_MTM_006(legg_til_arter_av_nasjonal_forvaltningsinteresse):
         test_df = pl.DataFrame(
             {
                 "validScientificNameId": pl.Series("validScientificNameId", [None], dtype=pl.Int64),
-                "validScientificName": ["Accipiter gentilis"],
+                "validScientificName": ["Astur gentilis"],
                 "verdi_rodliste_artskart": ["Stor verdi"],
             }
         )
@@ -2035,6 +2131,97 @@ def ANF_MTM_013(legg_til_arter_av_nasjonal_forvaltningsinteresse):
 
 
     test_legg_til_arter_av_nasjonal_forvaltningsinteresse_anf_mtm_013()
+    return
+
+
+@app.cell(hide_code=True)
+def ANF_MTM_014(legg_til_arter_av_nasjonal_forvaltningsinteresse):
+    def test_legg_til_arter_av_nasjonal_forvaltningsinteresse_anf_mtm_014():
+        """ANF-MTM-014: arter med ny NorTaxa-ID treffer ANF på gyldig ID og navn."""
+        test_df = pl.DataFrame(
+            {
+                "validScientificNameId": [204590, 298322, 295741, 296651],
+                "validScientificName": [
+                    "Eudromias morinellus",
+                    "Thinornis dubius",
+                    "Astur gentilis",
+                    "Acanthis flammea subsp. exilipes",
+                ],
+                "verdi_rodliste_artskart": ["Noe verdi", "Noe verdi", "Noe verdi", "Noe verdi"],
+            }
+        )
+
+        result = legg_til_arter_av_nasjonal_forvaltningsinteresse(test_df)
+        rader = {row["validScientificNameId"]: row for row in result.iter_rows(named=True)}
+
+        assert result.height == 4, "ANF-MTM-014 skal bevare alle inputrader"
+        for art_id in (204590, 298322, 295741):
+            assert rader[art_id]["Verdi M1941"] == "Stor verdi", f"ANF-MTM-014 {art_id} skal få ANF-verdi Stor verdi"
+        assert rader[204590]["Ansvarsarter"] == "Ja", "ANF-MTM-014 boltit er ansvarsart"
+        assert rader[296651]["verdi_m1941_nasjonal"] == "Noe verdi", "ANF-MTM-014 polarsisik skal treffe ANF"
+        assert rader[296651]["Hensynskrevende arter"] == "Ja", "ANF-MTM-014 polarsisik er hensynskrevende art"
+
+
+    test_legg_til_arter_av_nasjonal_forvaltningsinteresse_anf_mtm_014()
+    return
+
+
+@app.cell(hide_code=True)
+def ANF_MTM_015():
+    def test_valider_anf_ider_mot_nortaxa_anf_mtm_015():
+        """ANF-MTM-015: kontrollen stopper bare når ANF-treffet går via utgått ID."""
+        anf_ider = {3853, 3478}
+        anf_navn = {"Accipiter gentilis", "Anser erythropus"}
+
+        try:
+            valider_anf_ider_mot_nortaxa(
+                {295741: "Astur gentilis"}, anf_ider, anf_navn, {295741: {3853}}
+            )
+        except ValueError as feil:
+            tekst = str(feil)
+            for forventet in ("Astur gentilis", "295741", "3853", "arter_av_nasjonal_forvaltningsinteresse"):
+                assert forventet in tekst, f"ANF-MTM-015 feilmeldingen skal nevne {forventet}; fikk {tekst!r}"
+        else:
+            raise AssertionError("ANF-MTM-015 art med bare utgått ANF-ID skulle stoppe")
+
+        # Treff på gyldig ID, treff på navn, art uten ANF-oppføring og art uten NorTaxa-svar.
+        valider_anf_ider_mot_nortaxa(
+            {3478: "Anser erythropus", 295741: "Accipiter gentilis", 4382: "Poecile montanus", 1001: None},
+            anf_ider,
+            anf_navn,
+            {3478: {111}, 295741: {3853}, 4382: {4381}},
+        )
+
+
+    test_valider_anf_ider_mot_nortaxa_anf_mtm_015()
+    return
+
+
+@app.cell(hide_code=True)
+def ANF_MTM_016(NORTAXA_API_BASE_URL, bird_data, fetch_taxon_data):
+    def test_anf_fugle_ider_er_gyldige_i_nortaxa_anf_mtm_016():
+        """ANF-MTM-016: alle ANF-fugle-ID-er er `Accepted` i NorTaxa (nettverk)."""
+        if NORTAXA_API_BASE_URL.startswith("mock://"):
+            return
+        fugler = bird_data.execute(
+            "SELECT vitenskapelig_navn_id, populaernavn FROM arter_av_nasjonal_forvaltningsinteresse "
+            "WHERE artsgruppe ILIKE 'fugl%' AND vitenskapelig_navn_id IS NOT NULL"
+        ).fetchall()
+        assert fugler, "ANF-MTM-016 fant ingen fuglerader i ANF-tabellen"
+
+        ugyldige = []
+        for art_id, navn in fugler:
+            api_data = fetch_taxon_data(art_id) or {}
+            status = {
+                navnepost.get("id"): navnepost.get("taxonomicStatus")
+                for navnepost in api_data.get("scientificNames", [])
+            }.get(art_id)
+            if status != "Accepted":
+                ugyldige.append(f"{navn} ({art_id}: {status})")
+        assert not ugyldige, "ANF-MTM-016 ANF-tabellen har ID-er som ikke er Accepted i NorTaxa: " + "; ".join(ugyldige)
+
+
+    test_anf_fugle_ider_er_gyldige_i_nortaxa_anf_mtm_016()
     return
 
 
@@ -3778,6 +3965,7 @@ def definer_les_data_cli(
 @app.cell
 def definer_les_data_og_kjor_alle_funksjoner(
     console,
+    kontroller_anf_ider_mot_nortaxa,
     legg_til_arter_av_nasjonal_forvaltningsinteresse,
     legg_til_fuglegruppe,
     legg_til_månedsnavn,
@@ -3796,7 +3984,9 @@ def definer_les_data_og_kjor_alle_funksjoner(
 
         Raises:
             ValueError: Når input ikke følger Artskart-kontrakten, mangler
-                gyldige ID-er eller fuglegruppereglene er ugyldige.
+                gyldige ID-er, fuglegruppereglene er ugyldige eller en
+                observert art bare finnes i ANF-tabellen under utgått
+                NorTaxa-ID.
             RuntimeError: Når NorTaxa-oppslag feiler eller fuglegruppereglene
                 ikke kan leses fra DuckDB.
 
@@ -3875,6 +4065,10 @@ def definer_les_data_og_kjor_alle_funksjoner(
             df_steg0 = df_gruppert.pipe(legg_til_verdi_m1941)
         console.print("  [green]✓[/green] Beregnet M1941-verdi fra rødlistekategori")
 
+        with console.status("[bold blue]Kontrollerer ANF-tabellens ID-er mot NorTaxa..."):
+            kontroller_anf_ider_mot_nortaxa(df_steg0)
+        console.print("  [green]✓[/green] ANF-tabellen bruker gyldige NorTaxa-ID-er for observerte arter")
+
         with console.status("[bold blue]Legger til kriterier for nasjonal interesse..."):
             df_steg1 = df_steg0.pipe(legg_til_arter_av_nasjonal_forvaltningsinteresse)
         console.print("  [green]✓[/green] Lagt til Arter av nasjonal forvaltningsinteresse")
@@ -3922,7 +4116,7 @@ def md_testmatrise_les_data_og_kjor_alle_funksjoner():
 
     **Outputkontrakt:** Returnerer `pl.DataFrame` med sluttkolonnene fra `rydd_navn_og_datatyper`, pluss `Månedsnavn` rett etter `Observert dato`. `Fuglegruppe` beregnes fra DuckDB-reglene og NorTaxa-ID-ene før opprydding og bevares rett etter `Orden`, også ved Parquet-eksport. Bare observasjoner med dato fra og med `filter_year` skal inngå. Observasjoner med null dato fjernes av årfilteret. Hvis årfilteret gir null rader, returneres en tom slutt-DataFrame med riktig sluttkolonneliste og Fuglegruppe som String, uten NorTaxa-kall. Regeltabellen må likevel være gyldig. Fuglegruppe-utvidelsen og testomfanget er godkjent av bruker 2026-09-21.
 
-    **Godkjenningsstatus:** Godkjent av bruker 2026-06-05. PIPE-MTM-006 er avklart av bruker samme dato: tomt datasett etter årfilter skal returnere tom DataFrame, og konsollmeldingen skal vise at 0 rader/observasjoner ble inkludert.
+    **Godkjenningsstatus:** Godkjent av bruker 2026-06-05. PIPE-MTM-006 er avklart av bruker samme dato: tomt datasett etter årfilter skal returnere tom DataFrame, og konsollmeldingen skal vise at 0 rader/observasjoner ble inkludert. PIPE-MTM-007 lagt til og godkjent 2026-10-09: pipelinen stopper med egen feil når en observert art bare finnes i ANF-tabellen under utgått NorTaxa-ID.
 
     **Revisjonspolicy:** Hvis forventet oppførsel endres, oppdater og godkjenn denne matrisen på nytt før tester eller funksjonslogikk endres.
 
@@ -3934,6 +4128,7 @@ def md_testmatrise_les_data_og_kjor_alle_funksjoner():
     | PIPE-MTM-004 | Ugyldig `category` | CSV med `category="XYZ"` | `ValueError` med tekst om ukjente `category`-verdier og verdien `XYZ` | Exception-type og tekstutdrag | Kategorien styrer M1941 og må være validert | Feil kategori gir stille feilklassifisering | `PIPE_MTM_004` |
     | PIPE-MTM-005 | Ingen gyldige ID-er etter filtrering | Gyldig CSV der gjenværende rad etter årfilter har ugyldig `validScientificNameId`, f.eks. tekst som ikke kan konverteres til `int` | `ValueError` fra berikingssteget om ingen gyldige `validScientificNameId`-verdier | Exception-type og tekstutdrag | Pipeline skal ikke produsere ufullstendig taksonomi | Tomt/ugyldig grunnlag går videre som falsk suksess | `PIPE_MTM_005` |
     | PIPE-MTM-006 | Tomt datasett etter årfilter | Gyldig CSV der alle observasjoner er før `filter_year` | Returnerer tom `pl.DataFrame` med godkjente sluttkolonner, inkludert Fuglegruppe som String; Parquet-rundtur bevarer schema. NorTaxa/API-beriking kjøres ikke; konsollmeldingen sier semantisk at filteret ga `0 rader`/`0 observasjoner` | Eksakt radantall/kolonner og tekstutdrag | Viktig edge case når bruker filtrerer bort alt | Tomt filtrert datasett feiler unødvendig eller prøver API-oppslag uten rader | `PIPE_MTM_006` |
+    | PIPE-MTM-007 | ANF-tabellen har utgått ID for en observert art | Gyldig CSV; NorTaxa erstattes med fake, og ANF-ID-kontrollen får en falsk synonym-ID som finnes i ANF-tabellen | `ValueError` som nevner utgått NorTaxa-ID, art, gyldig ID og ANF-ID; ANF-steget kalles ikke | Exception-type, tekstutdrag og kallrekkefølge | Feil ANF-verdier skal aldri nå output.parquet | Pipelinen fortsetter og gir stille feil ANF-verdier | `PIPE_MTM_007` |
     """)
     return
 
@@ -4042,21 +4237,32 @@ def pipeline_testhjelpere():
 
         return hent_verdi.__closure__[0]
 
+    def _ingen_anf_kontroll(_df: pl.DataFrame) -> None:
+        """No-op for ANF-ID-kontrollen når NorTaxa-steget er falskt."""
+
     def lag_pipeline_testfunksjon(
         produksjonsfunksjon,
         *,
         process_and_enrich_data_fn=None,
         legg_til_anf_fn=None,
+        kontroller_anf_fn=None,
     ):
         """Returner pipeline-funksjon med isolerte testavhengigheter.
 
         I en lagret marimo-notebook ligger celleavhengigheter normalt i closure.
         Live code-mode kan eksponere dem i funksjonens globals; da klones globals
         slik at produksjonsfunksjonen fortsatt ikke muteres.
+
+        Når NorTaxa-steget er falskt og `kontroller_anf_fn` mangler, blir
+        ANF-ID-kontrollen en no-op, fordi falske arts-ID-er ikke finnes i NorTaxa.
         """
         replacements = {}
         if process_and_enrich_data_fn is not None:
             replacements["process_and_enrich_data"] = process_and_enrich_data_fn
+            if kontroller_anf_fn is None:
+                kontroller_anf_fn = _ingen_anf_kontroll
+        if kontroller_anf_fn is not None:
+            replacements["kontroller_anf_ider_mot_nortaxa"] = kontroller_anf_fn
         if legg_til_anf_fn is not None:
             replacements["legg_til_arter_av_nasjonal_forvaltningsinteresse"] = legg_til_anf_fn
 
@@ -4492,6 +4698,66 @@ def PIPE_MTM_006(
         )
 
     test_les_data_og_kjør_alle_funksjoner_pipe_mtm_006()
+    return
+
+
+@app.cell(hide_code=True)
+def PIPE_MTM_007(
+    bird_data,
+    console,
+    lag_pipeline_artskart_df,
+    lag_pipeline_fake_process,
+    lag_pipeline_testfunksjon,
+    les_data_og_kjør_alle_funksjoner,
+    pipeline_fake_status,
+    skriv_pipeline_artskart_csv,
+):
+    def test_les_data_og_kjør_alle_funksjoner_pipe_mtm_007():
+        """PIPE-MTM-007: art som bare treffer ANF via utgått ID stopper pipelinen."""
+        import tempfile
+
+        calls: list[tuple[str, list[object]]] = []
+        anf = bird_data.execute(
+            "SELECT vitenskapelig_navn_id, vitenskapelig_navn FROM arter_av_nasjonal_forvaltningsinteresse"
+        ).pl()
+
+        def fake_kontroll(df: pl.DataFrame) -> None:
+            # Lat som om NorTaxa oppgir dverggås-ID-en 3478 som utgått ID for testarten 1001.
+            valider_anf_ider_mot_nortaxa(
+                dict(df.select("validScientificNameId", "validScientificName").unique().iter_rows()),
+                set(anf["vitenskapelig_navn_id"].drop_nulls().to_list()),
+                set(anf["vitenskapelig_navn"].drop_nulls().to_list()),
+                {1001: {3478}},
+            )
+
+        def fail_anf(df: pl.DataFrame) -> pl.DataFrame:
+            calls.append(("legg_til_arter_av_nasjonal_forvaltningsinteresse", []))
+            raise AssertionError("PIPE-MTM-007 ANF-steg skal ikke kalles når ANF-ID-kontrollen feiler")
+
+        test_pipeline = lag_pipeline_testfunksjon(
+            les_data_og_kjør_alle_funksjoner,
+            process_and_enrich_data_fn=lag_pipeline_fake_process(calls),
+            legg_til_anf_fn=fail_anf,
+            kontroller_anf_fn=fake_kontroll,
+        )
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            # Navnet må mangle i ANF-tabellen; ellers treffer arten via navnefallback.
+            test_df = lag_pipeline_artskart_df([{"validScientificName": "Avis fictiva"}])
+            csv_sti = skriv_pipeline_artskart_csv(tmpdir, test_df)
+            with (
+                patch.object(console, "status", pipeline_fake_status),
+                patch.object(console, "print", lambda *args, **kwargs: None),
+                pytest.raises(ValueError) as exc_info,
+            ):
+                test_pipeline(csv_sti, filter_year=2020)
+
+        feilmelding = str(exc_info.value)
+        for forventet in ("utgått NorTaxa-ID", "Avis fictiva", "1001", "3478"):
+            assert forventet in feilmelding, f"PIPE-MTM-007 feilmeldingen skal nevne {forventet}; fikk {feilmelding!r}"
+        assert calls == [("process_and_enrich_data", [1001])], "PIPE-MTM-007 skal stoppe før ANF-steget"
+
+    test_les_data_og_kjør_alle_funksjoner_pipe_mtm_007()
     return
 
 
