@@ -2528,7 +2528,7 @@ def md_testmatrise_rydd_navn_og_datatyper():
 
     **Inputkontrakt:** `df_input` er en `pl.DataFrame` etter ANF-beriking, med kolonnene `Verdi M1941`, `category`, `Art av nasjonal forvaltningsinteresse (eks. rødlista)`, `preferredPopularName`, `validScientificName`, `individualCount`, `behavior`, `dateTimeCollected`, `coordinateUncertaintyInMeters`, taksonomi-, lokalitets-, koordinat- og ANF-kriteriekolonner.
 
-    **Outputkontrakt:** Returnerer `pl.DataFrame` med kun sluttbrukerrettede kolonner i fast rekkefølge. Radantall beholdes, men rader sorteres. Ekstra inputkolonner droppes, med unntak av `obs_id`, som bevares først når den finnes (godkjent QGIS–marimo-trinn 2, 7. september 2026). `Fuglegruppe` er påkrevd input og bevares som String rett etter `Orden`, før `Artsgruppe`; navne-ID-hjelpekolonnene eksporteres ikke. `Verdi M1941` sorteres slik: `Svært stor verdi`, `Stor verdi`, `Middels verdi`, `Noe verdi`, `Ingen`, der ukjente/default-verdier kommer sist.
+    **Outputkontrakt:** Returnerer `pl.DataFrame` med kun sluttbrukerrettede kolonner i fast rekkefølge. Radantall beholdes, men rader sorteres. Ekstra inputkolonner droppes, med unntak av `obs_id`, som bevares først når den finnes (godkjent QGIS–marimo-trinn 2, 7. september 2026). `Fuglegruppe` er påkrevd input og bevares som String rett etter `Orden`, før `Artsgruppe`. `ArtNavnId` (foreldreartens navne-ID for underarter, ellers lik `Artens ID`) eksporteres som Int64 rett etter `Artens ID`, slik at artsark kan kobles via arten; `FamilieNavnId` og `OrdenNavnId` eksporteres ikke. `Verdi M1941` sorteres slik: `Svært stor verdi`, `Stor verdi`, `Middels verdi`, `Noe verdi`, `Ingen`, der ukjente/default-verdier kommer sist.
 
     **Godkjenningsstatus:** Godkjent av bruker 2026-06-05. Fuglegruppe og plasseringen i sluttabellen er godkjent av bruker 2026-09-21.
 
@@ -2536,7 +2536,7 @@ def md_testmatrise_rydd_navn_og_datatyper():
 
     | ID | Scenario | Input | Forventet output/invariant | Toleranse | Hvorfor det betyr noe | Feilmodus testen beskytter mot | Testcelle |
     |---|---|---|---|---|---|---|---|
-    | RYDD-MTM-001 | Sluttschema og kolonnerekkefølge | Liten komplett DataFrame med alle påkrevde kolonner + ekstra kolonne og navne-ID-hjelpekolonner | Kun sluttkolonner beholdes. Fuglegruppe er String rett etter Orden; navne-ID-hjelpekolonnene droppes. ANF-kolonnen heter `Art av nasjonal forvaltningsinteresse (eks. rødlista)` | Eksakt kolonneliste | Sluttskjemaet er kontrakten mot eksport/analyse | Gammelt ANF-kolonnenavn, feil kolonnerekkefølge eller lekkasje av hjelpekolonner | `RYDD_MTM_001` |
+    | RYDD-MTM-001 | Sluttschema og kolonnerekkefølge | Liten komplett DataFrame med alle påkrevde kolonner + ekstra kolonne og navne-ID-hjelpekolonner | Kun sluttkolonner beholdes. Fuglegruppe er String rett etter Orden; `ArtNavnId` beholdes sist, mens `FamilieNavnId` og `OrdenNavnId` droppes. ANF-kolonnen heter `Art av nasjonal forvaltningsinteresse (eks. rødlista)` | Eksakt kolonneliste | Sluttskjemaet er kontrakten mot eksport/analyse | Gammelt ANF-kolonnenavn, feil kolonnerekkefølge eller lekkasje av hjelpekolonner | `RYDD_MTM_001` |
     | RYDD-MTM-002 | Sortering etter M1941 og kategori | Rader i usortert rekkefølge med `Svært stor verdi`, `Stor verdi`, `Middels verdi`, `Noe verdi`, `Ingen` og ukjent verdi | Sortert etter M1941-prioritet først: 0–4, ukjente verdier sist; deretter kategori-prioritet. Like sorteringsnøkler beholder inputrekkefølge | Eksakt radrekkefølge | Riktig prioritering er viktig for sluttpresentasjon | Feil sorteringsrekkefølge, `Ingen` feilplassert eller ustabil sortering | `RYDD_MTM_002` |
     | RYDD-MTM-003 | `individualCount` → `Antall` | Verdier `"6"`, `None`, `"3/1"` | `"6" → 6`, `None → 1`, `"3/1" → 3`; dtype `Int64` | Eksakt verdi og dtype | Antall brukes i summeringer og må være numerisk | Null tolkes feil, brøkformat håndteres feil eller dtype blir tekst | `RYDD_MTM_003` |
     | RYDD-MTM-004 | Dato, usikkerhet og koordinater | Datetime, null/usikkerhet, latitude/longitude med komma og punktum | `dateTimeCollected → Observert dato` som `pl.Date`; `coordinateUncertaintyInMeters → Int64`; koordinater → `Float64` | Eksakt dtype, dato og numerisk toleranse `1e-6` | Sluttdata må ha riktige typer for kart og filtrering | Koordinater forblir tekst, dato beholder tid eller usikkerhet får feil type | `RYDD_MTM_004` |
@@ -2633,6 +2633,7 @@ def rydd_navn_og_datatyper(df_input: pl.DataFrame) -> pl.DataFrame:
                 pl.col("longitude").str.replace_all(",", ".").cast(pl.Float64),
                 pl.col("geometry"),
                 pl.col("validScientificNameId").alias("Artens ID"),
+                pl.col("ArtNavnId").cast(pl.Int64),
             ]
         )
         # Sorterer i riktig rekkefølge
@@ -2689,6 +2690,7 @@ def rydd_navn_og_datatyper_testhjelpere():
             "longitude",
             "geometry",
             "Artens ID",
+            "ArtNavnId",
         ]
 
 
@@ -2728,6 +2730,7 @@ def rydd_navn_og_datatyper_testhjelpere():
             "longitude": "15,000000",
             "geometry": "POINT (0 0)",
             "validScientificNameId": 1000,
+            "ArtNavnId": 1000,
             "ekstra_inputkolonne": "skal droppes",
         }
 
@@ -2738,6 +2741,7 @@ def rydd_navn_og_datatyper_testhjelpere():
                 "preferredPopularName": f"standardnavn-{indeks}",
                 "validScientificName": f"Species standardus {indeks}",
                 "validScientificNameId": 1000 + indeks,
+                "ArtNavnId": 1000 + indeks,
                 "geometry": f"POINT ({indeks} {indeks})",
             }
             rad.update(overrides)
@@ -2782,6 +2786,7 @@ def rydd_navn_og_datatyper_testhjelpere():
         kolonner["dateTimeCollected"] = pl.Series("dateTimeCollected", [], dtype=pl.Datetime)
         kolonner["coordinateUncertaintyInMeters"] = pl.Series("coordinateUncertaintyInMeters", [], dtype=pl.Int64)
         kolonner["validScientificNameId"] = pl.Series("validScientificNameId", [], dtype=pl.Int64)
+        kolonner["ArtNavnId"] = pl.Series("ArtNavnId", [], dtype=pl.Int64)
         return pl.DataFrame(kolonner)
 
     return (
@@ -2819,7 +2824,8 @@ def RYDD_MTM_001(
             f"RYDD-MTM-001 forventet sluttkolonner i fast rekkefølge; fikk {result.columns}"
         )
         assert "ekstra_inputkolonne" not in result.columns, "RYDD-MTM-001 ekstra inputkolonner skal droppes"
-        assert not {"ArtNavnId", "FamilieNavnId", "OrdenNavnId"} & set(result.columns)
+        assert not {"FamilieNavnId", "OrdenNavnId"} & set(result.columns)
+        assert result["ArtNavnId"].to_list() == [4263], "RYDD-MTM-001 ArtNavnId skal eksporteres uendret"
         assert result.columns[result.columns.index("Orden") + 1] == "Fuglegruppe"
         assert result.schema["Fuglegruppe"] == pl.String
         assert "Art av nasjonal forvaltningsinteresse" not in result.columns, (
@@ -3140,6 +3146,7 @@ def RYDD_MTM_006(
             "latitude": pl.Float64,
             "longitude": pl.Float64,
             "Artens ID": pl.Int64,
+            "ArtNavnId": pl.Int64,
         }
         for column_name, expected_dtype in expected_dtypes.items():
             assert result.schema[column_name] == expected_dtype, (
@@ -3171,6 +3178,7 @@ def RYDD_MTM_007(lag_rydd_navn_og_datatyper_input):
         assert_missing_column_raises("Art av nasjonal forvaltningsinteresse (eks. rødlista)")
         assert_missing_column_raises("Hensynskrevende arter")
         assert_missing_column_raises("validScientificNameId")
+        assert_missing_column_raises("ArtNavnId")
         assert_missing_column_raises("Fuglegruppe")
 
 
@@ -4377,7 +4385,8 @@ def PIPE_MTM_001(
         assert result.height == 2, "PIPE-MTM-001 begge rader etter filter_year skal inngå"
         assert result["Fuglegruppe"].to_list() == ["Skoglevende arter", "Skoglevende arter"]
         assert result["obs_id"].to_list() == ["test-observasjon-1", "test-observasjon-0"]
-        assert not {"ArtNavnId", "FamilieNavnId", "OrdenNavnId"} & set(result.columns)
+        assert not {"FamilieNavnId", "OrdenNavnId"} & set(result.columns)
+        assert result["ArtNavnId"].to_list() == [1002, 1001], "PIPE-MTM-001 ArtNavnId skal overleve til eksport"
         assert calls == [
             ("process_and_enrich_data", [1001, 1002]),
             ("legg_til_arter_av_nasjonal_forvaltningsinteresse", [1001, 1002]),
