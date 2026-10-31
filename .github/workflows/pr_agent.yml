@@ -1,0 +1,48 @@
+# PR-Agent (https://github.com/The-PR-Agent/pr-agent) reviews pull requests with Claude:
+# a review and code suggestions when a pull request opens. Collaborators can comment
+# /review, /improve, /describe or /ask <question> on a pull request to run it again.
+name: PR-Agent
+
+on:
+  pull_request:
+    types: [opened, reopened, ready_for_review]
+  issue_comment:
+    types: [created]
+
+permissions: {}
+
+# One run at a time per pull request; a /review comment waits for the opening review.
+concurrency:
+  group: pr-agent-${{ github.event.pull_request.number || github.event.issue.number }}
+  cancel-in-progress: false
+
+jobs:
+  pr_agent:
+    name: Review
+    # The job holds the Anthropic key: pull requests from this repository and
+    # comments from collaborators only, so outsiders cannot spend it.
+    if: >-
+      github.event.sender.type != 'Bot' && (
+        (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository) ||
+        (github.event.issue.pull_request && contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.comment.author_association))
+      )
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read # read the diff and files through the API
+      issues: write # answer comments
+      pull-requests: write # post the review and code suggestions
+    steps:
+      # pragent/pr-agent:0.49.0-github_action, attested as built from The-PR-Agent/pr-agent v0.49.0.
+      # Bump together with the local pin in ~/dotfiles/mise/.config/mise/config.toml.
+      - uses: docker://pragent/pr-agent@sha256:b1ed6e8de56eb4d6e4169ee0d5c209bb5ed1ef071a01c0c042c64b80192a785c
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ANTHROPIC.KEY: ${{ secrets.ANTHROPIC_KEY }}
+          config.model: anthropic/claude-opus-5-5
+          config.fallback_models: '["anthropic/claude-sonnet-5-5"]'
+          config.output_run_details: "true"
+          github_action_config.auto_review: "true"
+          github_action_config.auto_improve: "true"
+          # Agents write the pull request descriptions; /describe rewrites one on request.
+          github_action_config.auto_describe: "false"
