@@ -11,23 +11,25 @@ on:
 
 permissions: {}
 
-# One run at a time per pull request; a /review comment waits for the opening review.
-concurrency:
-  group: pr-agent-${{ github.event.pull_request.number || github.event.issue.number }}
-  cancel-in-progress: false
-
 jobs:
   pr_agent:
     name: Review
     # The job holds the Anthropic key: pull requests from this repository and
-    # comments from collaborators only, so outsiders cannot spend it.
+    # collaborators' /commands only, so outsiders cannot spend it.
     if: >-
       github.event.sender.type != 'Bot' && (
         (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository) ||
-        (github.event.issue.pull_request && contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.comment.author_association))
+        (github.event.issue.pull_request && startsWith(github.event.comment.body, '/') &&
+          contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.comment.author_association))
       )
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    # One run at a time per pull request. On the job, not the workflow, so skipped
+    # comments never join the group: GitHub keeps one pending run per group and a
+    # newer one cancels it.
+    concurrency:
+      group: pr-agent-${{ github.event.pull_request.number || github.event.issue.number }}
+      cancel-in-progress: false
     permissions:
       contents: read # read the diff and files through the API
       issues: write # answer comments
