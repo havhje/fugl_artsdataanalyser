@@ -48,3 +48,7 @@ jobs:
           github_action_config.auto_improve: "true"
           # Agents write the pull request descriptions; /describe rewrites one on request.
           github_action_config.auto_describe: "false"
+          # /improve viser forslag som selvrefleksjonen ga 7 eller mer, og legger i tillegg ut
+          # dem med 9 eller mer som linjekommentarer med knappen «Commit suggestion».
+          pr_code_suggestions.suggestions_score_threshold: "7"
+          pr_code_suggestions.dual_publishing_score_threshold: "9"
