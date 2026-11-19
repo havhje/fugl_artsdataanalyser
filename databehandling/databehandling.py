@@ -4,6 +4,7 @@ __generated_with = "0.23.16"
 app = marimo.App(width="columns")
 
 with app.setup(hide_code=True):
+    import json
     import time
     from datetime import date
     from functools import lru_cache
@@ -3495,6 +3496,31 @@ def join_navn_til_orginal_df(
     return df_med_navn
 
 
+@app.function(hide_code=True)
+def les_navnefil(sti: str) -> dict[str, str]:
+    """Les en JSON-fil med norske navn per latinsk artsnavn.
+
+    Args:
+        sti: Sti til en JSON-fil på formen `{"Sylvia borin": "hagesanger"}`.
+
+    Returns:
+        Mapping fra latinsk artsnavn (`Art`) til norsk navn, uten omliggende
+        mellomrom.
+
+    Raises:
+        TypeError: Når filen ikke er et JSON-objekt.
+        ValueError: Når en art mangler et ikke-tomt norsk navn.
+    """
+    with open(sti, encoding="utf-8") as fil:
+        innhold = json.load(fil)
+    if not isinstance(innhold, dict):
+        raise TypeError(f"{sti} må være et JSON-objekt fra latinsk artsnavn til norsk navn.")
+    ugyldige = [art for art, navn in innhold.items() if not isinstance(navn, str) or not navn.strip()]
+    if ugyldige:
+        raise ValueError(f"{sti} mangler norsk navn for: {', '.join(ugyldige)}")
+    return {art: navn.strip() for art, navn in innhold.items()}
+
+
 @app.cell(hide_code=True)
 def definer_prompt_mangler_navn(console):
     def prompt_mangler_navn(mangler_df: pl.DataFrame) -> dict[str, str]:
@@ -3914,6 +3940,10 @@ def definer_les_data_cli(
         input_fil_sti: str = typer.Argument(..., help="Sti til CSV-fil med fugledata"),
         filter_year: int = typer.Option(1990, help="Filtrer observasjoner fra og med dette året"),
         output: str = typer.Option("output.parquet", help="Sti til utfil (Parquet)"),
+        names: str | None = typer.Option(None, help="JSON-fil med norske navn per latinsk artsnavn"),
+        missing_names: str | None = typer.Option(
+            None, help="Skriv arter uten norsk navn til denne JSON-filen og avslutt med kode 3 i stedet for å spørre"
+        ),
     ):
         """Kjør hele databehandlingsløpet fra kommandolinjen.
 
@@ -3921,10 +3951,14 @@ def definer_les_data_cli(
             input_fil_sti: Sti til CSV-fil fra Artskart.
             filter_year: Første observasjonsår som beholdes.
             output: Sti til Parquet-filen som skal skrives.
+            names: JSON-fil med norske navn som fylles inn før det spørres.
+            missing_names: JSON-fil som får artene som fortsatt mangler navn.
 
         Notes:
             Kommandoen leser data, beriker, spør om manglende norske navn og
-            skriver resultatet til disk.
+            skriver resultatet til disk. Med `missing_names` spør den ikke:
+            mangler navn, skrives de til filen og kommandoen avslutter med
+            kode 3 uten å skrive Parquet.
         """
         console.print(Rule("[bold]Fugl Artsdataanalyser[/bold]"))
         console.print(f"  Inputfil:    [cyan]{input_fil_sti}[/cyan]")
@@ -3937,6 +3971,20 @@ def definer_les_data_cli(
         # Sjekk for manglende navn
         console.print(Rule("[bold]Sjekker artsnavn[/bold]"))
         mangler_df = finn_mangler_navn(df)
+        if names is not None:
+            try:
+                df = join_navn_til_orginal_df(df, les_navnefil(names))
+            except (OSError, TypeError, ValueError) as feil:
+                console.print(f"[bold red]Feil:[/bold red] Kunne ikke lese --names: {feil}")
+                raise typer.Exit(code=1) from feil
+            mangler_df = finn_mangler_navn(df)
+        if not mangler_df.is_empty() and missing_names is not None:
+            with open(missing_names, "w", encoding="utf-8") as fil:
+                json.dump(mangler_df.select("Art", "Familie", "Orden").to_dicts(), fil, ensure_ascii=False, indent=2)
+            console.print(
+                f"  [yellow]![/yellow] {mangler_df.height} arter mangler norsk navn. Skrevet til {missing_names}"
+            )
+            raise typer.Exit(code=3)
         if not mangler_df.is_empty():
             navn_mapping = prompt_mangler_navn(mangler_df)
             df = join_navn_til_orginal_df(df, navn_mapping)
