@@ -1,0 +1,66 @@
+# OpenCodeReview (https://github.com/alibaba/open-code-review) reviews pull requests with
+# Claude: inline comments and one summary comment when a pull request opens. Collaborators
+# can comment /open-code-review on a pull request to run it again.
+name: OpenCodeReview
+
+on:
+  pull_request:
+    types: [opened, reopened, ready_for_review]
+  issue_comment:
+    types: [created]
+
+permissions: {}
+
+jobs:
+  ocr_review:
+    name: Review
+    # The job holds the Anthropic key: pull requests from this repository and
+    # collaborators' /open-code-review comments only, so outsiders cannot spend it.
+    # Drafts wait until they are marked ready; a comment reviews one on request.
+    if: >-
+      github.event.sender.type != 'Bot' && (
+        (github.event_name == 'pull_request' && !github.event.pull_request.draft &&
+          github.event.pull_request.head.repo.full_name == github.repository) ||
+        (github.event.issue.pull_request &&
+          (github.event.comment.body == '/open-code-review' || startsWith(github.event.comment.body, '/open-code-review ')) &&
+          contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.comment.author_association))
+      )
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    # One run at a time per pull request. On the job, not the workflow, so skipped
+    # comments never join the group: GitHub keeps one pending run per group and a
+    # newer one cancels it.
+    concurrency:
+      group: ocr-review-${{ github.event.pull_request.number || github.event.issue.number }}
+      cancel-in-progress: false
+    permissions:
+      contents: read # fetch the base and the pull request head
+      pull-requests: write # post the inline comments and the summary
+    steps:
+      # A comment event carries no base or head: look them up.
+      - name: Get pull request refs
+        id: pr
+        if: github.event_name == 'issue_comment'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_URL: ${{ github.event.issue.pull_request.url }}
+        run: gh api "$PR_URL" --jq '"base_ref=\(.base.ref)\nhead_sha=\(.head.sha)\nhead_repo=\(.head.repo.full_name)"' >> "$GITHUB_OUTPUT"
+
+      # Unpinned: the action from main installs the latest ocr release on every run.
+      # Never a fork's code, also when a collaborator asks in a comment.
+      - uses: alibaba/open-code-review@main
+        if: github.event_name == 'pull_request' || steps.pr.outputs.head_repo == github.repository
+        with:
+          llm_url: https://api.anthropic.com/v1/messages
+          llm_auth_token: ${{ secrets.ANTHROPIC_KEY }}
+          llm_model: claude-opus-5-5
+          llm_use_anthropic: "true"
+          # The action defaults to sending thinking: disabled, which this model rejects (HTTP 400).
+          llm_extra_body: "{}"
+          stream_progress: "true" # show review progress in the run log
+          background: ${{ github.event.pull_request.title || github.event.issue.title }}
+          # Low-severity, style and documentation findings go in the summary, not on the diff.
+          route_severity_below: low
+          route_categories: style,documentation
+          base_ref: ${{ steps.pr.outputs.base_ref }}
+          head_sha: ${{ steps.pr.outputs.head_sha }}
