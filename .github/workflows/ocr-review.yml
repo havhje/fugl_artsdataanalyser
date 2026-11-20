@@ -16,10 +16,13 @@ jobs:
     name: Review
     # The job holds the Anthropic key: pull requests from this repository and
     # collaborators' /open-code-review comments only, so outsiders cannot spend it.
+    # Drafts wait until they are marked ready; a comment reviews one on request.
     if: >-
       github.event.sender.type != 'Bot' && (
-        (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository) ||
-        (github.event.issue.pull_request && startsWith(github.event.comment.body, '/open-code-review') &&
+        (github.event_name == 'pull_request' && !github.event.pull_request.draft &&
+          github.event.pull_request.head.repo.full_name == github.repository) ||
+        (github.event.issue.pull_request &&
+          (github.event.comment.body == '/open-code-review' || startsWith(github.event.comment.body, '/open-code-review ')) &&
           contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.comment.author_association))
       )
     runs-on: ubuntu-latest
@@ -41,10 +44,12 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           PR_URL: ${{ github.event.issue.pull_request.url }}
-        run: gh api "$PR_URL" --jq '"base_ref=\(.base.ref)\nhead_sha=\(.head.sha)"' >> "$GITHUB_OUTPUT"
+        run: gh api "$PR_URL" --jq '"base_ref=\(.base.ref)\nhead_sha=\(.head.sha)\nhead_repo=\(.head.repo.full_name)"' >> "$GITHUB_OUTPUT"
 
       # Unpinned: the action from main installs the latest ocr release on every run.
+      # Never a fork's code, also when a collaborator asks in a comment.
       - uses: alibaba/open-code-review@main
+        if: github.event_name == 'pull_request' || steps.pr.outputs.head_repo == github.repository
         with:
           llm_url: https://api.anthropic.com/v1/messages
           llm_auth_token: ${{ secrets.ANTHROPIC_KEY }}
@@ -54,5 +59,8 @@ jobs:
           llm_extra_body: "{}"
           stream_progress: "true" # show review progress in the run log
           background: ${{ github.event.pull_request.title || github.event.issue.title }}
+          # Low-severity, style and documentation findings go in the summary, not on the diff.
+          route_severity_below: low
+          route_categories: style,documentation
           base_ref: ${{ steps.pr.outputs.base_ref }}
           head_sha: ${{ steps.pr.outputs.head_sha }}
